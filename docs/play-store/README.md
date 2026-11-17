@@ -4,7 +4,7 @@ The order of all steps (key, Play Console, upload) is in [../publish-android.md]
 
 Everything Play Console asks for in **Grow users → Store presence → Main store listing**, and in **Policy → App content**. Make the images again with `npm run store` (for example after a big change to the game).
 
-Set the **default language to English (United States)** and add **Dutch (nl-NL)** as a translation (Store presence → Main store listing → Manage translations).
+Set the **default language to English (United Kingdom) – en-GB** and add **Dutch (nl-NL)** as a translation (Store presence → Main store listing → Manage translations).
 
 ## Texts: English
 
@@ -30,7 +30,7 @@ Choose your hero and walk, jump and find your way through the forest, the cabin,
 • 8 levels, one for every day of the week
 • 9 characters to choose from
 • Code locks, with hints if you get stuck
-• Fries, chocolate and Christmas cookies to collect
+• Chips, chocolate and Christmas biscuits to collect
 • Jump on wild boars, robot vacuums and snowmen, or belly-slide into them
 • A birthday with Lego, and a Saab with a Christmas tree on the roof
 • Play with the TV remote, a controller (PlayStation, Stadia, Xbox) or the touch screen

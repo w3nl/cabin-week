@@ -34,7 +34,7 @@ test('English by default; Dutch with ?lang=nl and with the language button, and 
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB');
   await expect(page.locator('#title h2').first()).toContainText('Choose your hero');
   await expect(page.locator('#levels .n').first()).toContainText('Day 1');
   await page.locator('button[data-lang="nl"]').click();

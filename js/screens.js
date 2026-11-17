@@ -61,7 +61,7 @@ function completeLevel() {
   const stars = P.hearts >= 3 ? "★★★" : P.hearts >= 2 ? "★★" : "★";
   const stats = `<div class="stats"><div><b>${L.coins}/${L.coinTotal}</b><span>${d.coinName}</span></div><div><b>${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}</b><span>${T("time", "tijd")}</span></div><div><b>${stars}</b><span>${T("hearts left", "hartjes over")}</span></div></div>`;
   if (!last) {
-    const msg = d.doneMsg || T("The baubles are hanging, the fire is burning and the cookies are gone. Merry Christmas!", "De kerstballen hangen, het vuur brandt en de koekjes zijn op. Fijne kerst!");
+    const msg = d.doneMsg || T("The baubles are hanging, the fire is burning and the biscuits are gone. Merry Christmas!", "De kerstballen hangen, het vuur brandt en de koekjes zijn op. Fijne kerst!");
     card(`<div class="eyebrow">${d.day} · ${T("done", "gehaald")}</div><h2 style="font-size:30px;margin-top:6px">${d.quiet ? d.name : T("You made it! 🎉", "Overleefd! 🎉")}</h2><p>${msg}</p>${stats}${d.quiet ? "" : `<p style="color:var(--muted)">${JOKES[Math.floor(Math.random() * JOKES.length)]}</p>`}`,
       [...next, ["Menu", toTitle, true]]);
   } else {

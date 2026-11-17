@@ -49,7 +49,7 @@ Full explanation: [android-key.md](android-key.md). In short:
 1. **Developer account:** [play.google.com/console](https://play.google.com/console). If you already have one (for another app), use that. A new account costs $25 once, and Google checks your identity (can take a few days).
 2. **Create app:** **Home → Create app**:
    - App name: `Cabin Week`
-   - Default language: **English (United States) – en-US**
+   - Default language: **English (United Kingdom) – en-GB**
    - App or game: **Game**; Free or paid: **Free**
    - Tick the declarations → **Create app**.
 3. **Android TV:** **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV.

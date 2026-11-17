@@ -2,7 +2,7 @@
   "name": "Cabin Week",
   "short_name": "Cabin Week",
   "description": "A platform game about a Christmas week in a holiday cabin: one level a day, with keys, tasks and code locks.",
-  "lang": "en",
+  "lang": "en-GB",
   "id": "./",
   "start_url": "./",
   "scope": "./",

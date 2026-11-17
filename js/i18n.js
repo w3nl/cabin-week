@@ -17,7 +17,7 @@ function setLang(l) {
 }
 // Texts in index.html: English in the page, Dutch in data-nl (and data-nl-label for aria-label, data-nl-title for title,
 // data-nl-content for a meta tag).
-document.documentElement.lang = LANG;
+document.documentElement.lang = LANG === "nl" ? "nl" : "en-GB"; // British English
 if (LANG === "nl") {
   document.querySelectorAll("[data-nl]").forEach(el => { el.innerHTML = el.getAttribute("data-nl"); });
   document.querySelectorAll("[data-nl-label]").forEach(el => el.setAttribute("aria-label", el.getAttribute("data-nl-label")));

@@ -103,8 +103,8 @@ A 4-star holiday cabin for 9 people near Pinebrook. Ground floor: hall, two livi
 
 ## Tone and writing
 
-- **Funny and warm.** Jokes about the cabin, the wifi, the bathroom rota, Uno, gourmet and raclette, fries and chocolate. Never mean about a person.
-- **Tea, chocolate and fries:** Paul and Laura drink tea, not coffee (never let them ask for coffee). The ladies love chocolate, and everyone loves fries.
+- **Funny and warm.** Jokes about the cabin, the wifi, the bathroom rota, Uno, gourmet and raclette, chips (fries) and chocolate. Never mean about a person.
+- **Tea, chocolate and chips:** Paul and Laura drink tea, not coffee (never let them ask for coffee). The ladies love chocolate, and everyone loves chips (fries).
 - **Calm on day 3** (see above).
 - The characters are fictional. Keep their looks as in `CHARS` (`js/data.js`): Paul short light-brown hair, beige jacket, backpack (indoors his green Christmas jumper with a Saab 900); Laura shoulder-length blonde hair, a light long coat, a coral scarf and a brown beanie only outside in the cold (`beanieCold`: at the Christmas market; in the snow everyone wears a Santa hat); Sophie long blonde ponytail with a red bow and a white puffer; Lily long wavy blonde hair with a bun (purple clip), big eyes, a cream puffer, a burgundy skirt and shoes with coloured laces; Rob bald with stubble and a dark jacket; Anna blonde curls, a green long coat and a striped autumn scarf; Finn blond with round glasses and an olive puffer; Tom blond with dark thick glasses, a dark coat and a grey beanie; Max blond, a rust-brown jacket and green trousers. Height (`size`) follows age; primary-school kids (`kid`) have bigger heads.
 - No names, characters, art, music or levels from existing games: the game fits the genre, but everything is its own work.

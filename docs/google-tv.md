@@ -74,7 +74,7 @@ Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** 
 
 ### Once: Google Play Console
 
-1. **Create app:** name "Cabin Week", default language English (add Dutch as a translation), type **Game**, **free**.
+1. **Create app:** name "Cabin Week", default language English (United Kingdom) – en-GB (add Dutch as a translation), type **Game**, **free**.
 2. **Turn on Android TV:** Test and release → Advanced settings → Form factors → add **Android TV**. Without this the app does not show up in the Play Store on the Google TV.
 3. **The required questions** (content rating, target audience, data safety, privacy policy `https://cabinweek.online/privacy.html`): all answers, texts and images are in [play-store/](play-store/README.md).
 4. **Play App Signing** is on by default: Google keeps the real signing key; you upload with your upload key.
