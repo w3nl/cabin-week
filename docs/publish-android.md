@@ -101,6 +101,12 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
    - **Next** → **Save and publish**.
 4. Back on **Internal testing → Testers**: copy the **Join on the web** link (opt-in link) and send it to the testers.
 
+   The links for Cabin Week:
+   - **Join on the web** (opt-in, once per tester): https://play.google.com/apps/testing/nl.w3nl.cabinweek
+   - **Join on Android** (the store page, after opting in): https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek
+
+   Only Google accounts on the tester list can join; for others the links show "not found".
+
 ### C4. Install
 
 - **Phone or tablet:** open the opt-in link with the tester's Google account → **Become a tester** → **Download it on Google Play** → **Install**.
