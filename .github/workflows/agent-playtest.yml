@@ -1,0 +1,95 @@
+# Step 5 of the agent workflow (see docs/agent-workflow.md).
+# The whole test suite runs in "Play the game" (tests.yml). This agent plays the changed parts like a player,
+# on computer and phone size, and reports what happened, with screenshots.
+name: "Agent: playtest"
+
+# On demand: put the label "agent-speeltest" on a pull request, or start it in Actions with "Run workflow" (with the PR number).
+# Not on every pull request; remove the label and add it again to run it again.
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Number of the pull request
+        required: true
+
+concurrency:
+  group: agent-playtest-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  playtest:
+    # Only by hand or with the label, and only for pull requests from this repository (forks do not get the secrets).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'agent-speeltest' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    env:
+      PR: ${{ github.event.pull_request.number || inputs.pr_number }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/pull/${{ env.PR }}/head
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install the dependencies and the test browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Start the game
+        run: |
+          node tests/serve.js > /tmp/serve.log 2>&1 &
+          for i in $(seq 30); do curl -sf http://127.0.0.1:4180 > /dev/null && break; sleep 1; done
+          mkdir -p playtest
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 80
+            --allowedTools "Read,Glob,Grep,Write,Edit,Bash(node:*),Bash(npx:*),Bash(npm:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh issue view:*),Bash(ls:*),Bash(mkdir:*),Bash(cat:*)"
+          prompt: |
+            You are the PLAYTEST agent for "Cabin Week", a platform game in the browser in this repository.
+            AGENTS.md (loaded as project instructions) explains the game, how the tests fill the saved progress, and all solutions.
+
+            Test pull request #${{ env.PR }} in ${{ github.repository }}.
+            Read what it changes: gh pr view ${{ env.PR }}   and   gh pr diff ${{ env.PR }}
+            The automatic tests (npm test) run separately in "Play the game"; do not just run them again.
+
+            The game is already running at http://127.0.0.1:4180 (add ?lang=nl for Dutch).
+            Write throwaway Playwright scripts in /tmp (require('playwright'); chromium is installed) and play the changed parts like a player:
+            - the normal way, plus wrong moves and an odd order (to the exit too early, the wrong code, reloading);
+            - computer 1280x800, phone portrait 412x915 and landscape 915x412 (isMobile, hasTouch), with the on-screen buttons;
+            - in English and in Dutch;
+            - watch for console errors, sideways scrolling, cut-off text and things that cannot be reached;
+            - save screenshots of everything notable in the folder playtest/ (uploaded by the workflow).
+            Do not commit anything.
+
+            Post one comment (gh pr comment ${{ env.PR }} --body-file <file>) starting with
+            "**Playtest: ✅ works**" or "**Playtest: ❌ problems found**", with: what you tried, what worked, and each problem with
+            the steps to reproduce it and the name of the screenshot. Mention that the screenshots are in the artifact "playtest-screenshots".
+
+      - name: Upload the screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playtest-screenshots
+          path: playtest/
+          if-no-files-found: ignore
+          retention-days: 14

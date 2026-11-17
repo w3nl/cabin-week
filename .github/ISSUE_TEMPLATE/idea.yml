@@ -1,0 +1,43 @@
+name: Idea
+description: Think of something for the game. An AI agent looks into it and answers with a plan.
+title: "Idea: "
+labels: ["idee"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! After you submit, the **refine agent** reads the code and answers with a plan: how it works, which files change, acceptance criteria and a test plan.
+        Reply with `@claude …` to discuss it. Happy with it? Add the label **`klaar-om-te-bouwen`** and the build agent opens a pull request.
+  - type: textarea
+    id: idee
+    attributes:
+      label: What is the idea?
+      description: A new level, a task, a joke, a character, a sound, a bug… Rough is fine.
+      placeholder: "A level in a space museum where you look for three rocket parts and…"
+    validations:
+      required: true
+  - type: dropdown
+    id: waar
+    attributes:
+      label: Where in the game?
+      options:
+        - A new level
+        - Day 1 · Arrival in Pinebrook
+        - Day 2 · Forest & Old Railway
+        - Day 3 · Christmas Market in Luxembourg
+        - Day 4 · Paul's Birthday
+        - Day 5 · Christmas Day
+        - Day 6 · The Wildlife Park
+        - Day 7 · The Last Evening
+        - Day 8 · Going Home
+        - Title screen
+        - Translations (English / Dutch)
+        - Everywhere / the whole game
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else? (optional)
+      description: Jokes, who is in it, sketches, links.

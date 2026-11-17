@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "automerge": true,
+  "automergeType": "pr",
+  "packageRules": [
+    {
+      "description": "De Google TV-app: de Android Gradle-plugin, Gradle en Java hangen van elkaar af (AGP 9 wil Gradle 9.6+, Gradle 9.6+ wil AGP 9, Gradle 8 kent Java 25 niet). Daarom altijd samen in één pull request.",
+      "matchFileNames": ["android-tv/**", ".github/workflows/google-tv.yml"],
+      "groupName": "Android-bouw (Google TV-app)"
+    }
+  ]
+}

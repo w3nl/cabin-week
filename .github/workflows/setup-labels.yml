@@ -1,0 +1,23 @@
+# Run once (Actions → "Labels for the agents" → Run workflow) to create the labels of the agent workflow.
+name: Labels for the agents
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-26.04
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh label create idee           --repo "$REPO" --color f0a53a --description "A new idea for the game; the refine agent answers with a plan" --force
+          gh label create uitgewerkt     --repo "$REPO" --color 7dff9a --description "The refine agent has posted a plan" --force
+          gh label create klaar-om-te-bouwen --repo "$REPO" --color 1f45c4 --description "Plan approved: the build agent opens a pull request" --force
+          gh label create agent-pr       --repo "$REPO" --color 5f3dc4 --description "Pull request made by the build agent" --force
+          gh label create agent-review   --repo "$REPO" --color 0e8a16 --description "Let the review agent look at this pull request (on demand)" --force
+          gh label create agent-speeltest --repo "$REPO" --color 0e8a16 --description "Let the playtest agent play this pull request (on demand)" --force

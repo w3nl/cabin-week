@@ -1,0 +1,18 @@
+{
+  "name": "cabin-week",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cabin Week: a platform game in the browser about a Christmas week in a holiday cabin (English and Dutch)",
+  "scripts": {
+    "start": "node tests/serve.js",
+    "test": "playwright test",
+    "build": "node tools/build-site.js",
+    "bundle": "node tools/bundle.js",
+    "icons": "node tools/icons.js",
+    "store": "node tools/store.js"
+  },
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
+  }
+}

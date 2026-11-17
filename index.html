@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cabin Week</title>
+<meta name="description" content="A platform game about a Christmas week in a holiday cabin: one level a day, with keys, tasks and code locks. In English and Dutch." data-nl-content="Een platformspel over een kerstweek in een vakantiehuisje: elke dag een level, met sleutels, opdrachten en codesloten. In het Engels en Nederlands.">
+<meta name="theme-color" content="#0f1b2a">
+<!-- iPhone and iPad: Add to Home Screen (Safari → Share) opens the game full screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cabin Week">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<div id="game">
+  <canvas id="cv"></canvas>
+
+  <div id="hud" hidden>
+    <span class="pill lvl" id="hLvl">Level 1</span>
+    <span class="pill" id="hKeys">🔑 0/3</span>
+    <span class="pill" id="hQuest">☕</span>
+    <span class="pill" id="hCode">🔒 code</span>
+    <span class="pill" id="hCoins">🍟 0</span>
+    <span class="pill" id="hHearts">❤️❤️❤️</span>
+    <span class="grow"></span>
+    <span class="pill" id="hNights"></span>
+    <button id="hSound" type="button" aria-label="Sound on or off" data-nl-label="Geluid aan of uit">🔊</button>
+    <button id="hMenu" type="button">Menu</button>
+  </div>
+
+  <div id="dialog" hidden>
+    <div id="dName"></div>
+    <div id="dText"></div>
+    <div id="dMore" data-nl="Spatie / E / ✕ / tik om verder te gaan">Space / E / ✕ / tap to continue</div>
+  </div>
+
+  <div id="touch" hidden>
+    <div class="grp">
+      <button id="tL" type="button" aria-label="Left" data-nl-label="Naar links">◀</button>
+      <button id="tR" type="button" aria-label="Right" data-nl-label="Naar rechts">▶</button>
+    </div>
+    <div class="grp">
+      <button id="tA" type="button" aria-label="Talk or use" data-nl-label="Praten of gebruiken">💬</button>
+      <button id="tJ" type="button" class="big" aria-label="Jump" data-nl-label="Springen">⤒</button>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="overlay" id="title">
+    <div class="sheet">
+      <!-- Portrait: everything in one column. Landscape (computer, TV, phone or tablet turned): col-a and col-b
+           side by side, and the menu scales with the screen so nothing needs scrolling. -->
+      <div class="col-a">
+      <div class="eyebrow" data-nl="De Hills × de Woods · Pinebrook">The Hills × the Woods · Pinebrook</div>
+      <h1><span class="a">Cabin</span> <span class="b">Week</span></h1>
+
+      <div class="count">
+        <b id="cdNum">8</b>
+        <div><strong id="cdWord"></strong><span id="cdSub"></span></div>
+      </div>
+      <div class="special" id="special" hidden></div>
+      <ol class="week" id="week"></ol>
+      </div>
+
+      <div class="col-b">
+      <h2 data-nl="Kies je held <small>2 gezinnen · 9 personen · 1 huisje</small>">Choose your hero <small>2 families · 9 people · 1 cabin</small></h2>
+      <div class="chars" id="chars"></div>
+
+      <h2 data-nl="Kies je dag <small>elke dag van de week een eigen level</small>">Choose your day <small>every day of the week has its own level</small></h2>
+      <div class="levels" id="levels"></div>
+      </div>
+
+      <p class="ticker" id="ticker" title="Click for the next joke" data-nl-title="Klik voor de volgende grap"></p>
+      <div class="foot">
+      <p class="help" data-nl="<kbd>←</kbd> <kbd>→</kbd> lopen (rennen: <kbd>Shift</kbd>, of dubbeltik en vasthouden) · <kbd>Spatie</kbd> of <kbd>↑</kbd> springen · <kbd>E</kbd> of <kbd>↓</kbd> praten, lezen en gebruiken · lopen + <kbd>↓</kbd> op je buik glijden · <kbd>Esc</kbd> menu.<br>
+        Met een controller (PlayStation, Stadia, Xbox): stick of pijltjes lopen · <kbd>R1</kbd>/<kbd>L1</kbd> rennen · <kbd>✕</kbd>/<kbd>A</kbd> springen · <kbd>□</kbd>/<kbd>X</kbd> of <kbd>○</kbd>/<kbd>B</kbd> praten · <kbd>Start</kbd> menu. Druk eerst op een knop, dan ziet de browser hem.<br>
+        <span class='tips'>Spring op wilde zwijnen, robotstofzuigers en sneeuwpoppen. Lees de bordjes: de cijfers voor de codesloten staan erop. Elke dag van de week heeft een eigen level.</span>">
+        <kbd>←</kbd> <kbd>→</kbd> walk (run: <kbd>Shift</kbd>, or double-tap and hold) · <kbd>Space</kbd> or <kbd>↑</kbd> jump · <kbd>E</kbd> or <kbd>↓</kbd> talk, read and use · walk + <kbd>↓</kbd> belly slide · <kbd>Esc</kbd> menu.<br>
+        With a controller (PlayStation, Stadia, Xbox): stick or D-pad walk · <kbd>R1</kbd>/<kbd>L1</kbd> run · <kbd>✕</kbd>/<kbd>A</kbd> jump · <kbd>□</kbd>/<kbd>X</kbd> or <kbd>○</kbd>/<kbd>B</kbd> talk · <kbd>Start</kbd> menu. Press a button first so the browser sees it.<br>
+        <span class="tips">Jump on wild boars, robot vacuums and snowmen. Read the signs: the digits for the code locks are on them. Every day of the week has its own level.</span>
+      </p>
+      <p class="gp-status" id="gpStatus" role="status" hidden></p>
+      <p class="version">Cabin Week <span id="version" translate="no"></span> ·
+        <button type="button" class="lang" data-lang="en" lang="en">English</button>
+        <button type="button" class="lang" data-lang="nl" lang="nl">Nederlands</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Install as an app (Android: buttons; iPhone/iPad: explanation) and turn to landscape (see the hints in app.js) -->
+  <div class="hint-bar install" id="installBar" role="status" hidden>
+    <span id="installText">📲 Put Cabin Week on your home screen: play with one tap, even offline.</span>
+    <button class="btn" id="installBtn" type="button" hidden>Install</button>
+    <a class="btn" id="installPlay" href="https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek" target="_blank" rel="noopener" hidden>Google Play</a>
+    <button class="btn ghost" id="installClose" type="button" data-nl="Niet nu">Not now</button>
+  </div>
+  <div class="hint-bar rotate" id="rotateHint" role="status" hidden>
+    <span data-nl="📱 Draai je scherm: in de breedte zie je meer van het level.">📱 Turn your screen: in landscape you see more of the level.</span>
+    <button class="btn ghost" id="rotateClose" type="button" aria-label="Close" data-nl-label="Sluiten">✕</button>
+  </div>
+
+  <div class="update-bar" id="update-bar" role="status" hidden>
+    <span data-nl="Er staat een nieuwe versie klaar.">A new version is ready.</span>
+    <button class="btn" id="update-reload" type="button" data-nl="Herladen">Reload</button>
+  </div>
+
+  <!-- Generic card (intro / complete / finale) -->
+  <div class="overlay" id="cardWrap" hidden><div class="sheet card" id="card"></div></div>
+
+  <!-- Keypad -->
+  <div class="overlay" id="padWrap" hidden>
+    <div class="sheet pad">
+      <div class="eyebrow" data-nl="Codeslot">Code lock</div>
+      <h2 id="padTitle" style="margin-top:6px"></h2>
+      <p class="riddle" id="padRiddle"></p>
+      <div class="digits" id="digits"><span></span><span></span><span></span><span></span></div>
+      <div class="keys" id="keys"></div>
+      <p class="fb" id="padFb"></p>
+      <div class="cta" style="justify-content:center"><button class="btn ghost" id="padClose" type="button" data-nl="Sluiten">Close</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/data.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/levelgen.js"></script>
+<script src="js/core.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/game.js"></script>
+<script src="js/world.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/gamepad.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

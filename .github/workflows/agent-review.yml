@@ -1,0 +1,70 @@
+# Step 4 of the agent workflow (see docs/agent-workflow.md).
+# Claude reviews a pull request against AGENTS.md and leaves comments and a summary.
+name: "Agent: review"
+
+# On demand: put the label "agent-review" on a pull request, or start it in Actions with "Run workflow" (with the PR number).
+# Not on every pull request; remove the label and add it again to run it again.
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Number of the pull request
+        required: true
+
+concurrency:
+  group: agent-review-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Only by hand or with the label, and only for pull requests from this repository (forks do not get the secrets).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'agent-review' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    env:
+      PR: ${{ github.event.pull_request.number || inputs.pr_number }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: refs/pull/${{ env.PR }}/head
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 50
+            --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr review:*),Bash(gh issue view:*),Bash(git log:*),Bash(git diff:*),mcp__github_inline_comment__create_inline_comment"
+          prompt: |
+            You are the REVIEW agent for "Cabin Week", a platform game in the browser in this repository.
+            AGENTS.md (loaded as project instructions) describes how the code should be. Use it as a checklist.
+
+            Review pull request #${{ env.PR }} in ${{ github.repository }}.
+            Read it with: gh pr view ${{ env.PR }} --comments   and   gh pr diff ${{ env.PR }}
+            If it closes an issue, read that too and check the acceptance criteria from the plan.
+
+            Look, in this order, at:
+            1. Bugs: things that break the game, saved progress, other days, phones or offline play.
+            2. The rules in AGENTS.md: unique global names; scripts in index.html and in CORE (sw.js); CACHE and GAME_VERSION raised together;
+               levels reachable with the real jumps (max. 3 tiles up, 4 wide); no alert/confirm/prompt; buttons with type="button".
+            3. Tests: new behaviour is tested, including a wrong move; no tests skipped or weakened.
+            4. Text: in English and Dutch, funny and warm, in the tone of the game; no real names, places or dates.
+            5. Documentation: AGENTS.md (solutions, storage, pitfalls) and the README updated if the content changed.
+
+            Post inline comments (mcp__github_inline_comment__create_inline_comment) only for concrete problems, with a suggestion.
+            Then post one summary (gh pr comment ${{ env.PR }} --body-file <file>) starting with
+            "**Review: ✅ looks good**" or "**Review: ❌ something needs to change**", with a short list of findings.
+            If the owner wants it fixed, they reply with "@claude fix the review comments".
