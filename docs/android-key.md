@@ -95,8 +95,11 @@ Check: the page [Settings → Secrets and variables → Actions](https://github.
 
 Merge a change to `main`, or start it yourself: **Actions** → *Build the Google TV app* → **Run workflow** → branch `main` → **Run workflow**. After a few minutes the run is green. The step *Fixed key* says "The key is fine." If something is wrong, that step says what (wrong password, wrong alias, broken text).
 
+You can also run `npm run build:aab` from the repository root. It starts the same workflow, waits for it, downloads the protected artifact, and prompts for your key password to extract the `.aab` into `dist/android-aab-<run-id>/`. This requires the GitHub CLI (`gh`) to be installed and authenticated, the 7-Zip command (`7z`), and both GitHub secrets to be set.
+
 ### 7. Get the bundle for Google Play
 
+If you used the manual Actions steps above, get the bundle this way:
 1. **Actions** → *Build the Google TV app* → the latest green run on `main`.
 2. At the bottom, under **Artifacts**, click `cabin-week-google-play`. You get a zip (the artifact stays 7 days; after that, run the workflow again).
 3. Unzip it. Open `cabin-week-google-play.7z` with your **key password**:

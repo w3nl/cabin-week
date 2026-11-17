@@ -69,8 +69,9 @@ Full explanation: [android-key.md](android-key.md). In short:
 
 ### C1. Build the bundle (.aab)
 
-1. GitHub → **Actions** → **Build the Google TV app** → **Run workflow** → branch `main` → **Run workflow**. (A merge to `main` also starts it.)
-2. Wait until the run is green (about 5 minutes). The step *Fixed key* says "The key is fine". If it is red, see [android-key.md](android-key.md#something-went-wrong).
+From the repository root, run `npm run build:aab`. It starts the `main` workflow, waits for it, downloads the protected artifact, and prompts for your key password. The `.aab` is saved in `dist/android-aab-<run-id>/`.
+
+Alternatively, start the workflow manually: GitHub → **Actions** → **Build the Google TV app** → **Run workflow** → branch `main` → **Run workflow**. (A merge to `main` also starts it.) Wait until the run is green (about 5 minutes). The step *Fixed key* says "The key is fine". If it is red, see [android-key.md](android-key.md#something-went-wrong).
 
 ### C2. Get the .aab
 

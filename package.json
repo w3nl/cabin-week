@@ -7,6 +7,7 @@
     "start": "node tests/serve.js",
     "test": "playwright test",
     "build": "node tools/build-site.js",
+    "build:aab": "node tools/build-aab.js",
     "bundle": "node tools/bundle.js",
     "icons": "node tools/icons.js",
     "store": "node tools/store.js"

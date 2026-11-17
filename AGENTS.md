@@ -49,7 +49,7 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 | `android-tv/` | The Android app (phone, tablet, Google TV; Java, one WebView). `MainActivity.java` loads the game from `assets/game` (put there by the workflow *Build the Google TV app*) via `appassets.androidplatform.net`, passes a controller as `window.__nativePad` and the Back button as `window.tvBack()`. The workflow builds an `.apk` and, with the secrets `ANDROID_KEYSTORE_BASE64`/`ANDROID_KEYSTORE_PASSWORD`, a signed `.aab` for Google Play (key alias `cabinweek`, or the repository variable `ANDROID_KEY_ALIAS`). **The `.aab` is never public:** only in the artifact `cabin-week-google-play`, a 7z with `ANDROID_KEYSTORE_PASSWORD` as password; the release only has the `.apk`. See [docs/google-tv.md](docs/google-tv.md) and [docs/android-key.md](docs/android-key.md) |
 | `privacy.html` | Privacy policy (English and Dutch; the game collects nothing), for Google Play. Its own styles; published via `build-site.js`, not in `CORE` |
 | `docs/` | `domain.md`, `google-tv.md`, `publish-android.md` (publishing in Google Play and getting the `.aab`, step by step), `android-key.md` (the signing key), `iphone-ipad.md`, `agent-workflow.md`, `blueprint.md`, and `play-store/` (store texts in English and Dutch, and images: `npm run store`) |
-| `tools/` | `build-site.js` (the site in `_site/` for GitHub Pages), `bundle.js` (one loose HTML file in `dist/`), `icons.js`, `store.js` |
+| `tools/` | `build-site.js` (the site in `_site/` for GitHub Pages), `bundle.js` (one loose HTML file in `dist/`), `build-aab.js` (runs the GitHub Actions build and downloads/extracts the protected Google Play bundle), `icons.js`, `store.js` |
 | `tests/` | Playwright: `dagen`, `besturing`, `codeslot`, `controller`, `titel`, `voortgang`, `telefoon`, `pwa`; `helpers.js`; `serve.js` |
 | `.github/` | Workflows (see "Workflow" and [docs/agent-workflow.md](docs/agent-workflow.md)), the issue form *Idea*, the PR template |
 
@@ -149,6 +149,7 @@ npm install
 npx playwright install chromium   # only the first time
 npm test
 npm start                          # http://127.0.0.1:4180
+npm run build:aab                  # build/download the protected Google Play bundle (needs gh, 7z and GitHub secrets)
 ```
 
 Without internet (or with an installed Chromium): `PW_CHROMIUM=/path/to/chromium npm test`.
