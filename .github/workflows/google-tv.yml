@@ -111,11 +111,28 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: cabin-week-google-tv
-          path: |
-            cabin-week.apk
-            cabin-week.aab
+          path: cabin-week.apk
           if-no-files-found: warn
           retention-days: 30
+
+      # The bundle for Google Play is not public: only in a 7z file with a password (ANDROID_KEYSTORE_PASSWORD),
+      # and never on the release. Anyone with a GitHub account can download an artifact of a public repository.
+      - name: Encrypt the bundle for Google Play
+        if: env.HAS_KEY == 'true'
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          command -v 7z > /dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq 7zip; }
+          7z a -t7z -mhe=on -p"$ANDROID_KEYSTORE_PASSWORD" cabin-week-google-play.7z cabin-week.aab > /dev/null
+          rm cabin-week.aab
+
+      - name: Keep the bundle for Google Play (with a password)
+        if: env.HAS_KEY == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: cabin-week-google-play
+          path: cabin-week-google-play.7z
+          retention-days: 7
 
       - name: Attach the app to the release "google-tv"
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -125,4 +142,3 @@ jobs:
           gh release view google-tv >/dev/null 2>&1 || gh release create google-tv --title "Google TV-app" --latest=false \
             --notes "Cabin Week for Google TV. Install with the Downloader app: see docs/google-tv.md."
           gh release upload google-tv cabin-week.apk --clobber
-          if [ -f cabin-week.aab ]; then gh release upload google-tv cabin-week.aab --clobber; fi

@@ -62,31 +62,13 @@ The workflow *Build the Google TV app* (`google-tv.yml`) builds an Android TV ap
 
 ### A fixed (upload) key
 
-```bash
-keytool -genkeypair -v -keystore cabinweek.jks -alias cabinweek -keyalg RSA -keysize 2048 -validity 10000
-```
-
-Use the same password for the key and the file. Check it with `keytool -list -keystore cabinweek.jks -alias cabinweek`. Then store it in GitHub (Settings → Secrets and variables → Actions). With the GitHub CLI, no copy and paste needed:
-
-```bash
-base64 -w0 cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
-```
-
-```bash
-gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/cabin-week
-```
-
-On a Mac: `base64 -i cabinweek.jks | tr -d '\n' | pbcopy`; on Windows (PowerShell): `[Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | Set-Clipboard`, then paste it into the secret.
-
-**Reusing an existing key with another alias** (for example the key of another game): also add the repository **variable** `ANDROID_KEY_ALIAS` (Settings → Secrets and variables → Actions → Variables) with that alias. By default the alias is `cabinweek`. Google Play accepts the same upload key for several apps, but a separate key per app is tidier.
-
-Keep `cabinweek.jks` and the password safe (a password manager) and never put them in the repository.
+The key signs the app. With it, an update installs over the old app, and Google Play accepts the bundle. See **[android-key.md](android-key.md)** for every step: making the key, putting it in GitHub, and getting the bundle.
 
 **How the app works:** `android-tv/` is a small Android app (Java) with one WebView. The game is in the app (`assets/game`, put there by the workflow) and is loaded from `https://appassets.androidplatform.net/…`, so saving works. The remote sends ordinary arrow keys and Enter. A controller is passed on by the app as `window.__nativePad` (standard layout), at most once per frame with a counter per button, so a quick tap always counts. The Back button calls `window.tvBack()`; on the title screen it closes the app.
 
 ## 4. Through Google Play (internal test)
 
-Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** (above). With the secrets in place, the workflow builds `cabin-week.aab` next to the `.apk` (release **google-tv** and the workflow artifact).
+Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** (above). With the secrets in place, the workflow builds `cabin-week.aab`. It is **not public**: it is only in the workflow artifact `cabin-week-google-play`, as a 7z file with your `ANDROID_KEYSTORE_PASSWORD` as password (see [android-key.md](android-key.md)). Only the `.apk` is on the public release.
 
 ### Once: Google Play Console
 
@@ -98,7 +80,7 @@ Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** 
 ### Upload a version and share it
 
 1. Test and release → **Internal testing** → **Testers**: make an email list with the Google accounts of your testers (up to 100).
-2. **Create new release** → upload `cabin-week.aab` → save → **Publish**. An internal test is usually available within minutes.
+2. **Create new release** → upload `cabin-week.aab` (from the artifact) → save → **Publish**. An internal test is usually available within minutes.
 3. Copy the **opt-in link** and share it. Everyone opens it once and taps "Become a tester".
 4. A new version: upload the new `.aab` in a new release. The version number goes up by itself (the GitHub build number).
 

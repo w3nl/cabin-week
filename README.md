@@ -54,6 +54,7 @@ Jump on wild boars, robot vacuums and snowmen, or belly-slide into them (you sli
 
 - [AGENTS.md](AGENTS.md): how the code works, the solutions, the pitfalls and the checklists.
 - [docs/domain.md](docs/domain.md): the domain (cabinweek.online) and its DNS settings.
+- [docs/android-key.md](docs/android-key.md): the signing key for the Android app, step by step.
 - [docs/blueprint.md](docs/blueprint.md): the recipe for a game like this (in Dutch).
 - [docs/agent-workflow.md](docs/agent-workflow.md): from idea to pull request with AI agents.
 
