@@ -1,0 +1,91 @@
+# Step 3 of the agent workflow (see docs/agent-workflow.md).
+# An issue gets the label "klaar-om-te-bouwen" (ready to build): Claude builds the plan on a branch, runs the tests and opens a PR.
+name: "Agent: build"
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: agent-build-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event.label.name == 'klaar-om-te-bouwen'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+      id-token: write
+    env:
+      BRANCH: agent/issue-${{ github.event.issue.number }}
+      # Optional: a fine-grained token (contents, pull requests, issues: read & write). With it the PR starts
+      # the test workflow by itself. Without a token the last step starts it.
+      AGENT_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.AGENT_GITHUB_TOKEN || github.token }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install the dependencies and the test browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Create the branch
+        run: |
+          git config user.name "cabin-week-agent"
+          git config user.email "cabin-week-agent@users.noreply.github.com"
+          git checkout -B "$BRANCH" origin/main
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN || github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.AGENT_GITHUB_TOKEN || github.token }}
+          claude_args: |
+            --max-turns 150
+            --allowedTools "Read,Glob,Grep,Edit,Write,MultiEdit,Bash(npm:*),Bash(npx:*),Bash(node:*),Bash(git:*),Bash(gh issue:*),Bash(gh pr:*),Bash(ls:*),Bash(mkdir:*),Bash(cat:*),Bash(sed:*),Bash(grep:*)"
+          prompt: |
+            You are the BUILD agent for "Cabin Week", a platform game in the browser in this repository.
+            AGENTS.md (loaded as project instructions) explains the code, the conventions and the checklists. Follow it closely.
+
+            Build issue #${{ github.event.issue.number }} in ${{ github.repository }}.
+            Read the issue, the plan of the refine agent and the whole conversation: gh issue view ${{ github.event.issue.number }} --comments
+            The latest decisions in the conversation override the original plan.
+
+            You are on branch ${{ env.BRANCH }}, made from main.
+            1. Build the plan. Keep the change small. Follow AGENTS.md: unique global names, levels reachable with the real jumps,
+               every text in English and Dutch (T("…", "…")) in the tone of the game, phone sizes, accessibility.
+            2. Raise CACHE in sw.js and GAME_VERSION in js/app.js together, and put new files in CORE and in index.html.
+            3. Add or adapt Playwright tests (tests/*.spec.js), with at least one wrong move.
+            4. Run `npm test` until everything passes. Do not skip tests or weaken them to make them pass.
+            5. Update AGENTS.md (solutions, storage, pitfalls) and the README if the content changed.
+            6. Commit in small, logical steps with clear messages and push: git push -u origin ${{ env.BRANCH }}
+            7. Open a pull request:
+               gh pr create --base main --head ${{ env.BRANCH }} --label agent-pr --title "<short title>" --body-file <file>
+               Follow .github/pull_request_template.md, with "Closes #${{ github.event.issue.number }}".
+               If not all tests passed, open it as a draft (--draft) and explain exactly what goes wrong.
+            8. Comment on the issue with a link to the pull request.
+
+      # Review and playtest are on demand (label agent-review / agent-speeltest), so only the tests.
+      - name: Start the tests for the new pull request
+        if: success() && env.AGENT_TOKEN == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
+          if [ -z "$PR" ]; then echo "No pull request was opened."; exit 0; fi
+          gh workflow run tests.yml --ref "$BRANCH"

@@ -1,0 +1,58 @@
+# Step 2 of the agent workflow (see docs/agent-workflow.md).
+# An issue with the label "idee": Claude looks into it and answers with a plan. No code changes.
+name: "Agent: refine idea"
+
+on:
+  issues:
+    types: [opened, labeled]
+
+concurrency:
+  group: agent-refine-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  refine:
+    if: >-
+      contains(github.event.issue.labels.*.name, 'idee') &&
+      (github.event.action == 'opened' || github.event.label.name == 'idee') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 40
+            --allowedTools "Read,Glob,Grep,Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue list:*),Bash(git log:*)"
+          prompt: |
+            You are the REFINE agent for "Cabin Week", a platform game in the browser about a Christmas week of two families in a holiday cabin.
+            AGENTS.md (loaded as project instructions) explains the code, the tone and the solutions. Follow it.
+
+            Issue #${{ github.event.issue.number }} in ${{ github.repository }} is a new idea.
+            Read it with: gh issue view ${{ github.event.issue.number }} --comments
+
+            Explore the code so your plan is concrete. Do NOT change any files.
+
+            Then post ONE comment (gh issue comment ${{ github.event.issue.number }} --body-file <file>), in the language of the issue (English or Dutch), with:
+            1. **What I understand**: the idea in two or three sentences.
+            2. **Proposal**: how it works for the player, step by step. For a level: the day, the theme, what you look for (3 things), the task,
+               the code lock with its clues, the enemies and the jokes. Keep the tone from AGENTS.md (funny and warm), with texts in English and Dutch.
+            3. **Where it goes in the code**: the files that change, following the checklists in AGENTS.md (sw.js, version, tests, docs).
+            4. **Acceptance criteria**: a checklist the build and review agents can go through.
+            5. **Test plan**: which Playwright tests are added or changed.
+            6. **Open questions**: only what the owner must decide, each with a proposal.
+            7. **Size**: small, medium or large.
+            End with: "Is this right? Then add the label **klaar-om-te-bouwen**. Want something else? Reply with @claude and what you want."
+
+            Finally add the label: gh issue edit ${{ github.event.issue.number }} --add-label uitgewerkt

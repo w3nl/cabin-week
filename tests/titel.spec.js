@@ -1,0 +1,86 @@
+// The title screen and the languages. Cabin Week has no calendar: days unlock as you play.
+const { test, expect } = require('@playwright/test');
+const crypto = require('crypto');
+const { KEY, seed } = require('./helpers');
+
+test('a new player: 8 days to play, and day 1 is the next one', async ({ page }) => {
+  await seed(page);
+  await expect(page.locator('#cdNum')).toHaveText('8');
+  await expect(page.locator('#special')).toBeHidden();
+  await expect(page.locator('#ticker')).toBeVisible();
+  await expect(page.locator('#week li.today .dd')).toHaveText('1');
+  await expect(page.locator('#levels button.today')).toHaveCount(1);
+  await expect(page.locator('#levels button').first()).toHaveClass(/today/);
+});
+
+test('progress: the title shows how many days are done and which day is next', async ({ page }) => {
+  await seed(page, { unlocked: 4 });
+  await page.evaluate(KEY => { const s = JSON.parse(localStorage.getItem(KEY)); s.best = { 0: 3, 1: 5, 2: 2 }; localStorage.setItem(KEY, JSON.stringify(s)); }, KEY);
+  await page.reload();
+  await expect(page.locator('#cdNum')).toHaveText('3/8');
+  await expect(page.locator('#week li.past')).toHaveCount(3);
+  await expect(page.locator('#week li.today .dd')).toHaveText('4');
+  await expect(page.locator('#levels button').nth(3)).toHaveClass(/today/);
+});
+
+test('the whole week done', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  await page.evaluate(KEY => { const s = JSON.parse(localStorage.getItem(KEY)); s.best = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1 }; localStorage.setItem(KEY, JSON.stringify(s)); }, KEY);
+  await page.reload();
+  await expect(page.locator('.count')).toContainText('🏆');
+});
+
+test('English by default; Dutch with ?lang=nl and with the language button, and the choice is remembered', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#title h2').first()).toContainText('Choose your hero');
+  await expect(page.locator('#levels .n').first()).toContainText('Day 1');
+  await page.locator('button[data-lang="nl"]').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
+  await expect(page.locator('#title h2').first()).toContainText('Kies je held');
+  await expect(page.locator('#levels .n').first()).toContainText('Dag 1');
+  await expect(page.locator('button[data-lang="nl"]')).toHaveAttribute('aria-pressed', 'true');
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
+  await page.goto('/?lang=en');
+  await expect(page.locator('#title h2').first()).toContainText('Choose your hero');
+});
+
+// The original game was made for one family. This list holds the first 16 hex digits of the SHA-256 of words
+// (lower case) that must never appear: the real surnames, first names, village and region, and a name from a special day.
+// Hashed, so the test itself does not contain the personal information.
+const BANNED = new Set([
+  '07c28eb9f259fc93',
+  '1c4fe3992988ec78',
+  '37742e00d990d888',
+  '4ebfd3d661633441',
+  '546f6aa3973a2344',
+  '5a0521604876bda8',
+  '68fc8a764bb9de4d',
+  '75e80035bd7ece43',
+  '861ffad68d73d5ca',
+  '8cc2d053ad847fc1',
+  '90b8de4051f02b7a',
+  'a5969856c8a57fd0',
+  'bd968638f8abc2ac',
+  'c96623c777c68917',
+  'e8fb803a42bff958'
+]);
+
+test('no real places, dates or people from the original game', async ({ page }) => {
+  for (const lang of ['en', 'nl']) {
+    await seed(page, { unlocked: 8, lang });
+    const text = await page.evaluate(() => document.body.innerText + JSON.stringify(LEVELS) + JSON.stringify(JOKES) + JSON.stringify(CHARS));
+    const words = new Set(text.toLowerCase().match(/[\p{L}]+/gu));
+    const found = [...words].filter(w => BANNED.has(crypto.createHash('sha256').update(w).digest('hex').slice(0, 16)));
+    expect(found).toEqual([]);
+    expect(text).not.toContain('2026');
+  }
+});
+
+test("day 4 is Paul's birthday: he wears a party hat", async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  expect(await page.evaluate(() => LEVELS[3].birthday)).toBe('Paul');
+});
