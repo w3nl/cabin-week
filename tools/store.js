@@ -1,5 +1,6 @@
 // Maakt de plaatjes voor de winkelvermelding in Google Play (docs/play-store/). Draai: npm run store
 // - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding
+// - social-preview.png (1280×640): de social preview van de repository op GitHub (Settings → General → Social preview)
 // - tv-banner.png (1280×720): de banner voor Android TV (uit android-tv/banner.svg)
 // - screenshot-*.png (1920×1080): voor telefoon, tablet en tv
 const { chromium } = require('@playwright/test');
@@ -66,21 +67,23 @@ async function play(page, i, walk) {
       await page.close();
     }
 
-    // Grote afbeelding: Eerste Kerstdag met de naam van het spel erover
-    const page = await open(browser, { width: 1024, height: 500, char: 3 });
-    await play(page, 4, 1400);
-    await page.evaluate(() => {
-      for (const id of ['hud', 'touch', 'dialog']) { const el = document.getElementById(id); if (el) el.style.visibility = 'hidden'; }
-      const d = document.createElement('div');
-      d.style.cssText = 'position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding-left:56px;' +
-        'background:linear-gradient(90deg,rgba(11,22,49,.88),rgba(11,22,49,.55) 48%,transparent 75%);color:#fff;font-family:Fredoka,sans-serif;z-index:99';
-      d.innerHTML = '<div style="font-size:64px;font-weight:700;line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.35)">Cabin<br>Week</div>' +
-        '<div style="font-size:24px;font-weight:600;margin-top:16px;color:#ffd25e">A level a day in a Christmas week</div>';
-      document.body.appendChild(d);
-    });
-    await page.waitForTimeout(300);
-    await page.screenshot({ path: path.join(out, 'feature-graphic.png') });
-    await page.close();
+    // Feature graphic (Google Play, 1024×500) and social preview (GitHub, 1280×640): Christmas Day with the name on top.
+    for (const [file, width, height, pad, big, small] of [['feature-graphic.png', 1024, 500, 56, 64, 24], ['social-preview.png', 1280, 640, 72, 92, 32]]) {
+      const page = await open(browser, { width, height, char: 3 });
+      await play(page, 4, 1400);
+      await page.evaluate(([pad, big, small]) => {
+        for (const id of ['hud', 'touch', 'dialog']) { const el = document.getElementById(id); if (el) el.style.visibility = 'hidden'; }
+        const d = document.createElement('div');
+        d.style.cssText = `position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding-left:${pad}px;` +
+          'background:linear-gradient(90deg,rgba(11,22,49,.88),rgba(11,22,49,.55) 48%,transparent 75%);color:#fff;font-family:Fredoka,sans-serif;z-index:99';
+        d.innerHTML = `<div style="font-size:${big}px;font-weight:700;line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.35)">Cabin<br>Week</div>` +
+          `<div style="font-size:${small}px;font-weight:600;margin-top:16px;color:#ffd25e">A level a day in a Christmas week</div>`;
+        document.body.appendChild(d);
+      }, [pad, big, small]);
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: path.join(out, file) });
+      await page.close();
+    }
 
     // Banner voor Android TV, groot
     const banner = fs.readFileSync(path.join(root, 'android-tv', 'banner.svg'), 'utf8');

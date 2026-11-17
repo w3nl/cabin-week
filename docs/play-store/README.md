@@ -108,3 +108,7 @@ The Android TV fields only appear after adding Android TV in **Test and release 
 | Target audience | 6-8, 9-12, 13-15 and older. Not designed to attract children with ads (there are none) |
 | Data safety | Collects no data, shares no data |
 | Government, financial features, health | No |
+
+## GitHub social preview
+
+[`social-preview.png`](social-preview.png) (1280 × 640, made by `npm run store`) is the image GitHub shows when someone shares a link to the repository. GitHub has no API for it, so upload it by hand: **Settings → General → Social preview → Edit → Upload an image…**
