@@ -1,5 +1,7 @@
 # Google Play: store listing
 
+The order of all steps (key, Play Console, upload) is in [../publish-android.md](../publish-android.md).
+
 Everything Play Console asks for in **Grow users → Store presence → Main store listing**, and in **Policy → App content**. Make the images again with `npm run store` (for example after a big change to the game).
 
 Set the **default language to English (United States)** and add **Dutch (nl-NL)** as a translation (Store presence → Main store listing → Manage translations).

@@ -1,0 +1,137 @@
+# Publishing the Android app: step by step
+
+From nothing to Cabin Week in Google Play (phone, tablet and Google TV). Do part A once; part D for every new version.
+
+Commands are for Ubuntu (Linux). Mac and Windows: see [android-key.md](android-key.md).
+
+| Part | What | How often |
+|---|---|---|
+| A | The signing key in GitHub | once |
+| B | The app in Google Play Console | once |
+| C | The first version, for testers | once |
+| D | A new version | every update |
+| E | Public in Google Play (optional) | once |
+
+---
+
+## A. The signing key in GitHub (once)
+
+Full explanation: [android-key.md](android-key.md). In short:
+
+1. Install the tools:
+   ```bash
+   sudo apt install openjdk-21-jre-headless gh 7zip
+   ```
+2. Make the key. Use **one** password, and the same one if it asks twice:
+   ```bash
+   keytool -genkeypair -v -keystore ~/cabinweek.jks -alias cabinweek -keyalg RSA -keysize 2048 -validity 10000
+   ```
+3. Check it (you see `cabinweek, …, PrivateKeyEntry`):
+   ```bash
+   keytool -list -keystore ~/cabinweek.jks -alias cabinweek
+   ```
+4. Back up `~/cabinweek.jks` and the password (password manager and a USB stick).
+5. Give it to GitHub:
+   ```bash
+   gh auth login
+   ```
+   ```bash
+   base64 -w0 ~/cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+   ```
+   ```bash
+   gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/cabin-week
+   ```
+
+---
+
+## B. The app in Google Play Console (once)
+
+1. **Developer account:** [play.google.com/console](https://play.google.com/console). If you already have one (for another app), use that. A new account costs $25 once, and Google checks your identity (can take a few days).
+2. **Create app:** **Home → Create app**:
+   - App name: `Cabin Week`
+   - Default language: **English (United States) – en-US**
+   - App or game: **Game**; Free or paid: **Free**
+   - Tick the declarations → **Create app**.
+3. **Android TV:** **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV.
+4. **App content** (left menu **Policy → App content**). Fill in every item with the answers in [play-store/README.md](play-store/README.md#app-content-the-questionnaires):
+   - Privacy policy: `https://cabinweek.online/privacy.html` (until the domain works: `https://w3nl.github.io/cabin-week/privacy.html`)
+   - App access, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health.
+5. **Store listing:** **Grow users → Store presence → Main store listing**:
+   - Name, short description and full description: copy from [play-store/README.md](play-store/README.md).
+   - App icon: `icons/icon-512.png`. Feature graphic: `docs/play-store/feature-graphic.png`.
+   - Phone screenshots: the five `docs/play-store/screenshot-*.png`. The same five for tablet and Android TV, plus `docs/play-store/tv-banner.png` as TV banner.
+   - **Save.** Then **Manage translations → Add translations → Dutch – nl-NL** and paste the Dutch texts.
+6. **Store settings:** **Grow users → Store presence → Store settings**: category **Adventure**, an email address, website `https://cabinweek.online/`.
+
+---
+
+## C. The first version, for testers (once)
+
+### C1. Build the bundle (.aab)
+
+1. GitHub → **Actions** → **Build the Google TV app** → **Run workflow** → branch `main` → **Run workflow**. (A merge to `main` also starts it.)
+2. Wait until the run is green (about 5 minutes). The step *Fixed key* says "The key is fine". If it is red, see [android-key.md](android-key.md#something-went-wrong).
+
+### C2. Get the .aab
+
+The `.aab` is **not public**: it is only in the run, inside a 7z file with your key password.
+
+1. Open the green run. At the bottom, under **Artifacts**, click **cabin-week-google-play**. You get `cabin-week-google-play.zip`. It stays there for 7 days; after that, run the workflow again.
+2. Unpack it in your Downloads folder:
+   ```bash
+   cd ~/Downloads && unzip cabin-week-google-play.zip
+   ```
+   ```bash
+   7z x cabin-week-google-play.7z
+   ```
+   7z asks for the password: your key password (`ANDROID_KEYSTORE_PASSWORD`).
+3. You now have `~/Downloads/cabin-week.aab`. Do not share it; delete it after uploading.
+
+(The `.apk` on the release **google-tv** is public and fine to share: that is the version for Downloader on the TV. Google Play does not take an `.apk`.)
+
+### C3. Upload to internal testing
+
+1. Play Console → Cabin Week → **Test and release → Testing → Internal testing**.
+2. Tab **Testers** → **Create email list**: a name (e.g. "Family") and the Google accounts of your testers (up to 100) → **Save**. Tick the list → **Save**.
+3. **Create new release**:
+   - Play App Signing: **Continue** (Google keeps the real signing key; your key is the upload key).
+   - **Upload** `cabin-week.aab`.
+   - Release name: filled in by itself (the version number). Release notes: e.g. `First version.`
+   - **Next** → **Save and publish**.
+4. Back on **Internal testing → Testers**: copy the **Join on the web** link (opt-in link) and send it to the testers.
+
+### C4. Install
+
+- **Phone or tablet:** open the opt-in link with the tester's Google account → **Become a tester** → **Download it on Google Play** → **Install**.
+- **Google TV:** the Google account on the TV must be a tester (it opened the opt-in link once). Then, on the phone with the same account: Play Store → Cabin Week → **Install on more devices** → the TV. Or on the TV: Play Store → search **Cabin Week**. Just after the first upload it can take an hour.
+
+"Not available for this device" on the TV: Android TV is not on yet (B3), or the account on the TV is not a tester.
+
+---
+
+## D. A new version (every update)
+
+1. Merge the change to `main` (the build starts by itself), or run **Build the Google TV app** by hand.
+2. Get the `.aab` (C2).
+3. Play Console → **Internal testing** → **Create new release** → upload → **Next** → **Save and publish**.
+
+The version number goes up by itself (the GitHub build number), so Google always accepts the new bundle. Testers get the update automatically, usually within a day. Right away: Play Store → **Manage apps → Updates**.
+
+---
+
+## E. Public in Google Play (optional)
+
+Internal testing is enough for family and friends. For everyone:
+
+1. A **personal** developer account made after November 2023 first needs a **closed test** with at least **12 testers** who stay opted in for **14 days**: **Testing → Closed testing → Create track**, upload the same `.aab`, add the testers.
+2. Then **Production → Create new release** → upload → **Send for review**. Google's review usually takes a few days.
+3. Countries: **Production → Countries/regions → Add countries**.
+
+---
+
+## Good to know
+
+- The package name `nl.w3nl.cabinweek` is fixed forever after the first upload.
+- **Lost the key?** Play Console → **Test and release → App integrity → App signing → Request upload key reset**. Your app and players are safe: Google keeps the real signing key.
+- Google raises the required Android version every year. The app targets Android 16 (API 36). If Play Console asks for higher, raise `compileSdk` and `targetSdk` in `android-tv/app/build.gradle.kts`.
+- The store images can be made again with `npm run store`.

@@ -9,7 +9,7 @@ You walk and jump through the forest, the cabin, the snow and a Christmas market
 ## Play
 
 - **Online:** [cabinweek.online](https://cabinweek.online/) (GitHub Pages).
-- **Android app:** [Cabin Week on Google Play](https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek) (once it is published).
+- **Android app:** [Cabin Week on Google Play](https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek) (once it is published). Publishing it: [docs/publish-android.md](docs/publish-android.md).
 - **On your phone or tablet:** open the site and choose "Add to Home screen" (or the Android app, offered in the game). After that the game also works offline. iPhone and iPad: see [docs/iphone-ipad.md](docs/iphone-ipad.md).
 - **On the TV (Google TV):** in a browser app, by casting, or as an app on the home screen. See [docs/google-tv.md](docs/google-tv.md).
 - **Locally:**
@@ -54,7 +54,8 @@ Jump on wild boars, robot vacuums and snowmen, or belly-slide into them (you sli
 
 - [AGENTS.md](AGENTS.md): how the code works, the solutions, the pitfalls and the checklists.
 - [docs/domain.md](docs/domain.md): the domain (cabinweek.online) and its DNS settings.
-- [docs/android-key.md](docs/android-key.md): the signing key for the Android app, step by step.
+- [docs/publish-android.md](docs/publish-android.md): publishing the Android app in Google Play, and getting the `.aab`, step by step.
+- [docs/android-key.md](docs/android-key.md): the signing key for the Android app, in detail.
 - [docs/blueprint.md](docs/blueprint.md): the recipe for a game like this (in Dutch).
 - [docs/agent-workflow.md](docs/agent-workflow.md): from idea to pull request with AI agents.
 

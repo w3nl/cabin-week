@@ -68,6 +68,8 @@ The key signs the app. With it, an update installs over the old app, and Google 
 
 ## 4. Through Google Play (internal test)
 
+**The complete checklist is in [publish-android.md](publish-android.md).** Below is a summary.
+
 Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** (above). With the secrets in place, the workflow builds `cabin-week.aab`. It is **not public**: it is only in the workflow artifact `cabin-week-google-play`, as a 7z file with your `ANDROID_KEYSTORE_PASSWORD` as password (see [android-key.md](android-key.md)). Only the `.apk` is on the public release.
 
 ### Once: Google Play Console
