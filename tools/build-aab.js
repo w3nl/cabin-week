@@ -23,16 +23,19 @@ function run(command, args, options = {}) {
   return options.capture ? result.stdout : '';
 }
 
-async function findDispatchedRun(startedAt) {
+function getRecentWorkflowRuns() {
+  const output = run('gh', [
+    'run', 'list', '--workflow', 'google-tv.yml', '--branch', 'main',
+    '--event', 'workflow_dispatch', '--limit', '10', '--json', 'databaseId'
+  ], { capture: true });
+  return JSON.parse(output);
+}
+
+async function findDispatchedRun(previousRunId) {
   const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
-    const output = run('gh', [
-      'run', 'list', '--workflow', 'google-tv.yml', '--branch', 'main',
-      '--event', 'workflow_dispatch', '--limit', '10',
-      '--json', 'databaseId,createdAt'
-    ], { capture: true });
-    const runs = JSON.parse(output);
-    const matchingRun = runs.find(item => Date.parse(item.createdAt) >= startedAt - 2_000);
+    const runs = getRecentWorkflowRuns();
+    const matchingRun = runs.find(item => Number(item.databaseId) > previousRunId);
     if (matchingRun) return matchingRun.databaseId;
     await delay(2_000);
   }
@@ -42,9 +45,10 @@ async function findDispatchedRun(startedAt) {
 async function main() {
   run('gh', ['auth', 'status']);
 
-  const startedAt = Date.now();
+  const previousRuns = getRecentWorkflowRuns();
+  const previousRunId = Math.max(0, ...previousRuns.map(item => Number(item.databaseId)));
   run('gh', ['workflow', 'run', 'google-tv.yml', '--ref', 'main']);
-  const runId = await findDispatchedRun(startedAt);
+  const runId = await findDispatchedRun(previousRunId);
 
   run('gh', ['run', 'watch', String(runId), '--exit-status']);
 
