@@ -11,6 +11,18 @@
 			],
 			"isBackground": false,
 			"problemMatcher": []
+		},
+		{
+			"label": "Extract protected Google Play AAB",
+			"type": "shell",
+			"command": "7z",
+			"args": [
+				"x",
+				"dist/android-aab-44153730850/cabin-week-google-play.7z",
+				"-odist/android-aab-44153730850"
+			],
+			"isBackground": true,
+			"problemMatcher": []
 		}
 	]
 }
