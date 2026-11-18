@@ -51,7 +51,7 @@ Choose a trip on the **map of Europe** (🗺️ on the title screen). Every trip
 | 🌷 **Netherlands** | a little house by a windmill near Tulpendam | the Zaanse Schans, the windmills of Kinderdijk, Amsterdam by canal boat, Gouda by candlelight, skating in Giethoorn, the Hoge Veluwe, a Wadden island, going home |
 | ☀️ **Dalmatia** (summer!) | Camp Lavanda on the Croatian coast | the camping, the Krka waterfalls, the walls of Dubrovnik, island hopping, the Plitvice lakes, Zadar and the sea organ, the rocky beach of Šibenik, going home. The sea is warm: you can swim |
 
-Coming later: Iceland, Scania, Tuscany, Veneto, Scotland, Catalonia, Ardèche and Greece.
+Coming later: Iceland, Småland, Tuscany, Veneto, Scotland, Catalonia, Ardèche and Greece (ideas in [docs/ideas.md](docs/ideas.md)).
 
 ## Contributing
 

@@ -58,7 +58,7 @@ const REGIONS = [
 /** Places on the map that are not playable yet. */
 const SOON = [
   { name: T("Iceland", "IJsland"), lon: -19, lat: 64.9 },
-  { name: T("Scania", "Skåne"), lon: 13.6, lat: 55.9 },
+  { name: "Småland", lon: 15.2, lat: 57.3 },
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
   { name: "Veneto", lon: 12.3, lat: 45.5 },
   { name: T("Scotland", "Schotland"), lon: -4.3, lat: 57.0 },

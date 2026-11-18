@@ -12,6 +12,7 @@ test('the map shows the regions; choosing one switches the days, and the choice 
   await expect(page.locator('#mapBox .pin.here')).toHaveAttribute('data-region', 'ardennes');
   await expect(page.locator('#mapSoon')).toContainText('Iceland');
   await expect(page.locator('#mapSoon')).toContainText('Greece');
+  await expect(page.locator('#mapSoon')).toContainText('Småland');
   await expect(page.locator('#mapBox .soon-dot')).toHaveCount(8);
   await page.locator('#mapBox .pin[data-region="tirol"]').click();
   await expect(page.locator('#title')).toBeVisible();
