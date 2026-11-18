@@ -50,7 +50,7 @@ Choose a trip on the **map of Europe** (🗺️ on the title screen). Every trip
 
 | 🌷 **Netherlands** | a little house by a windmill near Tulpendam | the Zaanse Schans, the windmills of Kinderdijk, Amsterdam by canal boat, Gouda by candlelight, skating in Giethoorn, the Hoge Veluwe, a Wadden island, going home |
 
-Coming later: Iceland, Scania, Tuscany, Veneto and Dalmatia.
+Coming later: Iceland, Scania, Tuscany, Veneto, Dalmatia, Scotland, Catalonia, Ardèche and Greece.
 
 ## Contributing
 

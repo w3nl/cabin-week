@@ -51,7 +51,11 @@ const SOON = [
   { name: T("Scania", "Skåne"), lon: 13.6, lat: 55.9 },
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
   { name: "Veneto", lon: 12.3, lat: 45.5 },
-  { name: T("Dalmatia", "Dalmatië"), lon: 16.4, lat: 43.5 }
+  { name: T("Dalmatia", "Dalmatië"), lon: 16.4, lat: 43.5 },
+  { name: T("Scotland", "Schotland"), lon: -4.3, lat: 57.0 },
+  { name: T("Catalonia", "Catalonië"), lon: 1.8, lat: 41.9 },
+  { name: T("Ardèche", "Ardèche"), lon: 4.4, lat: 44.7 },
+  { name: T("Greece", "Griekenland"), lon: 22.0, lat: 39.6 }
 ];
 let REGION = REGIONS[0];
 /** Progress of a region: the Ardennes keep the top-level unlocked/best (old saves keep working), the others save.regions[id]. */
