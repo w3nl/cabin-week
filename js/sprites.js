@@ -190,6 +190,21 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
 function shadowAt(x, y, w) { g.fillStyle = "rgba(0,0,0,.22)"; g.beginPath(); g.ellipse(x, y, w, 3, 0, 0, 7); g.fill(); }
 
 /* ---------- Vijanden ---------- */
+/** A leg that swings from the hip while an animal walks. ph is the step phase (from the distance walked, so the legs stop
+ *  when the animal stops), amp the swing angle. The foot lifts a little while it swings forward. */
+function walkLeg(hx, hy, len, w, ph, amp, col, hoof) {
+  const lift = Math.max(0, Math.cos(ph)) * len * .2;
+  g.save(); g.translate(hx, hy); g.rotate(Math.sin(ph) * amp);
+  blob(col, () => rp(-w / 2, -1, w, len + 1 - lift, w / 2));
+  if (hoof) { g.fillStyle = hoof; g.fillRect(-w / 2, len - lift - 2, w, 2); }
+  g.restore();
+}
+/** Four legs in a trot: the diagonal pairs move together. Far legs (darker) and near legs. */
+function trotLegs(ph, legs, amp, far, near, hoof) {
+  legs.forEach(([x, y, len, w], i) => walkLeg(x, y, len, w, ph + (i === 0 || i === 3 ? 0 : Math.PI), amp, i % 2 ? near : far, hoof));
+}
+/** The body goes up and down a little with every step. */
+const stepBob = ph => -Math.abs(Math.sin(ph)) * 1.2;
 function drawEnemy(e, t) {
   const f = e.vx > 0 ? 1 : -1;
   shadowAt(e.x + e.w / 2, e.y + e.h, 14);
@@ -197,15 +212,13 @@ function drawEnemy(e, t) {
   if (e.dead) g.scale(1.1, .35);
   g.lineJoin = "round"; g.lineCap = "round"; g.lineWidth = 1.6; g.strokeStyle = OUT;
   if (e.kind === "zwijn") {
-    const st = Math.sin(e.x * .35) * 3; // pas op de afgelegde weg, zodat de pootjes vloeiend meelopen
+    const ph = e.x * .3; // op de afgelegde weg, zodat de pootjes vloeiend meelopen
     // staart
     g.strokeStyle = "#3a2618"; g.lineWidth = 1.8; g.beginPath(); g.moveTo(-15, -15); g.bezierCurveTo(-22, -20, -20, -10, -17, -13); g.stroke();
     g.strokeStyle = OUT; g.lineWidth = 1.6;
     // poten
-    [[-10, st], [-4, -st], [5, st], [10, -st]].forEach(([x, d], i) => {
-      blob(i % 2 ? "#3c2a1d" : "#4a3424", () => g.rect(x - 2, -8 + (i % 2 ? 0 : 0), 4, 7 + d * .3));
-      g.fillStyle = "#1c1410"; g.fillRect(x - 2, -2 + d * .3, 4, 2);
-    });
+    trotLegs(ph, [[-10, -9, 9, 4], [-4, -9, 9, 4], [5, -9, 9, 4], [10, -9, 9, 4]], .5, "#3c2a1d", "#4a3424", "#1c1410");
+    g.translate(0, stepBob(ph));
     // lijf
     g.save(); g.beginPath(); g.ellipse(0, -14, 16, 10, 0, 0, 7); g.fillStyle = "#5e432f"; g.fill(); g.clip();
     g.fillStyle = "#4a3324"; g.fillRect(-16, -12, 32, 10); g.fillStyle = "#77563d"; g.beginPath(); g.ellipse(2, -19, 10, 3, 0, 0, 7); g.fill();
@@ -251,8 +264,9 @@ function drawEnemy(e, t) {
     blob("#d8232a", () => rp(-5, -22, 13, 3.5, 1.5));
   } else if (e.kind === "geit") {
     // an Alpine mountain goat with curved horns and a beard
-    const st = Math.sin(e.x * .35) * 3;
-    [[-10, st], [-5, -st], [6, st], [11, -st]].forEach(([x, d], i) => { blob(i % 2 ? "#cfc7b8" : "#e2dccd", () => g.rect(x - 1.8, -9, 3.6, 8 + d * .3)); g.fillStyle = "#3a3026"; g.fillRect(x - 1.8, -2 + d * .3, 3.6, 2); });
+    const ph = e.x * .3;
+    trotLegs(ph, [[-10, -10, 10, 3.6], [-5, -10, 10, 3.6], [6, -10, 10, 3.6], [11, -10, 10, 3.6]], .55, "#cfc7b8", "#e2dccd", "#3a3026");
+    g.translate(0, stepBob(ph));
     blob("#ece6d8", () => g.ellipse(0, -14, 15, 8.5, 0, 0, 7));
     g.fillStyle = "#d8d0bf"; g.beginPath(); g.ellipse(-2, -10, 12, 3, 0, 0, 7); g.fill();
     blob("#ece6d8", () => { g.moveTo(-15, -17); g.lineTo(-19, -21); g.lineTo(-14, -14); g.closePath(); });
@@ -266,9 +280,9 @@ function drawEnemy(e, t) {
   } else if (e.kind === "gans") {
     // a cross Dutch goose: grey-brown, long neck, orange beak, and it means business
     const st = Math.sin(e.x * .3) * 2.5;
-    g.strokeStyle = "#e8822a"; g.lineWidth = 2; g.beginPath(); g.moveTo(-3, -9); g.lineTo(-3 + st * .4, 0); g.moveTo(3, -9); g.lineTo(3 - st * .4, 0); g.stroke();
+    g.strokeStyle = "#e8822a"; g.lineWidth = 2; g.beginPath(); g.moveTo(-3, -9); g.lineTo(-3 + st * 1.2, 0); g.moveTo(3, -9); g.lineTo(3 - st * 1.2, 0); g.stroke();
     g.strokeStyle = OUT; g.lineWidth = 1.6;
-    blob("#e8822a", () => g.ellipse(-2 + st * .4, 0, 4, 1.6, 0, 0, 7)); blob("#e8822a", () => g.ellipse(4 - st * .4, 0, 4, 1.6, 0, 0, 7));
+    blob("#e8822a", () => g.ellipse(-2 + st * 1.2, 0, 4, 1.6, 0, 0, 7)); blob("#e8822a", () => g.ellipse(4 - st * 1.2, 0, 4, 1.6, 0, 0, 7));
     blob("#8f8a80", () => g.ellipse(-2, -13, 13, 8, -.1, 0, 7));
     g.fillStyle = "#6f6a60"; g.beginPath(); g.ellipse(-5, -15, 8, 4, -.2, 0, 7); g.fill();
     g.fillStyle = "#f4f1ea"; g.beginPath(); g.ellipse(0, -8, 9, 3.5, 0, 0, 7); g.fill();
@@ -281,7 +295,7 @@ function drawEnemy(e, t) {
   } else if (e.kind === "meeuw") {
     // a seagull on the beach, looking for your chips
     const st = Math.sin(e.x * .35) * 2;
-    g.strokeStyle = "#e8a53a"; g.lineWidth = 1.8; g.beginPath(); g.moveTo(-2, -8); g.lineTo(-2 + st * .5, 0); g.moveTo(3, -8); g.lineTo(3 - st * .5, 0); g.stroke();
+    g.strokeStyle = "#e8a53a"; g.lineWidth = 1.8; g.beginPath(); g.moveTo(-2, -8); g.lineTo(-2 + st * 1.3, 0); g.moveTo(3, -8); g.lineTo(3 - st * 1.3, 0); g.stroke();
     g.strokeStyle = OUT; g.lineWidth = 1.6;
     blob("#f6f8fc", () => g.ellipse(0, -13, 11, 7, -.15, 0, 7));
     blob("#9aa6b4", () => { g.moveTo(-12, -16); g.quadraticCurveTo(-2, -22, 7, -15); g.lineTo(-4, -11); g.closePath(); });
@@ -304,8 +318,10 @@ function drawEnemy(e, t) {
     g.fillStyle = "#1d1d26"; g.fillRect(-3, -19.5, 1.2, 1.2); g.fillRect(3, -19.5, 1.2, 1.2);
   } else if (e.kind === "alg") {
     // a big, friendly moose: you can't knock it over, but its back is a fine springboard
-    const st = Math.sin(e.x * .2) * 3;
-    [[-18, st], [-10, -st], [10, st], [18, -st]].forEach(([x, d]) => blob("#3a2a1e", () => g.rect(x - 2.5, -22, 5, 22 + d * .3)));
+    const ph = e.x * .16;
+    // long legs, a slow stately walk; the body sways a little
+    trotLegs(ph, [[-18, -24, 24, 5], [-10, -24, 24, 5], [10, -24, 24, 5], [18, -24, 24, 5]], .42, "#2a1e14", "#3a2a1e", "#1a120c");
+    g.translate(0, stepBob(ph) * 1.5);
     blob("#5a4030", () => rp(-26, -46, 46, 26, 12));
     g.fillStyle = "#6a4c38"; g.beginPath(); g.ellipse(-6, -42, 18, 4, 0, 0, 7); g.fill();
     blob("#4a3426", () => { g.moveTo(14, -44); g.lineTo(24, -52); g.lineTo(36, -42); g.lineTo(34, -32); g.lineTo(22, -34); g.closePath(); });
@@ -326,10 +342,11 @@ function drawEnemy(e, t) {
     g.fillStyle = "#ff5a5a"; g.beginPath(); g.arc(7, -12, 1.2, 0, 7); g.fill();
   } else if (e.kind === "bever") {
     // a beaver from the lake, with a flat tail and big orange teeth
-    const st = Math.sin(e.x * .4) * 2;
+    const ph = e.x * .4;
     blob("#4a3a2e", () => { g.ellipse(-16, -4, 8, 3, .2, 0, 7); });
     g.strokeStyle = "#3a2a1e"; g.lineWidth = .8; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-22 + i * 4, -6); g.lineTo(-20 + i * 4, -2); g.stroke(); } g.strokeStyle = OUT; g.lineWidth = 1.6;
-    [[-5, st], [5, -st]].forEach(([x, d]) => blob("#3a2a1e", () => g.rect(x - 2, -6, 4, 6 + d * .3)));
+    [[-5, 0], [5, Math.PI]].forEach(([x, o]) => walkLeg(x, -7, 7, 4, ph + o, .6, "#3a2a1e"));
+    g.translate(0, stepBob(ph));
     blob("#7a5636", () => g.ellipse(-2, -12, 12, 8, 0, 0, 7));
     blob("#8a6644", () => g.ellipse(10, -15, 7, 6, 0, 0, 7));
     blob("#5a4030", () => g.arc(7, -20, 2, 0, 7));
@@ -337,9 +354,10 @@ function drawEnemy(e, t) {
     g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(17, -16, 1.4, 0, 7); g.fill(); g.beginPath(); g.arc(12, -18, 1.2, 0, 7); g.fill();
   } else if (e.kind === "poolvos") {
     // an arctic fox: white, with a big bushy tail, after your sweets
-    const st = Math.sin(e.x * .4) * 2.5;
+    const ph = e.x * .38;
     blob("#f4f8fb", () => { g.moveTo(-10, -12); g.quadraticCurveTo(-26, -20, -22, -8); g.quadraticCurveTo(-18, -4, -10, -9); g.closePath(); });
-    [[-7, st], [-2, -st], [5, st], [9, -st]].forEach(([x, d]) => blob("#dfe7ee", () => g.rect(x - 1.8, -8, 3.6, 8 + d * .3)));
+    trotLegs(ph, [[-7, -9, 9, 3.4], [-2, -9, 9, 3.4], [5, -9, 9, 3.4], [9, -9, 9, 3.4]], .6, "#cfd8e0", "#dfe7ee");
+    g.translate(0, stepBob(ph));
     blob("#f4f8fb", () => g.ellipse(0, -12, 12, 6.5, 0, 0, 7));
     blob("#f4f8fb", () => g.ellipse(12, -16, 6.5, 5.5, 0, 0, 7));
     blob("#f4f8fb", () => { g.moveTo(17, -15); g.lineTo(23, -13); g.lineTo(17, -11); g.closePath(); });
@@ -348,9 +366,9 @@ function drawEnemy(e, t) {
     g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(23, -13, 1.4, 0, 7); g.fill(); g.beginPath(); g.arc(14, -17.5, 1.3, 0, 7); g.fill();
   } else if (e.kind === "lemming") {
     // a lemming: a small round rodent in a hurry
-    const st = Math.sin(e.x * .7) * 1.5, b = Math.abs(Math.sin(e.x * .35)) * 1.5;
+    const ph = e.x * .7, b = Math.abs(Math.sin(ph)) * 1.5;
+    [[-4, 0], [4, Math.PI]].forEach(([x, o]) => walkLeg(x, -5, 5, 3, ph + o, .7, "#3a2a1e"));
     g.translate(0, -b);
-    [[-4, st], [4, -st]].forEach(([x, d]) => blob("#3a2a1e", () => g.rect(x - 1.5, -4, 3, 4 + d * .3)));
     blob("#c8884a", () => g.ellipse(0, -8, 10, 7, 0, 0, 7));
     g.fillStyle = "#2a1e16"; g.beginPath(); g.ellipse(-3, -12, 6, 3, 0, 0, 7); g.fill();
     g.fillStyle = "#e8c8a0"; g.beginPath(); g.ellipse(4, -5, 5, 3, 0, 0, 7); g.fill();
@@ -358,9 +376,10 @@ function drawEnemy(e, t) {
     g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(7, -10, 1.3, 0, 7); g.fill(); g.fillStyle = "#e88a8a"; g.beginPath(); g.arc(10.5, -8, 1.2, 0, 7); g.fill();
   } else if (e.kind === "marmot") {
     // a marmot from the Alps that slipped into the hut: chubby, brown, with big front teeth
-    const st = Math.sin(e.x * .4) * 2;
+    const ph = e.x * .42;
     blob("#6a4a2e", () => g.ellipse(-14, -7, 6, 3.5, -.5, 0, 7));
-    [[-8, st], [-3, -st], [5, st], [9, -st]].forEach(([x, d]) => blob("#4a321e", () => g.rect(x - 2, -6, 4, 6 + d * .3)));
+    trotLegs(ph, [[-8, -7, 7, 4], [-3, -7, 7, 4], [5, -7, 7, 4], [9, -7, 7, 4]], .55, "#3a2616", "#4a321e");
+    g.translate(0, stepBob(ph));
     blob("#9a6a3e", () => g.ellipse(-1, -12, 13, 9, 0, 0, 7));
     g.fillStyle = "#b8895a"; g.beginPath(); g.ellipse(2, -9, 8, 5, 0, 0, 7); g.fill();
     blob("#9a6a3e", () => g.ellipse(11, -15, 7, 6.5, 0, 0, 7));
@@ -372,8 +391,9 @@ function drawEnemy(e, t) {
   } else if (e.kind === "speelgoed") {
     // a wind-up tin toy robot that escaped from the workshop: it marches, and the key on its back turns
     const st = Math.sin(e.x * .45) * 2.5;
-    blob("#5a6070", () => g.rect(-6, -6 + Math.max(0, st) * .4, 4, 6));
-    blob("#5a6070", () => g.rect(2, -6 + Math.max(0, -st) * .4, 4, 6));
+    // stiff little legs that march: one lifts, then the other
+    walkLeg(-4, -7, 7, 4, e.x * .45, .35, "#5a6070"); walkLeg(4, -7, 7, 4, e.x * .45 + Math.PI, .35, "#5a6070");
+    g.translate(0, -Math.abs(st) * .4);
     blob("#d8423a", () => rp(-8, -19, 16, 13, 2));
     g.fillStyle = "#ffd25e"; g.fillRect(-5, -16, 3, 3); g.fillRect(-1, -16, 3, 3); g.fillRect(3, -16, 3, 3);
     blob("#c9ced8", () => rp(-6, -29, 13, 10, 2));
@@ -400,8 +420,8 @@ function drawEnemy(e, t) {
     g.strokeStyle = "#5a4a3a"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(-10, -8); g.quadraticCurveTo(-20, -6, -19, -15); g.stroke();
     g.fillStyle = "#3a2e22"; g.beginPath(); g.arc(-19, -16, 2.5, 0, 7); g.fill();
     g.strokeStyle = OUT; g.lineWidth = 1.6;
-    blob("#6d7a52", () => g.rect(-6 + st * .3, -6, 4.5, 6));
-    blob("#6d7a52", () => g.rect(2 - st * .3, -6, 4.5, 6));
+    walkLeg(-4, -7, 7, 4.5, e.x * .3, .6, "#6d7a52"); walkLeg(4, -7, 7, 4.5, e.x * .3 + Math.PI, .6, "#6d7a52");
+    g.translate(0, -Math.abs(Math.sin(e.x * .3)) * 1.2);
     blob("#7d8a5e", () => g.ellipse(0, -15, 11, 11, 0, 0, 7));
     blob("#8a6a46", () => rp(-11, -12, 22, 8, 3));
     blob("#7d8a5e", () => g.ellipse(9, -17, 6, 4.5, .2, 0, 7));
