@@ -123,7 +123,10 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           command -v 7z > /dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq 7zip; }
-          7z a -t7z -mhe=on -p"$ANDROID_KEYSTORE_PASSWORD" cabin-week-google-play.7z cabin-week.aab > /dev/null
+          # with the R8 mapping file (Play also gets it inside the bundle; this copy is for uploading by hand if needed)
+          MAP=android-tv/app/build/outputs/mapping/release/mapping.txt
+          if [ -f "$MAP" ]; then cp "$MAP" cabin-week-mapping.txt; fi
+          7z a -t7z -mhe=on -p"$ANDROID_KEYSTORE_PASSWORD" cabin-week-google-play.7z cabin-week.aab $( [ -f cabin-week-mapping.txt ] && echo cabin-week-mapping.txt ) > /dev/null
           rm cabin-week.aab
 
       - name: Keep the bundle for Google Play (with a password)

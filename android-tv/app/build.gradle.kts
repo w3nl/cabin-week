@@ -40,6 +40,12 @@ android {
         // De release-bundel (.aab) voor Google Play, ondertekend met dezelfde vaste sleutel (de uploadsleutel).
         getByName("release") {
             signingConfigs.findByName("upload")?.let { signingConfig = it }
+            // R8 (recommended by Google Play): shrinks and optimises the Java code and removes unused resources.
+            // The app is one WebView, without a JavaScript bridge, so nothing is lost. The mapping file goes into the
+            // bundle (Play uses it for readable crash reports) and into the protected 7z next to the .aab.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
