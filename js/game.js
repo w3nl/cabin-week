@@ -85,18 +85,25 @@ const edges = [];
    liep het poppetje te ver. Daarom onthouden we wanneer een knop echt werd ingedrukt en losgelaten, en laten we het
    poppetje precies zo lang lopen: indrukken telt meteen bij de volgende stap, loslaten even veel later als je drukte. */
 const holdQ = [], holdShift = {};
-function eventTime(e) { const now = performance.now(), t = e && e.timeStamp; return t > 0 && Math.abs(now - t) < 5000 ? t : now; }
-function queueHold(o, a, down, t) { holdQ.push({ o, a, down, t }); }
+/** The moment of a key event. Some devices (Android/TV WebViews) stamp events with another clock: a time that is far off,
+ *  or in the future, would make a release wait for seconds. Then we use "now". */
+function eventTime(e) { const now = performance.now(), t = e && e.timeStamp; return t > 0 && Math.abs(now - t) < 1000 ? Math.min(t, now) : now; }
+function queueHold(o, a, down, t) { holdQ.push({ o, a, down, t, at: performance.now() }); }
 /** De speltijd sprong d ms vooruit: knoppen die nu ingedrukt zijn, laten even veel later los. */
 function shiftHolds(d) { if (d > 0) for (const k in holdShift) holdShift[k] += d; }
 /** Verwerk de knoppen tot en met speltijd t (aangeroepen vóór elke stap, vanuit de spellus). */
+// A release that still has to wait only holds up later events of the same key: another key (← after →) counts at once.
+// And a release never waits more than a second of real time.
 function applyHolds(t) {
-  while (holdQ.length) {
-    const h = holdQ[0], k = (h.o === held ? "k" : "t") + h.a;
-    if (h.down) { h.o[h.a] = true; holdShift[k] = Math.max(0, t - h.t); holdQ.shift(); continue; }
-    if (state === "play" && h.t + (holdShift[k] || 0) > t) break;
-    h.o[h.a] = false; holdQ.shift();
+  const wait = new Set(), keep = [], now = performance.now();
+  for (const h of holdQ) {
+    const k = (h.o === held ? "k" : "t") + h.a;
+    if (wait.has(k)) { keep.push(h); continue; }
+    if (h.down) { h.o[h.a] = true; holdShift[k] = Math.min(1000, Math.max(0, t - h.t)); continue; }
+    if (state === "play" && h.t + (holdShift[k] || 0) > t && now - h.at < 1000) { wait.add(k); keep.push(h); continue; }
+    h.o[h.a] = false;
   }
+  holdQ.length = 0; holdQ.push(...keep);
 }
 const KEYMAP = { ShiftLeft: "run", ShiftRight: "run", ControlLeft: "run", ControlRight: "run", ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right", ArrowUp: "jump", KeyW: "jump", Space: "jump", KeyE: "act", ArrowDown: "act", KeyS: "act", Enter: "act" };
 addEventListener("keydown", e => {
