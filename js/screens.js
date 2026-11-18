@@ -149,7 +149,7 @@ function buildTitle() {
   $("regionName").textContent = REGION.name;
   if (done === 0) {
     $("cdNum").textContent = LEVELS.length;
-    $("cdWord").textContent = T("winter days to play", "winterdagen om te spelen");
+    $("cdWord").textContent = REGION.summer ? T("summer days to play", "zomerdagen om te spelen") : T("winter days to play", "winterdagen om te spelen");
     $("cdSub").textContent = REGION.blurb;
   } else if (done < LEVELS.length) {
     $("cdNum").textContent = `${done}/${LEVELS.length}`;

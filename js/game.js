@@ -8,6 +8,8 @@ let L = null, P = null, cam = 0, frame = 0;
 let particles = [], popups = [], flakes = [];
 let dialog = null, padState = null;
 
+/** The water surface in pits (drawn by drawWater): where you float when you swim. */
+const SWIM_Y = 12 * 32 + 14;
 function buildLevel(idx) {
   const d = LEVELS[idx], w = d.w;
   const grid = Array.from({ length: ROWS }, () => Array(w).fill(" "));
@@ -28,7 +30,7 @@ function buildLevel(idx) {
     if (type === "coin" || type === "key" || type === "heart" || type === "quest") {
       lv.items.push({ type, x: px, y: py, w: TS, h: TS, taken: false });
       if (type === "coin") lv.coinTotal++;
-    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5 }[d.enemy] || -1, dead: 0 });
+    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3 }[d.enemy] || -1, dead: 0 });
     else if (type === "npc") lv.npcs.push({ x: px + 5, y: py, who: others[(idx * 3 + npcN++) % others.length], ...extra, talked: false });
     else if (type === "sign") lv.signs.push({ x: px, y: py, lines: extra });
     else if (type === "check") lv.checks.push({ x: px, y: py, on: false });
@@ -221,7 +223,7 @@ function step() {
     P.slide--;
     if (Math.abs(P.vx) < 1.2) P.slide = 0;
     if (P.onGround && L.time % 3 === 0) {
-      const c = { sneeuw: "#ffffff", bos: "#b08a5a", stad: "#d8d0c8", huis: "#e8dcc8" }[L.d.theme] || "#ffffff";
+      const c = { sneeuw: "#ffffff", bos: "#b08a5a", stad: "#d8d0c8", huis: "#e8dcc8", kust: "#e6d9b8" }[L.d.theme] || "#ffffff";
       particles.push({ x: P.x + P.w / 2 - P.face * 18, y: P.y + P.h - 2, vx: -P.face * (1 + Math.random() * 1.5), vy: -1 - Math.random() * 2, life: 22, c, s: 2 + Math.random() * 2.5 });
     }
   } else {
@@ -288,6 +290,16 @@ function step() {
   if (P.vy >= 0) for (const m of L.movers) {
     if (P.x + P.w > m.x + 2 && P.x < m.x + m.w - 2 && prevBottom <= m.y + 1 && P.y + P.h >= m.y) { P.y = m.y - P.h; P.vy = 0; P.onGround = true; P.mover = m; break; }
   }
+  // Swimming (Dalmatia): the sea is warm, so you float in the water instead of falling. You can jump out again.
+  P.swim = false;
+  if (L.d.swim && !P.onGround) {
+    const col = Math.floor((P.x + P.w / 2) / TS), surf = SWIM_Y;
+    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55) {
+      P.y = surf - P.h * .45 + Math.sin(L.time / 12) * 1.2; P.vy = 0; P.onGround = true; P.swim = true; P.mover = null;
+      P.vx = Math.max(-2.6, Math.min(2.6, P.vx));
+      if (L.time % 10 === 0) particles.push({ x: P.x + P.w / 2 + (Math.random() - .5) * 20, y: surf + 4, vx: 0, vy: -.6, life: 18, c: "#e8fbff", s: 2.5 });
+    }
+  }
   if (P.inv > 0) P.inv--;
   P.anim += Math.abs(P.vx) * .09;
 
@@ -328,11 +340,11 @@ function step() {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
         e.dead = 1; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!") }[e.kind], "#fff");
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
         e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!") }[e.kind], "#fff");
-      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!") }[e.kind]);
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!") }[e.kind], "#fff");
+      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!") }[e.kind]);
     }
   }
   L.enemies = L.enemies.filter(e => e.dead < 30);

@@ -6,14 +6,16 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   const skin = c.skin || "#f4caa6", skinD = c.skin ? shade(c.skin, -.14) : "#d9a07c", shoe = c.shoes || "#3a2a22";
   // Indoors Paul wears his green Christmas jumper with a Saab 900 on it.
   const sweater = opts.indoor && c.sweater;
-  const coat = sweater ? c.sweater : c.coatCol, coatD = shade(coat, -.3), coatL = shade(coat, .25);
+  // Summer (Dalmatia): a light T-shirt instead of a coat, shorts, and no hat or scarf.
+  const summer = !!opts.summer && !sweater;
+  const coat = sweater ? c.sweater : summer ? shade(c.coatCol, .3) : c.coatCol, coatD = shade(coat, -.3), coatL = shade(coat, .25);
   const pants = c.pants, pantsD = shade(pants, -.28);
   const hairC = c.hairCol, hairL = shade(hairC, .3), hairD = shade(hairC, -.35);
   const bob = (!moving && !air) ? Math.sin(t / 280) * .5 : 0;
   const sw = air ? .5 : moving ? Math.sin(phase) * .7 : 0;
   // Kinderen hebben een iets grotere kop en een korter lijf.
   const hr = kid ? 9.4 : 8.6, hip = kid ? -12 : -13, top = (kid ? -26 : -28) + bob, hy = top - hr + .6;
-  const longCoat = c.coat === "long" && !opts.indoor;
+  const longCoat = c.coat === "long" && !opts.indoor && !opts.summer;
   // Buikglijden (opts.slide): het hoofd kijkt omhoog-vooruit (gekanteld rond de nek) en de armen gaan gestrekt naar voren.
   // De wereld draait het hele poppetje een kwartslag (world.js); hier draaien hoofd en armen terug.
   const tilt = opts.slide ? -1.3 : 0;
@@ -53,7 +55,8 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   // benen
   const leg = (x, a, col) => {
     g.save(); g.translate(x, hip); g.rotate(a);
-    blob(col, () => g.rect(-2.7, 0, 5.4, -hip - 2));
+    if (summer) { blob(skinD, () => g.rect(-2.4, 0, 4.8, -hip - 2)); blob(col, () => g.rect(-2.9, 0, 5.8, (-hip - 2) * .45)); }
+    else blob(col, () => g.rect(-2.7, 0, 5.4, -hip - 2));
     blob(shoe, () => rp(-3.2, -hip - 3.6, 8.2, 4.2, 1.6));
     if (c.laces) c.laces.forEach((lc, i) => { g.fillStyle = lc; g.fillRect(-1.5 + i * 2, -hip - 3, 1.4, 1.4); });
     g.fillStyle = "rgba(255,255,255,.25)"; g.fillRect(-2, -hip - 3, 4, 1);
@@ -62,7 +65,8 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   leg(-3, sw, pantsD);
   // achterste arm
   g.save(); g.translate(-3, top + 2); g.rotate(opts.slide ? Math.PI - .3 : air ? 2.3 : sw * .8);
-  blob(coatD, () => rp(-2.3, 0, 4.6, 11, 2)); blob(skinD, () => g.arc(0, 11.6, 2.3, 0, 7)); g.restore();
+  if (summer) { blob(skinD, () => rp(-2, 0, 4, 11, 2)); blob(coatD, () => rp(-2.5, 0, 5, 4.5, 2)); } else blob(coatD, () => rp(-2.3, 0, 4.6, 11, 2));
+  blob(skinD, () => g.arc(0, 11.6, 2.3, 0, 7)); g.restore();
   leg(3, -sw, pants);
 
   // rokje over de maillot
@@ -82,14 +86,14 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
     g.fillRect(-6, top + 9, 9, 2.4); g.fillRect(-4, top + 7.6, 5, 1.6); g.beginPath(); g.arc(-4, top + 11.8, 1.2, 0, 7); g.arc(2, top + 11.8, 1.2, 0, 7); g.fill();
     g.fillStyle = "#2a9a4a"; g.fillRect(-3, top + 5.8, 3, 1.8);
   }
-  if (c.coat === "puffer" && !opts.indoor) { g.strokeStyle = coatD; g.lineWidth = 1; for (let y = top + 4.5; y < top + bodyH; y += 4.2) { g.beginPath(); g.moveTo(-10, y); g.lineTo(10, y); g.stroke(); } }
+  if (c.coat === "puffer" && !opts.indoor && !summer) { g.strokeStyle = coatD; g.lineWidth = 1; for (let y = top + 4.5; y < top + bodyH; y += 4.2) { g.beginPath(); g.moveTo(-10, y); g.lineTo(10, y); g.stroke(); } }
   g.strokeStyle = coatD; g.lineWidth = 1; g.beginPath(); g.moveTo(4, top + 1); g.lineTo(4, top + bodyH); g.stroke();
   if (c.coat !== "puffer" && !sweater) { g.fillStyle = coatD; g.fillRect(-4, top + bodyH - (longCoat ? 12 : 6), 5, 1.2); }
   g.restore();
   g.lineWidth = 1.5; g.strokeStyle = OUT; g.beginPath(); bodyPath(); g.stroke();
 
   // sjaal: eigen sjaal, of een rode in de sneeuw
-  const scarf = c.scarf || (opts.scarf ? ["#d33a3a", "#ffffff"] : null);
+  const scarf = summer ? null : c.scarf || (opts.scarf ? ["#d33a3a", "#ffffff"] : null);
   if (scarf) {
     const band = () => rp(-8.8, top - 2.5, 17.6, 5.5, 2.5);
     g.save(); g.beginPath(); band(); g.clip(); scarf.forEach((col, i) => { g.fillStyle = col; g.fillRect(-9 + i * 18 / scarf.length, top - 3, 18 / scarf.length + .5, 6); }); g.restore();
@@ -157,14 +161,15 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
 
   // voorste arm
   g.save(); g.translate(3, top + 2); g.rotate(opts.slide ? Math.PI + .15 : air ? -2.5 : -sw * .8);
-  blob(coat, () => rp(-2.3, 0, 4.6, 11, 2)); blob(skin, () => g.arc(0, 11.6, 2.3, 0, 7)); g.restore();
+  if (summer) { blob(skin, () => rp(-2, 0, 4, 11, 2)); blob(coat, () => rp(-2.5, 0, 5, 4.5, 2)); } else blob(coat, () => rp(-2.3, 0, 4.6, 11, 2));
+  blob(skin, () => g.arc(0, 11.6, 2.3, 0, 7)); g.restore();
   if (c.backpack && !sweater) { g.strokeStyle = shade(c.backpack, -.2); g.lineWidth = 1.8; g.beginPath(); g.moveTo(-2, top + .5); g.lineTo(-3, top + 11); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 1.5; }
 
   // haarband, muts en hoedjes
   tiltOn();
   if (c.headband && !hat) { g.strokeStyle = c.headband; g.lineWidth = 3; g.beginPath(); g.arc(0, hy - .5, hr - .2, Math.PI * 1.08, Math.PI * 1.92); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 1.5; }
   // beanieCold: de muts alleen buiten in de kou (sneeuw en kerstmarkt: daar krijgt iedereen een sjaal), niet binnen of op het portretje.
-  const beanie = c.beanie && !(c.beanieCold && (opts.indoor || !opts.scarf));
+  const beanie = c.beanie && !opts.summer && !(c.beanieCold && (opts.indoor || !opts.scarf));
   const ownHat = !hat && beanie ? "beanie" : hat;
   if (ownHat === "xmas") {
     blob("#d8323a", () => { g.moveTo(-9, hy - 6); g.quadraticCurveTo(-2, hy - 22, -12, hy - 17); g.lineTo(8, hy - 6); g.closePath(); });
@@ -285,6 +290,18 @@ function drawEnemy(e, t) {
     blob("#f2c230", () => { g.moveTo(12, -21.5); g.lineTo(19, -20); g.lineTo(12, -18.5); g.closePath(); });
     g.fillStyle = "#d8232a"; g.fillRect(16, -20.3, 1.5, 1.2);
     g.fillStyle = "#1d1d26"; g.fillRect(9, -23, 1.8, 1.8);
+  } else if (e.kind === "krab") {
+    // a little red crab that scuttles along the rocks (sideways, of course)
+    const st = Math.sin(e.x * .5) * 1.5;
+    g.strokeStyle = "#a8281e"; g.lineWidth = 1.6;
+    for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-6, -6); g.lineTo(-11 - i * 2, -2 + i * 1.5 + (i % 2 ? st : -st)); g.lineTo(-12 - i * 2, 0); g.moveTo(6, -6); g.lineTo(11 + i * 2, -2 + i * 1.5 + (i % 2 ? -st : st)); g.lineTo(12 + i * 2, 0); g.stroke(); }
+    g.strokeStyle = OUT; g.lineWidth = 1.6;
+    blob("#d8402e", () => g.ellipse(0, -8, 11, 6.5, 0, 0, 7));
+    g.fillStyle = "#f07a5a"; g.beginPath(); g.ellipse(-2, -10, 6, 2.5, 0, 0, 7); g.fill();
+    [[-1, -1], [1, 1]].forEach(([s, d]) => { blob("#d8402e", () => { g.arc(s * 13, -14 + d * st * .3, 4.5, 0, 7); }); g.fillStyle = "#1d1d26"; g.beginPath(); g.moveTo(s * 13, -14); g.lineTo(s * 17.5, -16); g.lineTo(s * 17.5, -12); g.fill(); });
+    g.strokeStyle = "#a8281e"; g.beginPath(); g.moveTo(-3, -13); g.lineTo(-3, -18); g.moveTo(3, -13); g.lineTo(3, -18); g.stroke(); g.strokeStyle = OUT;
+    blob("#fff", () => g.arc(-3, -19, 2, 0, 7)); blob("#fff", () => g.arc(3, -19, 2, 0, 7));
+    g.fillStyle = "#1d1d26"; g.fillRect(-3, -19.5, 1.2, 1.2); g.fillRect(3, -19.5, 1.2, 1.2);
   } else if (e.kind === "troll") {
     // a small, grumpy forest troll with a big nose, a mossy tuft and a tail
     const st = Math.sin(e.x * .3) * 2.5;

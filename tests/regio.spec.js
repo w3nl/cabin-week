@@ -8,11 +8,12 @@ test('the map shows the regions; choosing one switches the days, and the choice 
   await expect(page.locator('#levels .t').first()).toHaveText('Arrival in Pinebrook');
   await page.locator('#regionBtn').click();
   await expect(page.locator('#mapWrap')).toBeVisible();
-  await expect(page.locator('#mapBox .pin')).toHaveCount(5);
+  await expect(page.locator('#mapBox .pin')).toHaveCount(6);
   await expect(page.locator('#mapBox .pin.here')).toHaveAttribute('data-region', 'ardennes');
   await expect(page.locator('#mapSoon')).toContainText('Iceland');
   await expect(page.locator('#mapSoon')).toContainText('Greece');
-  await expect(page.locator('#mapBox .soon-dot')).toHaveCount(9);
+  await expect(page.locator('#mapSoon')).toContainText('Småland');
+  await expect(page.locator('#mapBox .soon-dot')).toHaveCount(8);
   await page.locator('#mapBox .pin[data-region="tirol"]').click();
   await expect(page.locator('#title')).toBeVisible();
   await expect(page.locator('#regionName')).toHaveText('Tirol');
@@ -71,13 +72,13 @@ test('the map works with the keyboard and the remote: arrows, Enter, and Escape 
 test('the new regions have their own scenery, enemies and checkpoint flags', async ({ page }) => {
   await seed(page, { unlocked: 8 });
   const info = await page.evaluate(() => REGIONS.map(r => ({ id: r.id, n: r.levels.length, scenes: [...new Set(r.levels.map(l => l.scene || l.theme))], enemies: [...new Set(r.levels.filter(l => l.enemies !== false).map(l => l.enemy))] })));
-  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8]);
+  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8, 8]);
   expect(info.find(r => r.id === 'pole').scenes).toContain('pole');
   expect(info.find(r => r.id === 'tirol').enemies).toContain('geit');
   expect(info.find(r => r.id === 'norway').enemies).toContain('troll');
   expect(info.find(r => r.id === 'pole').enemies).toContain('pinguin');
   const codes = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map(l => l.code && l.code.answer)));
-  expect(new Set(codes).size).toBe(40);
+  expect(new Set(codes).size).toBe(48);
   expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'meeuw', 'zwijn']));
 });
 
@@ -96,7 +97,7 @@ for (const [w, h, what] of [[960, 540, 'tv'], [740, 360, 'phone turned'], [412, 
     await seed(page, { lang: 'nl' });
     await page.locator('#regionBtn').click();
     expect(await page.evaluate(() => document.getElementById('mapWrap').scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
+    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
     await expect(page.locator('#mapClose')).toBeInViewport({ ratio: .99 });
   });
 }
@@ -151,4 +152,30 @@ test('the Netherlands: the wind pushes you, sometimes against you and sometimes 
   const w = await page.evaluate(() => { const out = []; for (let t = 0; t < 900; t += 30) { L.time = t; out.push(windNow()); } return { min: Math.min(...out), max: Math.max(...out) }; });
   expect(w.min).toBeLessThan(-.3);
   expect(w.max).toBeGreaterThan(.1);
+});
+
+test('Dalmatia is summer: no snow, summer clothes, and in the warm sea you swim instead of falling', async ({ page }) => {
+  await seed(page, { region: 'dalmatia', unlocked: 8 });
+  const d = await page.evaluate(() => REGIONS.find(r => r.id === 'dalmatia').levels.map(l => ({ theme: l.theme, summer: l.summer, scene: l.scene })));
+  expect(d.every(l => l.theme === 'kust' && l.summer)).toBe(true);
+  expect(new Set(d.map(l => l.scene))).toEqual(new Set(['adriatic', 'falls', 'oldtown']));
+  await startDay(page, 0);
+  for (let n = 0; n < 12 && await page.locator('#dialog').isVisible(); n++) { await page.keyboard.press('Space'); await page.waitForTimeout(40); }
+  const r = await page.evaluate(() => {
+    window.hurt = () => {}; L.enemies.length = 0;
+    const col = L.grid[ROWS - 1].findIndex((c, x) => x > 5 && c !== '#');
+    P.x = col * 32 + 4; P.y = 8 * 32; P.vy = 0; P.vx = 0;
+    for (let i = 0; i < 90; i++) step();
+    const swimming = P.swim, hearts = P.hearts;
+    edges.push('jump'); step(); const up = P.vy < 0;
+    return { swimming, hearts, up };
+  });
+  expect(r).toEqual({ swimming: true, hearts: 3, up: true });
+});
+
+test('a summer region says "summer days" on the title screen', async ({ page }) => {
+  await seed(page, { region: 'dalmatia' });
+  await expect(page.locator('#cdWord')).toHaveText('summer days to play');
+  await seed(page);
+  await expect(page.locator('#cdWord')).toHaveText('winter days to play');
 });
