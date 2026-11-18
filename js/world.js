@@ -480,6 +480,23 @@ function buildInterior() {
     for (let x = 0; x < L.w; x++) {
       const zone = L.d.fixedInterior ? (x < 50 ? 0 : x < 90 ? 1 : x < 133 ? 2 : 0) : Math.floor(x / 48) % 3;
       const px = x * TS, fy = groundTop(x) * TS;
+      if (L.d.interior === "wood") {
+        // a Tirolean hut or chalet: pine panelling, a darker wainscot and little hearts cut in the wood
+        g.fillStyle = zone === 1 ? "#d09a62" : "#c88f56"; g.fillRect(px, 0, TS, VIEW_H);
+        g.fillStyle = "#b47c46"; g.fillRect(px, 0, 2, VIEW_H); g.fillRect(px + 15, 0, 1, VIEW_H);
+        g.fillStyle = "#8a5a32"; g.fillRect(px, fy - 110, TS, 110); g.fillStyle = "#6e4426"; g.fillRect(px, fy - 112, TS, 4);
+        if (x % 4 === 0) { g.fillStyle = "#6e4426"; g.beginPath(); g.arc(px + 13, fy - 62, 4, 0, 7); g.arc(px + 19, fy - 62, 4, 0, 7); g.fill(); g.beginPath(); g.moveTo(px + 9, fy - 60); g.lineTo(px + 16, fy - 52); g.lineTo(px + 23, fy - 60); g.fill(); }
+        g.fillStyle = "#6e4426"; g.fillRect(px, 0, TS, 16);
+        continue;
+      }
+      if (L.d.interior === "workshop") {
+        // Santa's workshop: red and white striped walls, a green wainscot and a garland of lights
+        g.fillStyle = (x % 2) ? "#c8323a" : "#f4ece0"; g.fillRect(px, 0, TS, VIEW_H);
+        g.fillStyle = zone === 2 ? "#2a7a4a" : "#2f6a3a"; g.fillRect(px, fy - 96, TS, 96); g.fillStyle = "#e8c45a"; g.fillRect(px, fy - 98, TS, 4);
+        g.fillStyle = ["#ffd25e", "#ff6b6b", "#59c28a", "#5aa8ff"][x % 4]; g.beginPath(); g.arc(px + 16, 34 + Math.sin(x * 1.3) * 6, 4, 0, 7); g.fill();
+        g.fillStyle = "#1f4a2f"; g.fillRect(px, 0, TS, 18);
+        continue;
+      }
       if (zone === 0) {
         g.fillStyle = "#efe3cf"; g.fillRect(px, 0, TS, VIEW_H);
         g.fillStyle = "#e3d3b8"; for (let y = 24; y < fy; y += 24) { const o = (y / 24) % 2 ? 16 : 0; g.save(); g.translate(px + 8 + o / 2, y); g.rotate(Math.PI / 4); g.fillRect(-3, -3, 6, 6); g.restore(); }
@@ -1254,6 +1271,49 @@ function vignette() {
   }); g.fillRect(0, 0, viewW, VIEW_H);
 }
 
+/* ---------- Region gameplay: water, movers and darkness ---------- */
+/** Water in the gaps (North Pole and Norway): you see what you would fall into. */
+function drawWater(cx) {
+  const x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1), top = 12 * TS + 14;
+  for (let x = x0; x <= x1; x++) {
+    if (L.grid[ROWS - 1][x] === "#") continue;
+    g.fillStyle = L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; g.fillRect(x * TS, top, TS, VIEW_H - top);
+    g.fillStyle = "rgba(255,255,255,.45)"; for (let i = 0; i < 2; i++) g.fillRect(x * TS + ((frame * .4 + i * 16 + x * 7) % TS), top + 3 + i * 9, 8, 1.5);
+  }
+}
+/** An ice floe, a gondola of the cable car, or a little boat: you stand on top of it. */
+function drawMover(m) {
+  const x = m.x, y = m.y, w = m.w, st = L.d.movers;
+  g.strokeStyle = OUT; g.lineWidth = 2; g.lineJoin = "round";
+  if (st === "gondola") {
+    g.strokeStyle = "#2a2f3c"; g.lineWidth = 2; g.beginPath(); g.moveTo(m.x0 - TS, y - 70); g.lineTo(m.x1 + w + TS, y - 70); g.stroke();
+    g.fillStyle = "#2a2f3c"; g.fillRect(x + w / 2 - 2, y - 70, 4, 20); g.beginPath(); g.arc(x + w / 2, y - 70, 5, 0, 7); g.fill();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#d8423a"; g.beginPath(); rp(x + 2, y - 50, w - 4, 50, 6); g.fill(); g.stroke();
+    g.fillStyle = "#ffe7a8"; g.fillRect(x + 8, y - 42, w - 16, 16); g.strokeRect(x + 8, y - 42, w - 16, 16);
+    g.fillStyle = "#f4f8ff"; g.fillRect(x + 2, y - 4, w - 4, 4);
+    g.fillStyle = "#b8332c"; g.fillRect(x, y - 2, w, 6); g.strokeRect(x, y - 2, w, 6);
+  } else if (st === "boat") {
+    const bob = Math.sin(frame / 20 + x * .01) * 1.5;
+    g.fillStyle = "#8a5a32"; g.beginPath(); g.moveTo(x - 6, y + bob); g.lineTo(x + w + 6, y + bob); g.lineTo(x + w - 6, y + 16 + bob); g.lineTo(x + 6, y + 16 + bob); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#b2322a"; g.fillRect(x - 4, y + 2 + bob, w + 8, 4);
+    g.fillStyle = "#f4f8ff"; g.fillRect(x - 6, y - 1 + bob, w + 12, 3);
+    g.strokeStyle = "#5a3a22"; g.lineWidth = 2; g.beginPath(); g.moveTo(x + w - 10, y + bob); g.lineTo(x + w + 8, y - 10 + bob); g.stroke();
+  } else {
+    g.fillStyle = "#cfe4f5"; g.beginPath(); g.moveTo(x - 4, y); g.lineTo(x + w + 4, y); g.lineTo(x + w - 2, y + 14); g.lineTo(x + 2, y + 14); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#ffffff"; g.fillRect(x - 3, y, w + 6, 4);
+    g.fillStyle = "rgba(90,140,200,.35)"; g.fillRect(x + 6, y + 7, w - 20, 2);
+  }
+}
+/** Darkness with a circle of light around you (the troll forest, the northern lights night). Finding things makes it bigger. */
+function drawDark(cx) {
+  const dk = L.d.dark, r = dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0);
+  const sx = P.x + P.w / 2 - cx, sy = P.y + P.h / 2;
+  const gr = g.createRadialGradient(sx, sy, r * .45, sx, sy, r);
+  gr.addColorStop(0, "rgba(4,6,18,0)"); gr.addColorStop(1, "rgba(4,6,18,.9)");
+  g.fillStyle = gr; g.fillRect(0, 0, viewW, VIEW_H);
+}
+
 /* ---------- Alles samen ---------- */
 function render() {
   // Geen aparte wisbeurt: de achtergrond (lucht of interieur) bedekt altijd het hele canvas.
@@ -1278,6 +1338,8 @@ function render() {
   for (let ty = 0; ty < ROWS; ty++) for (let tx = x0; tx <= x1; tx++) { const c = L.grid[ty][tx]; if (c !== " " && c !== "G" && c !== "H") drawTile(c, tx * TS, ty * TS, theme, tx, ty, T); }
   g.imageSmoothingEnabled = true;
 
+  if (L.d.water) drawWater(cx);
+  for (const m of L.movers) drawMover(m);
   if (!L.groundDecor) L.groundDecor = buildGroundDecor();
   for (const d of L.groundDecor) if (d.x > cx - 20 && d.x < cx + viewW + 20) drawGroundDecor(d, theme);
 
@@ -1355,6 +1417,7 @@ function render() {
   for (const p of popups) { g.globalAlpha = Math.min(1, p.life / 20); g.lineWidth = 4; g.strokeStyle = "rgba(20,10,20,.8)"; g.strokeText(p.text, p.x, p.y); g.fillStyle = p.color; g.fillText(p.text, p.x, p.y); }
   g.globalAlpha = 1;
   g.restore();
+  if (L.d.dark) drawDark(cx);
   drawAmbient(theme);
   if (theme === "sneeuw" || theme === "stad") drawFlakes();
   vignette();

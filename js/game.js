@@ -20,7 +20,7 @@ function buildLevel(idx) {
 
   const others = CHARS.filter((_, i) => i !== save.char);
   let npcN = 0;
-  const lv = { idx, d, w, grid, items: [], enemies: [], npcs: [], signs: [], checks: [], exit: null, lantern: null,
+  const lv = { idx, d, w, grid, items: [], enemies: [], movers: [], npcs: [], signs: [], checks: [], exit: null, lantern: null,
     keys: 0, coins: 0, coinTotal: 0, hasQuest: false, questDone: !d.gate, gateOpen: !d.gate, codeOpen: !d.code,
     gateFade: d.gate ? 1 : 0, codeFade: d.code ? 1 : 0, need: d.keysNeeded ?? 3, respawn: null, time: 0, codeTries: 0 };
   for (const [type, x, y, extra] of d.ents) {
@@ -34,8 +34,10 @@ function buildLevel(idx) {
     else if (type === "check") lv.checks.push({ x: px, y: py, on: false });
     else if (type === "exit") lv.exit = { x: px, y: py - TS, w: TS, h: TS * 2 };
     else if (type === "lantern") lv.lantern = { x: px, y: py, lit: false };
+    // Something that carries you across a wide gap: an ice floe, a gondola or a boat. It goes back and forth, and waits a bit at each end.
+    else if (type === "mover") lv.movers.push({ x: px, y: py, w: extra.n * TS, x0: px, x1: px + extra.range * TS, dir: 1, wait: 40, speed: d.moverSpeed || 1.1, dx: 0 });
   }
-  lv.pad = d.code ? { x: d.code.pad * TS, y: 11 * TS } : null;
+  lv.pad = d.code ? { x: d.code.pad * TS, y: d.code.y2 * TS } : null;
   return lv;
 }
 
@@ -227,12 +229,13 @@ function step() {
     if (ax !== P.runDir) { P.run = 0; P.runDir = ax; }
     if (ax) {
       // versnellen tot de topsnelheid (lopen 4,4, rennen 6,2), nooit eroverheen
-      const v = P.vx * ax, up = !P.onGround ? .45 : v < 0 ? 1.1 : Math.min(.7, .12 + P.run * .03);
+      // On ice (North Pole, the toboggan run, the kicksled) you get going slowly and turning takes a while.
+      const ice = L.d.ice && P.onGround, v = P.vx * ax, up = !P.onGround ? .45 : v < 0 ? (ice ? .25 : 1.1) : Math.min(ice ? .3 : .7, (ice ? .06 : .12) + P.run * .03);
       if (P.onGround && v >= 0) P.run++;
       if (v < top) P.vx = ax * Math.min(top, v + up);
       P.face = ax;
     }
-    else P.vx *= P.onGround ? .74 : .93;
+    else P.vx *= P.onGround ? (L.d.ice ? .965 : .74) : .93;
     // Boven de topsnelheid (rennen losgelaten, of na glijden): op de grond soepel terug, in de lucht meteen,
     // zodat je zonder rennen nooit verder springt dan normaal.
     if (Math.abs(P.vx) > top) P.vx = Math.sign(P.vx) * (P.onGround ? Math.max(top, Math.abs(P.vx) * .94) : top);
@@ -246,6 +249,15 @@ function step() {
   P.buffer--;
   P.vy += (P.vy < 0 && !jumpHeld) ? 1.1 : .55;
   P.vy = Math.min(P.vy, 12);
+
+  // movers (ice floes, gondolas, boats): move, and take along whoever stands on them
+  for (const m of L.movers) {
+    if (m.wait > 0) { m.wait--; m.dx = 0; continue; }
+    const nx = Math.max(m.x0, Math.min(m.x1, m.x + m.dir * m.speed));
+    m.dx = nx - m.x; m.x = nx;
+    if (m.x === m.x0 || m.x === m.x1) { m.dir = -m.dir; m.wait = 50; }
+  }
+  if (P.mover && P.onGround) P.x += P.mover.dx;
 
   // move X
   P.x += P.vx;
@@ -266,6 +278,11 @@ function step() {
       const ty = Math.floor(P.y / TS);
       for (let tx = x0; tx <= x1; tx++) if (isSolid(tx, ty)) { P.y = (ty + 1) * TS; P.vy = 0; break; }
     }
+  }
+  // standing on a mover (only from above, like a plank)
+  P.mover = null;
+  if (P.vy >= 0) for (const m of L.movers) {
+    if (P.x + P.w > m.x + 2 && P.x < m.x + m.w - 2 && prevBottom <= m.y + 1 && P.y + P.h >= m.y) { P.y = m.y - P.h; P.vy = 0; P.onGround = true; P.mover = m; break; }
   }
   if (P.inv > 0) P.inv--;
   P.anim += Math.abs(P.vx) * .09;

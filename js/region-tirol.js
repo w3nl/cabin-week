@@ -2,7 +2,7 @@
 // Tirol: a ski week in a chalet in the (fictional) village of Lindenalm, high in the Alps. Eight levels made with genLevel.
 const TIROL_LEVELS = [
   genLevel({
-    seed: 4101, w: 150, day: dayLabel(0), name: T("Arrival in Lindenalm", "Aankomst in Lindenalm"), theme: "sneeuw", scene: "alps",
+    seed: 4101, hills: [12, 10], w: 150, day: dayLabel(0), name: T("Arrival in Lindenalm", "Aankomst in Lindenalm"), theme: "sneeuw", scene: "alps",
     sub: T("The chalet is at the top of the village. The keys are not. They're somewhere in the snow.",
       "Het chalet ligt boven in het dorp. De sleutels niet. Die liggen ergens in de sneeuw."),
     keyType: "key", keyHud: "🔑", keyName: T("chalet keys", "chaletsleutels"),
@@ -26,7 +26,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Keys found, chalet open, fire lit. The view from the balcony: mountains, mountains, mountains.", "Sleutels gevonden, chalet open, kachel aan. Uitzicht vanaf het balkon: bergen, bergen, bergen.")
   }),
   genLevel({
-    seed: 4202, w: 150, day: dayLabel(1), name: T("Ski School", "Skiles"), theme: "sneeuw", scene: "alps",
+    seed: 4202, hills: [12, 10], ice: true, w: 150, day: dayLabel(1), name: T("Ski School", "Skiles"), theme: "sneeuw", scene: "alps",
     sub: T("First day of ski school. Three pairs of skis are missing, and the teacher lost his goggles.",
       "Eerste dag skiles. Er missen drie paar ski's, en de skileraar is zijn skibril kwijt."),
     keyType: "🎿", keyHud: "🎿", keyName: T("pairs of skis", "paar ski's"),
@@ -50,7 +50,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Everyone made it down the nursery slope. Some on skis, some on their bottom.", "Iedereen is de oefenweide af gekomen. Sommigen op ski's, sommigen op hun billen.")
   }),
   genLevel({
-    seed: 4303, w: 150, day: dayLabel(2), name: T("The Cable Car", "De kabelbaan"), theme: "sneeuw", scene: "alps",
+    seed: 4303, hills: [12, 9], movers: "gondola", w: 150, day: dayLabel(2), name: T("The Cable Car", "De kabelbaan"), theme: "sneeuw", scene: "alps",
     sub: T("Up to the summit! Find three lift passes. The man at the cable car is cold and needs his scarf.",
       "Naar de top! Vind drie skipassen. De man bij de kabelbaan heeft het koud en zoekt zijn sjaal."),
     keyType: "🎫", keyHud: "🎫", keyName: T("lift passes", "skipassen"),
@@ -98,7 +98,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Candles bought, chestnuts eaten, the band played. Back up the mountain.", "Kaarsjes gekocht, kastanjes gegeten, de kapel speelde. Terug de berg op.")
   }),
   genLevel({
-    seed: 4505, w: 160, day: dayLabel(4), name: T("The Toboggan Run", "De rodelbaan"), theme: "sneeuw", scene: "alps",
+    seed: 4505, hills: [12, 10], ice: true, w: 160, day: dayLabel(4), name: T("The Toboggan Run", "De rodelbaan"), theme: "sneeuw", scene: "alps",
     sub: T("Christmas Day on the toboggan run! Find three sledges, and a helmet for the smallest racer.",
       "Eerste kerstdag op de rodelbaan! Vind drie sleeën, en een helm voor de kleinste racer."),
     keyType: "🛷", keyHud: "🛷", keyName: T("sledges", "sleeën"),
@@ -122,7 +122,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Six runs, two crashes, one bowl of soup halfway. The best Christmas Day ever.", "Zes ritten, twee keer in de sneeuw, één kom soep halverwege. De beste eerste kerstdag ooit.")
   }),
   genLevel({
-    seed: 4606, w: 150, day: dayLabel(5), name: T("The Mountain Hut", "De berghut"), theme: "huis",
+    seed: 4606, interior: "wood", w: 150, day: dayLabel(5), name: T("The Mountain Hut", "De berghut"), theme: "huis",
     sub: T("Boxing Day in the mountain hut. Kaiserschmarrn for nine: we need three eggs and the big pan.",
       "Tweede kerstdag in de berghut. Kaiserschmarrn voor negen: we hebben drie eieren en de grote pan nodig."),
     keyType: "🥚", keyHud: "🥚", keyName: T("eggs", "eieren"),
@@ -147,7 +147,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Nine plates of Kaiserschmarrn. Nine empty plates. Nine happy faces.", "Negen borden Kaiserschmarrn. Negen lege borden. Negen blije gezichten.")
   }),
   genLevel({
-    seed: 4707, w: 150, day: dayLabel(6), name: T("Fondue Night", "Fondue-avond"), theme: "huis",
+    seed: 4707, interior: "wood", w: 150, day: dayLabel(6), name: T("Fondue Night", "Fondue-avond"), theme: "huis",
     sub: T("The last evening in the chalet: cheese fondue! Find three fondue forks, and the bread.",
       "De laatste avond in het chalet: kaasfondue! Vind drie fonduevorkjes, en het brood."),
     keyType: "🍴", keyHud: "🍴", keyName: T("fondue forks", "fonduevorkjes"),
@@ -172,7 +172,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Fondue gone, Uno played, rules argued about. Goodnight, mountains.", "Fondue op, Uno gespeeld, over de regels gediscussieerd. Welterusten, bergen.")
   }),
   genLevel({
-    seed: 4808, w: 160, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "alps",
+    seed: 4808, hills: [12, 10], movers: "gondola", w: 160, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "alps",
     sub: T("Everything has to go! Find three ski boots and the last suitcase before the car leaves.",
       "Alles moet mee! Vind drie skischoenen en de laatste koffer voordat de auto vertrekt."),
     keyType: "🥾", keyHud: "🥾", keyName: T("ski boots", "skischoenen"),

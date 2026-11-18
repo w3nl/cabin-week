@@ -97,3 +97,46 @@ for (const [w, h, what] of [[960, 540, 'tv'], [740, 360, 'phone turned'], [412, 
     await expect(page.locator('#mapClose')).toBeInViewport({ ratio: .99 });
   });
 }
+
+test('every region plays differently: hills, movers, ice, water and darkness where they belong', async ({ page }) => {
+  await seed(page);
+  const f = await page.evaluate(() => Object.fromEntries(REGIONS.map(r => [r.id, {
+    hills: r.levels.filter(l => l.hills && new Set(l.ground.map(g => g[2])).size > 1).length,
+    movers: r.levels.filter(l => l.ents.some(e => e[0] === 'mover')).length,
+    ice: r.levels.filter(l => l.ice).length, dark: r.levels.filter(l => l.dark).length,
+    water: r.levels.filter(l => l.water).length, interior: r.levels.filter(l => l.interior).length }])));
+  // the Ardennes stay as they were: flat ground, nothing that moves, no ice or darkness
+  expect(f.ardennes).toEqual({ hills: 0, movers: 0, ice: 0, dark: 0, water: 0, interior: 0 });
+  expect(f.pole.ice).toBeGreaterThanOrEqual(5); expect(f.pole.movers).toBeGreaterThanOrEqual(2); expect(f.pole.dark).toBe(1); expect(f.pole.interior).toBe(2);
+  expect(f.tirol.hills).toBeGreaterThanOrEqual(4); expect(f.tirol.movers).toBeGreaterThanOrEqual(2); expect(f.tirol.interior).toBe(2);
+  expect(f.norway.movers).toBeGreaterThanOrEqual(2); expect(f.norway.dark).toBe(1); expect(f.norway.water).toBeGreaterThanOrEqual(6);
+});
+
+test('a mover carries you across a gap that is too wide to jump', async ({ page }) => {
+  await seed(page, { region: 'tirol', unlocked: 8 });
+  await startDay(page, 2);
+  await page.locator('#card .btn').first().isVisible().then(v => v && page.locator('#card .btn').first().click());
+  for (let n = 0; n < 12 && await page.locator('#dialog').isVisible(); n++) { await page.keyboard.press('Space'); await page.waitForTimeout(40); }
+  const m = await page.evaluate(() => { window.hurt = () => {}; const m = L.movers[0]; m.x = m.x0; m.dir = 1; m.wait = 30; P.x = m.x + 10; P.y = m.y - P.h; P.vx = P.vy = 0; return { x0: m.x0, x1: m.x1 }; });
+  await expect.poll(() => page.evaluate(() => P.x), { timeout: 15000 }).toBeGreaterThan(m.x1 - 20);
+  expect(await page.evaluate(() => ({ ground: P.onGround, riding: !!P.mover, hearts: P.hearts }))).toEqual({ ground: true, riding: true, hearts: 3 });
+});
+
+test('on ice you keep sliding when you let go', async ({ page }) => {
+  const slide = async region => {
+    await seed(page, { region, unlocked: 8 });
+    await startDay(page, 0);
+    for (let n = 0; n < 12 && await page.locator('#dialog').isVisible(); n++) { await page.keyboard.press('Space'); await page.waitForTimeout(40); }
+    return page.evaluate(() => { window.hurt = () => {}; L.enemies.length = 0; P.x = 3 * 32; P.y = 12 * 32 - P.h; P.vx = 4.4; P.vy = 0; P.onGround = true;
+      const x0 = P.x; held.left = held.right = false; for (let i = 0; i < 30; i++) step(); return P.x - x0; });
+  };
+  const ardennes = await slide('ardennes'), pole = await slide('pole');
+  expect(pole).toBeGreaterThan(ardennes * 2);
+});
+
+test('in the dark troll forest you see more once you have the torch', async ({ page }) => {
+  await seed(page, { region: 'norway', unlocked: 8 });
+  await startDay(page, 5);
+  const r = await page.evaluate(() => { const dk = L.d.dark, rad = () => dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0); const a = rad(); L.hasQuest = true; return [a, rad()]; });
+  expect(r[1]).toBeGreaterThan(r[0] + 100);
+});

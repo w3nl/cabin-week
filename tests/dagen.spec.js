@@ -17,7 +17,10 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway']) DAYS.forEach((day,
     // Elke sleutel, het opdrachtvoorwerp en de uitgang zijn te bereiken met de sprongen die het poppetje echt kan maken.
     const bad = await page.evaluate(() => {
       const solid = (x, y, open) => { if (x < 0 || x >= L.w) return true; if (y < 0 || y >= ROWS) return false; const c = L.grid[y][x]; return c === '#' || c === 'S' || (!open && (c === 'G' || c === 'H')); };
-      const stand = (x, y, open) => y >= 1 && y < ROWS - 1 && !solid(x, y, open) && !solid(x, y - 1, open) && (solid(x, y + 1, open) || L.grid[y + 1][x] === '=') && L.grid[y][x] !== '^';
+      // A mover (ice floe, gondola, boat) carries you across a gap: you can stand anywhere along its track.
+      const ride = new Set();
+      for (const m of L.movers) for (let px = m.x0; px <= m.x1 + m.w - TS; px += TS / 2) ride.add(Math.floor(px / TS) + ',' + (m.y / TS - 1));
+      const stand = (x, y, open) => y >= 1 && y < ROWS - 1 && !solid(x, y, open) && !solid(x, y - 1, open) && (solid(x, y + 1, open) || L.grid[y + 1][x] === '=' || ride.has(x + ',' + y)) && L.grid[y][x] !== '^';
       const wall = (a, b) => { const s = Math.sign(b - a); for (let x = a + s; x !== b + s && a !== b; x += s) if ('GH'.includes(L.grid[2][x])) return true; return false; };
       const reach = open => {
         const seen = new Set(['2,11']), q = [[2, 11]];
