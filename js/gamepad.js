@@ -49,7 +49,7 @@ addEventListener("gamepadconnected", () => { gpStatus(); lastInput = "pad"; menu
 addEventListener("gamepaddisconnected", gpStatus);
 
 /* ---------- Menu's met de controller ---------- */
-function gpRoot() { return state === "title" ? $("title") : state === "map" ? $("mapWrap") : state === "pad" ? $("padWrap") : $("cardWrap"); }
+function gpRoot() { return state === "title" ? $("title") : state === "map" ? $("mapWrap") : state === "hero" ? $("heroWrap") : state === "pad" ? $("padWrap") : $("cardWrap"); }
 function gpFocusables() { return [...gpRoot().querySelectorAll("button")].filter(b => !b.disabled && b.offsetParent !== null); }
 function gpCurrent() { const list = gpFocusables(); return list.includes(document.activeElement) ? document.activeElement : null; }
 function gpFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.scrollIntoView({ block: "nearest", inline: "nearest" }); }
@@ -57,6 +57,7 @@ function gpFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.sc
 function gpDefault(list) {
   if (state === "title") { const days = list.filter(b => b.closest("#levels")); return days[days.length - 1] || list[0]; }
   if (state === "map") return list.find(b => b.classList.contains("here")) || list[0];
+  if (state === "hero") return $("heroDone");
   return list[0];
 }
 /** Ga naar de dichtstbijzijnde knop in een richting. */
@@ -90,7 +91,7 @@ function gpPress() {
 }
 function gpBack() {
   if (state === "pad") setScreen("play");
-  else if (state === "intro" || state === "card" || state === "map") toTitle();
+  else if (state === "intro" || state === "card" || state === "map" || state === "hero") toTitle();
 }
 
 /* ---------- Toetsenbord en tv-afstandsbediening in menu's ---------- */

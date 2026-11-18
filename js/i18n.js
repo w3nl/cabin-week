@@ -22,5 +22,6 @@ if (LANG === "nl") {
   document.querySelectorAll("[data-nl]").forEach(el => { el.innerHTML = el.getAttribute("data-nl"); });
   document.querySelectorAll("[data-nl-label]").forEach(el => el.setAttribute("aria-label", el.getAttribute("data-nl-label")));
   document.querySelectorAll("[data-nl-title]").forEach(el => el.setAttribute("title", el.getAttribute("data-nl-title")));
+  document.querySelectorAll("[data-nl-placeholder]").forEach(el => el.setAttribute("placeholder", el.getAttribute("data-nl-placeholder")));
   document.querySelectorAll("[data-nl-content]").forEach(el => el.setAttribute("content", el.getAttribute("data-nl-content")));
 }

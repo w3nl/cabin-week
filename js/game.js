@@ -49,7 +49,7 @@ function isSolid(tx, ty) {
 
 function startLevel(idx) {
   L = buildLevel(idx);
-  const ch = CHARS[save.char];
+  const ch = heroChar();
   P = { x: 2 * TS + 5, y: 0, w: 22, h: Math.round(40 * ch.size), vx: 0, vy: 0, onGround: false, face: 1, coyote: 0, buffer: 0, inv: 0, hearts: 3, anim: 0, slide: 0, run: 0, runDir: 0, dash: false, lastAx: 0, relDir: 0, relTime: -99 };
   P.y = 12 * TS - P.h;
   L.respawn = { x: P.x, y: P.y };
@@ -90,7 +90,7 @@ addEventListener("keydown", e => {
   // In menu's: pijltjes kiezen een knop, Enter/OK drukt (gamepad.js). Zo werkt ook een tv-afstandsbediening.
   if (state !== "play" && menuKey(e)) return;
   if (state === "pad") { padKey(e); return; }
-  if (e.code === "Escape") { if (state === "play" || state === "intro" || state === "map") toTitle(); return; }
+  if (e.code === "Escape") { if (state === "play" || state === "intro" || state === "map" || state === "hero") toTitle(); return; }
   const a = KEYMAP[e.code];
   if (!a) return;
   if (state === "play") e.preventDefault();

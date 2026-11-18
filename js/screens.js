@@ -22,6 +22,7 @@ function setScreen(s) {
   state = s;
   $("title").hidden = s !== "title";
   $("mapWrap").hidden = s !== "map";
+  $("heroWrap").hidden = s !== "hero";
   $("cardWrap").hidden = !(s === "intro" || s === "card");
   $("padWrap").hidden = s !== "pad";
   $("hud").hidden = !(s === "play" || s === "pad");
@@ -175,6 +176,22 @@ function buildTitle() {
     b.onclick = () => { save.char = i; persist(); buildTitle(); tone(660, .06, "triangle", .05); };
     chEl.appendChild(b);
   });
+  // Your own hero: the tenth tile. Not made yet: "+ Create". Made: choose it, and press it again to change it.
+  const own = document.createElement("button"); own.type = "button"; own.id = "ownHero"; own.className = "own";
+  if (save.hero) {
+    const me = makeHero(save.hero), on = save.char === "me";
+    own.setAttribute("aria-pressed", String(on));
+    own.appendChild(portrait(me));
+    own.insertAdjacentHTML("beforeend", `<span class="nm"></span><span class="fm"></span>`);
+    own.querySelector(".nm").textContent = me.name; own.querySelector(".fm").textContent = on ? T("✏️ change", "✏️ aanpassen") : me.fam;
+    own.onclick = () => { if (save.char === "me") return openHero(); save.char = "me"; persist(); buildTitle(); tone(660, .06, "triangle", .05); };
+  } else {
+    own.setAttribute("aria-pressed", "false");
+    own.innerHTML = `<span class="plus">+</span><span class="nm"></span><span class="fm"></span>`;
+    own.querySelector(".nm").textContent = T("Your hero", "Jouw held"); own.querySelector(".fm").textContent = T("create", "maken");
+    own.onclick = openHero;
+  }
+  chEl.appendChild(own);
   const lvEl = $("levels"); lvEl.innerHTML = "";
   LEVELS.forEach((d, i) => {
     const b = document.createElement("button"); b.type = "button"; b.disabled = i + 1 > pr.unlocked;
