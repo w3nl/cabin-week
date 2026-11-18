@@ -302,6 +302,39 @@ function drawEnemy(e, t) {
     g.strokeStyle = "#a8281e"; g.beginPath(); g.moveTo(-3, -13); g.lineTo(-3, -18); g.moveTo(3, -13); g.lineTo(3, -18); g.stroke(); g.strokeStyle = OUT;
     blob("#fff", () => g.arc(-3, -19, 2, 0, 7)); blob("#fff", () => g.arc(3, -19, 2, 0, 7));
     g.fillStyle = "#1d1d26"; g.fillRect(-3, -19.5, 1.2, 1.2); g.fillRect(3, -19.5, 1.2, 1.2);
+  } else if (e.kind === "alg") {
+    // a big, friendly moose: you can't knock it over, but its back is a fine springboard
+    const st = Math.sin(e.x * .2) * 3;
+    [[-18, st], [-10, -st], [10, st], [18, -st]].forEach(([x, d]) => blob("#3a2a1e", () => g.rect(x - 2.5, -22, 5, 22 + d * .3)));
+    blob("#5a4030", () => rp(-26, -46, 46, 26, 12));
+    g.fillStyle = "#6a4c38"; g.beginPath(); g.ellipse(-6, -42, 18, 4, 0, 0, 7); g.fill();
+    blob("#4a3426", () => { g.moveTo(14, -44); g.lineTo(24, -52); g.lineTo(36, -42); g.lineTo(34, -32); g.lineTo(22, -34); g.closePath(); });
+    blob("#3a2a1e", () => g.ellipse(36, -36, 5, 4, 0, 0, 7));
+    blob("#c8a878", () => { g.moveTo(20, -52); g.lineTo(12, -66); g.lineTo(18, -61); g.lineTo(19, -70); g.lineTo(24, -61); g.lineTo(30, -68); g.lineTo(28, -53); g.closePath(); });
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(28, -44, 1.6, 0, 7); g.fill();
+    blob("#4a3426", () => g.ellipse(28, -28, 3, 5, 0, 0, 7));
+  } else if (e.kind === "mygga") {
+    // a Swedish summer mosquito: it hums along low over the grass
+    const hov = Math.sin(e.x * .15) * 3, wing = Math.abs(Math.sin(t / 25));
+    g.translate(0, -8 + hov);
+    g.strokeStyle = "#3a3a40"; g.lineWidth = 1.2; [-6, 0, 6].forEach(x => { g.beginPath(); g.moveTo(x, -8); g.lineTo(x - 3, -1); g.stroke(); });
+    g.fillStyle = "rgba(220,240,255,.75)"; g.beginPath(); g.ellipse(-3, -15 - wing * 3, 7, 3 + wing * 2, -.4, 0, 7); g.ellipse(4, -15 - wing * 3, 7, 3 + wing * 2, .4, 0, 7); g.fill();
+    g.strokeStyle = OUT; g.lineWidth = 1.4;
+    blob("#5a5a62", () => g.ellipse(-4, -10, 8, 3.5, -.15, 0, 7));
+    blob("#3a3a40", () => g.arc(6, -11, 3.5, 0, 7));
+    g.strokeStyle = "#3a3a40"; g.beginPath(); g.moveTo(9, -10); g.lineTo(16, -7); g.stroke(); g.strokeStyle = OUT;
+    g.fillStyle = "#ff5a5a"; g.beginPath(); g.arc(7, -12, 1.2, 0, 7); g.fill();
+  } else if (e.kind === "bever") {
+    // a beaver from the lake, with a flat tail and big orange teeth
+    const st = Math.sin(e.x * .4) * 2;
+    blob("#4a3a2e", () => { g.ellipse(-16, -4, 8, 3, .2, 0, 7); });
+    g.strokeStyle = "#3a2a1e"; g.lineWidth = .8; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-22 + i * 4, -6); g.lineTo(-20 + i * 4, -2); g.stroke(); } g.strokeStyle = OUT; g.lineWidth = 1.6;
+    [[-5, st], [5, -st]].forEach(([x, d]) => blob("#3a2a1e", () => g.rect(x - 2, -6, 4, 6 + d * .3)));
+    blob("#7a5636", () => g.ellipse(-2, -12, 12, 8, 0, 0, 7));
+    blob("#8a6644", () => g.ellipse(10, -15, 7, 6, 0, 0, 7));
+    blob("#5a4030", () => g.arc(7, -20, 2, 0, 7));
+    g.fillStyle = "#f2a03a"; g.fillRect(14, -12, 3, 4); g.strokeRect(14, -12, 3, 4);
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(17, -16, 1.4, 0, 7); g.fill(); g.beginPath(); g.arc(12, -18, 1.2, 0, 7); g.fill();
   } else if (e.kind === "poolvos") {
     // an arctic fox: white, with a big bushy tail, after your sweets
     const st = Math.sin(e.x * .4) * 2.5;

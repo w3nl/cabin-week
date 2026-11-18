@@ -8,12 +8,13 @@ test('the map shows the regions; choosing one switches the days, and the choice 
   await expect(page.locator('#levels .t').first()).toHaveText('Arrival in Pinebrook');
   await page.locator('#regionBtn').click();
   await expect(page.locator('#mapWrap')).toBeVisible();
-  await expect(page.locator('#mapBox .pin')).toHaveCount(6);
+  await expect(page.locator('#mapBox .pin')).toHaveCount(7);
   await expect(page.locator('#mapBox .pin.here')).toHaveAttribute('data-region', 'ardennes');
   await expect(page.locator('#mapSoon')).toContainText('Iceland');
   await expect(page.locator('#mapSoon')).toContainText('Greece');
-  await expect(page.locator('#mapSoon')).toContainText('Småland');
-  await expect(page.locator('#mapBox .soon-dot')).toHaveCount(8);
+  await expect(page.locator('#mapSoon')).toContainText('Iceland');
+  await expect(page.locator('#mapSoon')).not.toContainText('Småland'); // Småland is playable now
+  await expect(page.locator('#mapBox .soon-dot')).toHaveCount(7);
   await page.locator('#mapBox .pin[data-region="tirol"]').click();
   await expect(page.locator('#title')).toBeVisible();
   await expect(page.locator('#regionName')).toHaveText('Tirol');
@@ -72,13 +73,13 @@ test('the map works with the keyboard and the remote: arrows, Enter, and Escape 
 test('the new regions have their own scenery, enemies and checkpoint flags', async ({ page }) => {
   await seed(page, { unlocked: 8 });
   const info = await page.evaluate(() => REGIONS.map(r => ({ id: r.id, n: r.levels.length, scenes: [...new Set(r.levels.map(l => l.scene || l.theme))], enemies: [...new Set(r.levels.filter(l => l.enemies !== false).map(l => l.enemy))] })));
-  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8, 8]);
+  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8, 8, 8]);
   expect(info.find(r => r.id === 'pole').scenes).toContain('pole');
   expect(info.find(r => r.id === 'tirol').enemies).toContain('geit');
   expect(info.find(r => r.id === 'norway').enemies).toContain('troll');
   expect(info.find(r => r.id === 'pole').enemies).toEqual(expect.arrayContaining(['poolvos', 'lemming']));
   const codes = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map(l => l.code && l.code.answer)));
-  expect(new Set(codes).size).toBe(48);
+  expect(new Set(codes).size).toBe(56);
   expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'meeuw', 'zwijn']));
 });
 
@@ -97,7 +98,7 @@ for (const [w, h, what] of [[960, 540, 'tv'], [740, 360, 'phone turned'], [412, 
     await seed(page, { lang: 'nl' });
     await page.locator('#regionBtn').click();
     expect(await page.evaluate(() => document.getElementById('mapWrap').scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
+    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia', 'smaland']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
     await expect(page.locator('#mapClose')).toBeInViewport({ ratio: .99 });
   });
 }

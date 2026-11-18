@@ -54,11 +54,20 @@ const REGIONS = [
     finale: [T("Doviđenja, Dalmatia! ☀️🚗", "Doviđenja, Dalmatië! ☀️🚗"),
       T("Camp Lavanda, the Krka waterfalls, the walls of Dubrovnik, island hopping, the lakes of Plitvice, the sea organ in Zadar and the rocky beach. Salty, sunny and happy.",
         "Camping Lavanda, de watervallen van Krka, de muren van Dubrovnik, eilandhoppen, de meren van Plitvice, het zeeorgel in Zadar en het rotsstrand. Zout, zonnig en blij.")] }
+,
+  { id: "smaland", name: "Småland", icon: "🛶", lon: 15.2, lat: 57.3, scene: "smaland", summer: true,
+    place: "Lingonby", blurb: T("A summer week in a red cottage by a lake near Lingonby: forest, moose, fika, midsummer and a car meet.",
+      "Een zomerweek in een rood huisje aan een meer bij Lingonby: bos, elanden, fika, midzomer en een autotreffen."),
+    levels: SMALAND_LEVELS,
+    week: regionWeek([["🏠", "Arrival", "Aankomst"], ["☕", "Fika", "Fika"], ["🌲", "Moose forest", "Elandenbos"], ["🐦", "Glassworks", "Glasblazerij"],
+      ["🌼", "Midsummer", "Midzomer"], ["🛶", "Canoe", "Kano"], ["🚗", "Car meet", "Autotreffen"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Hej då, Småland! 🛶🚗", "Hej då, Småland! 🛶🚗"),
+      T("A red cottage by the lake, fika with princess cake, moose to bounce on, glass birds, dancing like frogs at midsummer, a canoe that tipped over and a parade of Saabs.",
+        "Een rood huisje aan het meer, fika met prinsessentaart, elanden om op te stuiteren, glazen vogeltjes, als kikkers dansen met midzomer, een kano die omsloeg en een parade van Saabs.")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [
   { name: T("Iceland", "IJsland"), lon: -19, lat: 64.9 },
-  { name: "Småland", lon: 15.2, lat: 57.3 },
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
   { name: "Veneto", lon: 12.3, lat: 45.5 },
   { name: T("Scotland", "Schotland"), lon: -4.3, lat: 57.0 },
