@@ -19,6 +19,8 @@ function buildLevel(idx) {
   for (const [x, y, n] of d.spikes) for (let i = 0; i < n; i++) grid[y][x + i] = "^";
   if (d.gate) for (let y = d.gate[1]; y <= d.gate[2]; y++) grid[y][d.gate[0]] = "G";
   if (d.code) for (let y = d.code.y1; y <= d.code.y2; y++) grid[y][d.code.x] = "H";
+  // ladders: "|" cells from just below a plank down to the ground; you climb them with ↑ and ↓
+  for (const [x, y0, y1] of d.ladderCols || []) for (let y = y0; y <= y1; y++) if (grid[y][x] === " ") grid[y][x] = "|";
 
   const others = CHARS.filter((_, i) => i !== save.char);
   let npcN = 0;
@@ -65,7 +67,7 @@ function isSolid(tx, ty) {
 function startLevel(idx) {
   L = buildLevel(idx);
   const ch = heroChar();
-  P = { x: 2 * TS + 5, y: 0, w: 22, h: Math.round(40 * ch.size), vx: 0, vy: 0, onGround: false, face: 1, coyote: 0, buffer: 0, inv: 0, hearts: 3, anim: 0, slide: 0, run: 0, runDir: 0, dash: false, lastAx: 0, relDir: 0, relTime: -99 };
+  P = { x: 2 * TS + 5, y: 0, w: 22, h: Math.round(40 * ch.size), vx: 0, vy: 0, onGround: false, face: 1, coyote: 0, buffer: 0, inv: 0, hearts: 3, anim: 0, slide: 0, run: 0, runDir: 0, dash: false, lastAx: 0, relDir: 0, relTime: -99, climb: false, drop: 0 };
   P.y = 12 * TS - P.h;
   L.respawn = { x: P.x, y: P.y };
   cam = 0; particles = []; popups = []; dialog = null; hideDialog();
@@ -75,7 +77,7 @@ function startLevel(idx) {
 /* =====================================================================
    INVOER
    ===================================================================== */
-const held = { left: false, right: false, jump: false, run: false };
+const held = { left: false, right: false, jump: false, run: false, down: false };
 // Lopen met de controller in de Google TV-app (zie __tvDir in gamepad.js).
 const tvHeld = { left: false, right: false };
 const edges = [];
@@ -117,13 +119,19 @@ addEventListener("keydown", e => {
   if (!a) return;
   if (state === "play") e.preventDefault();
   if (a in held && !e.repeat) queueHold(held, a, true, eventTime(e));
+  // ↓ also counts as held: to climb down a ladder
+  if ((e.code === "ArrowDown" || e.code === "KeyS") && !e.repeat) queueHold(held, "down", true, eventTime(e));
   if (!e.repeat && (a === "jump" || a === "act")) edges.push(a);
 });
-addEventListener("keyup", e => { const a = KEYMAP[e.code]; if (a in held) queueHold(held, a, false, eventTime(e)); });
+addEventListener("keyup", e => {
+  const a = KEYMAP[e.code]; if (a in held) queueHold(held, a, false, eventTime(e));
+  if (e.code === "ArrowDown" || e.code === "KeyS") queueHold(held, "down", false, eventTime(e));
+});
 function bindTouch(id, a) {
   const b = $(id);
-  b.addEventListener("pointerdown", e => { e.preventDefault(); if (a in held) held[a] = true; if (a === "jump" || a === "act") edges.push(a); try { b.setPointerCapture(e.pointerId); } catch (x) {} });
-  const up = () => { if (a in held) held[a] = false; };
+  // the 💬 button is also "down" while you hold it (to climb down a ladder)
+  b.addEventListener("pointerdown", e => { e.preventDefault(); if (a in held) held[a] = true; if (a === "act") held.down = true; if (a === "jump" || a === "act") edges.push(a); try { b.setPointerCapture(e.pointerId); } catch (x) {} });
+  const up = () => { if (a in held) held[a] = false; if (a === "act") held.down = false; };
   b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("lostpointercapture", up);
 }
 bindTouch("tL", "left"); bindTouch("tR", "right"); bindTouch("tJ", "jump"); bindTouch("tA", "act");
@@ -167,7 +175,7 @@ function hurt(msg) {
   }
   updateHud();
 }
-function respawn() { P.x = L.respawn.x; P.y = L.respawn.y; P.vx = P.vy = 0; P.inv = 60; P.slide = 0; }
+function respawn() { P.x = L.respawn.x; P.y = L.respawn.y; P.vx = P.vy = 0; P.inv = 60; P.slide = 0; P.climb = false; P.drop = 0; }
 
 function nearest(list, range = 44) {
   const pc = P.x + P.w / 2;
@@ -245,6 +253,13 @@ function clueTalk(c) {
   return say(T("Letter", "Letter"), [T(`Letter ${nr}: ${c.v}`, `Letter ${nr}: ${c.v}`)]);
 }
 function ringClue(c) { const nt = NOTES[+c.v - 1]; c.ring = 50; tone(nt[2], .45, "sine", .07); tone(nt[2] * 2, .3, "sine", .02); }
+/** Standing on a plank ("="), not on the ground: then ↓ can drop you through it. */
+function onPlank() {
+  const ty = Math.floor((P.y + P.h + 1) / TS), x0 = Math.floor(P.x / TS), x1 = Math.floor((P.x + P.w - .01) / TS);
+  let plank = false;
+  for (let tx = x0; tx <= x1; tx++) { const c = cell(tx, ty); if (c === "=") plank = true; else if (isSolid(tx, ty)) return false; }
+  return plank;
+}
 /** The wind right now: slow gusts, mostly against you (it's the Netherlands), sometimes from behind. */
 function windNow() { return L.d.wind * (Math.sin(L.time / 140) * .9 - .25 + Math.sin(L.time / 37) * .25); }
 function step() {
@@ -268,6 +283,9 @@ function step() {
     // Niets om mee te praten of te gebruiken, en je loopt? Dan ga je op je buik glijden (↓, E, □/○ of 💬).
     if (P.onGround && !P.slide && Math.abs(P.vx) > 2) {
       P.face = Math.sign(P.vx); P.vx = P.face * Math.max(6.5, Math.abs(P.vx) + .8); P.slide = L.d.theme === "sneeuw" ? 60 : 50; SFX.slide();
+    } else if (P.onGround && !P.slide && onPlank()) {
+      // standing still on a plank (not on the ground): ↓ drops you through it
+      P.drop = 14; P.y += 2; P.onGround = false; P.mover = null;
     }
   }
 
@@ -316,13 +334,25 @@ function step() {
   }
   if (Math.abs(P.vx) < .05) P.vx = 0;
 
+  // Ladders: hold ↑ to climb up, ↓ to climb down. At the top you step onto the plank; from the plank ↓ takes you down.
+  const goDown = held.down || padHeld.down, lc = Math.floor((P.x + P.w / 2) / TS);
+  const ladderCell = ty => cell(lc, ty) === "|" || (cell(lc, ty) === "=" && cell(lc, ty + 1) === "|");
+  const feetRow = Math.floor((P.y + P.h - 1) / TS);
+  let onLadder = false; for (let ty = Math.floor(P.y / TS); ty <= feetRow; ty++) if (ladderCell(ty)) onLadder = true;
+  const ladderBelow = P.onGround && cell(lc, feetRow + 1) === "=" && cell(lc, feetRow + 2) === "|";
+  if (!P.climb && ((onLadder && (jumpHeld || goDown)) || (ladderBelow && goDown))) { P.climb = true; P.slide = 0; P.x = lc * TS + (TS - P.w) / 2; }
+  if (P.climb && ((!onLadder && !ladderBelow) || (P.onGround && !jumpHeld && !goDown && !ladderBelow))) P.climb = false;
+  if (P.climb) {
+    P.vy = jumpHeld ? -2.6 : goDown ? 2.6 : 0; P.vx = ax * 1.4; P.buffer = 0; P.coyote = 0;
+    if (P.vy) P.anim += .25;
+  }
+  if (P.drop > 0) P.drop--;
   // jump
-  if (wantJump) P.buffer = 8;
+  if (wantJump && !P.climb) P.buffer = 8;
   P.coyote = P.onGround ? 7 : P.coyote - 1;
   if (P.buffer > 0 && P.coyote > 0) { P.vy = -11.6; P.buffer = 0; P.coyote = 0; P.onGround = false; SFX.jump(); }
   P.buffer--;
-  P.vy += (P.vy < 0 && !jumpHeld) ? 1.1 : .55;
-  P.vy = Math.min(P.vy, 12);
+  if (!P.climb) { P.vy += (P.vy < 0 && !jumpHeld) ? 1.1 : .55; P.vy = Math.min(P.vy, 12); }
 
   // movers (ice floes, gondolas, boats): move, and take along whoever stands on them
   for (const m of L.movers) {
@@ -349,7 +379,7 @@ function step() {
     const x0 = Math.floor(P.x / TS), x1 = Math.floor((P.x + P.w - .01) / TS);
     if (P.vy > 0) {
       const ty = Math.floor((P.y + P.h - .01) / TS);
-      for (let tx = x0; tx <= x1; tx++) if (isSolid(tx, ty) || (cell(tx, ty) === "=" && prevBottom <= ty * TS + .5)) { P.y = ty * TS - P.h; P.vy = 0; P.onGround = true; break; }
+      for (let tx = x0; tx <= x1; tx++) if (isSolid(tx, ty) || (cell(tx, ty) === "=" && prevBottom <= ty * TS + .5 && !P.drop && !P.climb)) { P.y = ty * TS - P.h; P.vy = 0; P.onGround = true; break; }
     } else if (P.vy < 0) {
       const ty = Math.floor(P.y / TS);
       for (let tx = x0; tx <= x1; tx++) if (isSolid(tx, ty)) { P.y = (ty + 1) * TS; P.vy = 0; break; }
