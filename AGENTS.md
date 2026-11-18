@@ -55,7 +55,7 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 | `docs/` | `domain.md`, `google-tv.md`, `publish-android.md` (publishing in Google Play and getting the `.aab`, step by step), `android-key.md` (the signing key), `iphone-ipad.md`, `agent-workflow.md`, `blueprint.md`, and `play-store/` (store texts in English and Dutch, and images: `npm run store`) |
 | `tools/` | `build-site.js` (the site in `_site/` for GitHub Pages), `bundle.js` (one loose HTML file in `dist/`), `build-aab.js` (runs the GitHub Actions build and downloads/extracts the protected Google Play bundle), `icons.js`, `store.js` |
 | `tests/` | Playwright: `dagen` (every day of every region), `regio` (map and regions), `held` (your own hero), `besturing`, `codeslot`, `controller`, `titel`, `voortgang`, `telefoon`, `pwa`; `helpers.js` (`seed(page, { unlocked, char, lang, region })`); `serve.js` |
-| `.github/` | Workflows (see "Workflow" and [docs/agent-workflow.md](docs/agent-workflow.md)), the issue form *Idea*, the PR template |
+| `.github/` | Workflows (see "Workflow" and [docs/agent-workflow.md](docs/agent-workflow.md)), the *Idea* and *Build ticket* issue forms, the PR template |
 
 ## Languages
 
@@ -231,7 +231,7 @@ Everything in "Lessons learned" in [docs/blueprint.md](docs/blueprint.md) applie
 
 ## Workflow
 
-**Never push directly to `main`.** Every change goes through a branch from the latest `origin/main` and a pull request; the owner reviews and merges. The workflow *Play the game* runs all tests on every pull request, and *Publish the game* publishes `main` to GitHub Pages. The review and playtest agents run on demand: the label `agent-review` or `agent-speeltest` on a pull request, or Actions → Run workflow. Ideas can be refined and built by the AI agents via the issue form *Idea*: see [docs/agent-workflow.md](docs/agent-workflow.md).
+**Never push directly to `main`.** Every change goes through a branch from the latest `origin/main` and a pull request; the owner reviews and merges. The workflow *Play the game* runs all tests on every pull request, and *Publish the game* publishes `main` to GitHub Pages. The review and playtest agents run on demand: the label `agent-review` or `agent-speeltest` on a pull request, or Actions → Run workflow. Use *Build ticket* for a small, ready change and *Idea* for work that needs a plan. The build workflow runs Playwright before opening a PR and does not change workflows, Android code, dependencies or release tooling. See [docs/agent-workflow.md](docs/agent-workflow.md).
 
 ```bash
 npm install

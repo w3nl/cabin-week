@@ -58,6 +58,10 @@ Put `cabinweek.jks` and the password in a safe place, for example a password man
 
 ### 5. Put the key in GitHub
 
+In **Settings → Environments**, create `android-release`. Under **Deployment branches and tags**, choose **Selected branches and tags** and add the branch `main` (not a tag). Add both secrets to this environment. Leave `android-preview` without secrets.
+
+If you already set repository-level secrets, use the same key and password to create the environment secrets. Once a build on `main` confirms signing, delete the repository-level copies and verify another `main` build. Restricting the environment does not restrict those copies.
+
 **With the GitHub CLI (easiest, no copying):**
 
 Install it once ([cli.github.com](https://cli.github.com/); Ubuntu: `sudo apt install gh`) and sign in:
@@ -69,27 +73,27 @@ Then, in the folder with `cabinweek.jks`:
 
 - **Linux:**
   ```bash
-  base64 -w0 cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+  base64 -w0 cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --env android-release --repo w3nl/cabin-week
   ```
 - **Mac:**
   ```bash
-  base64 -i cabinweek.jks | tr -d '\n' | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+  base64 -i cabinweek.jks | tr -d '\n' | gh secret set ANDROID_KEYSTORE_BASE64 --env android-release --repo w3nl/cabin-week
   ```
 - **Windows (PowerShell):**
   ```powershell
-  [Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+  [Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | gh secret set ANDROID_KEYSTORE_BASE64 --env android-release --repo w3nl/cabin-week
   ```
 
 And the password (`gh` asks for it, so it does not end up in your shell history):
 ```bash
-gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/cabin-week
+gh secret set ANDROID_KEYSTORE_PASSWORD --env android-release --repo w3nl/cabin-week
 ```
 
-**Or on the website:** turn the key into one line of text and copy it (Linux: `base64 -w0 cabinweek.jks`; Mac: `base64 -i cabinweek.jks | tr -d '\n' | pbcopy`; Windows: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | Set-Clipboard`). Then go to [github.com/w3nl/cabin-week/settings/secrets/actions](https://github.com/w3nl/cabin-week/settings/secrets/actions) → **New repository secret**:
+**Or on the website:** turn the key into one line of text and copy it (Linux: `base64 -w0 cabinweek.jks`; Mac: `base64 -i cabinweek.jks | tr -d '\n' | pbcopy`; Windows: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | Set-Clipboard`). Then go to **Settings → Environments → android-release → Add environment secret**:
 - Name `ANDROID_KEYSTORE_BASE64`, value: the long line of text (2500 to 4000 characters, nothing else).
 - Name `ANDROID_KEYSTORE_PASSWORD`, value: the password.
 
-Check: the page [Settings → Secrets and variables → Actions](https://github.com/w3nl/cabin-week/settings/secrets/actions) lists both names.
+Check: the `android-release` environment lists both names.
 
 ### 6. Build
 

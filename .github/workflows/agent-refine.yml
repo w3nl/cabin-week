@@ -53,6 +53,6 @@ jobs:
             5. **Test plan**: which Playwright tests are added or changed.
             6. **Open questions**: only what the owner must decide, each with a proposal.
             7. **Size**: small, medium or large.
-            End with: "Is this right? Then add the label **klaar-om-te-bouwen**. Want something else? Reply with @claude and what you want."
+            End with: "Want changes? Reply with @claude. To build, put the approved plan in the issue description under `## What to change` and `## Acceptance criteria`, then add `klaar-om-te-bouwen`."
 
             Finally add the label: gh issue edit ${{ github.event.issue.number }} --add-label uitgewerkt

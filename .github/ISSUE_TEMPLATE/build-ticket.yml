@@ -1,0 +1,23 @@
+name: Build ticket
+description: Give Claude a small, ready-to-build change with clear acceptance criteria.
+labels: [build-ticket]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for one small change that fits in a pull request. Tickets opened by the repository owner start Claude automatically; other submissions wait for the owner. Claude opens a PR, not a release.
+        For a new trip, an unclear design, or a change that needs discussion, use **Idea** instead. Never put secrets or personal information in a ticket.
+  - type: textarea
+    id: change
+    attributes:
+      label: What to change
+      description: Describe the desired result, where it happens, and what should stay unchanged.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable checks, one per line. Include the relevant language, device, or controls when it matters.
+    validations:
+      required: true

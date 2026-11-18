@@ -31,15 +31,15 @@ Full explanation: [android-key.md](android-key.md). In short:
    keytool -list -keystore ~/cabinweek.jks -alias cabinweek
    ```
 4. Back up `~/cabinweek.jks` and the password (password manager and a USB stick).
-5. Give it to GitHub:
+5. Create the `android-release` environment restricted to `main` as described in [Android signing setup](android-key.md#5-put-the-key-in-github). Then give it the key and password:
    ```bash
    gh auth login
    ```
    ```bash
-   base64 -w0 ~/cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+   base64 -w0 ~/cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --env android-release --repo w3nl/cabin-week
    ```
    ```bash
-   gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/cabin-week
+   gh secret set ANDROID_KEYSTORE_PASSWORD --env android-release --repo w3nl/cabin-week
    ```
 
 ---

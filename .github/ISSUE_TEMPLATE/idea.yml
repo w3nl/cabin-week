@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thank you! After you submit, the **refine agent** reads the code and answers with a plan: how it works, which files change, acceptance criteria and a test plan.
-        Reply with `@claude …` to discuss it. Happy with it? Add the label **`klaar-om-te-bouwen`** and the build agent opens a pull request.
+        Reply with `@claude …` to discuss it. When the plan is ready, the repository owner puts the approved scope and checks in the issue description under **What to change** and **Acceptance criteria**, then adds **`klaar-om-te-bouwen`**.
   - type: textarea
     id: idee
     attributes:

@@ -1,50 +1,24 @@
-# The agent workflow: from idea to pull request
+# From a GitHub issue to a pull request
 
-Ideas for *Cabin Week* go past a small team of AI agents (Claude, in GitHub Actions). You decide at two moments: **approving the plan** and **merging the pull request**.
+Cabin Week uses Claude Code in GitHub Actions. A Claude Pro subscription can authenticate the action; GitHub Copilot is not needed. Claude prepares the change, but the repository owner reviews and merges it.
 
-```
- You            Refine agent       You               Build agent         Tests (+ on demand review      You
- ───            ────────────       ───               ───────────         and playtest)                  ───
- Open an   ──▶  explores and  ──▶  discuss with ──▶  builds on a    ──▶  look at the code, play  ──▶   merge
- "Idea"         answers with       @claude, add      branch, runs        the new part; "Play the
- issue          a plan             the label         all tests,          game" runs all tests
-                (uitgewerkt)       klaar-om-te-      opens a PR
-                                   bouwen
-```
+| Start with | What happens |
+|---|---|
+| **Build ticket** | For one small, well-defined change. Opening the form as the repository owner starts Claude automatically. For a submission from someone else, review the issue first, then add `build-ticket` as the owner (remove it first if already present). |
+| **Idea** | For work that needs discussion. The `idee` label starts the refine agent for trusted contributors. Discuss the proposal with `@claude`, then put the agreed plan in the issue description under `## What to change` and `## Acceptance criteria`. The owner adds `klaar-om-te-bouwen` to start the build. |
 
-The label names are Dutch (they come from the original project); they work the same.
+Both routes use the issue description as it was when work started, not the comment thread. If the build stops because the description is incomplete, edit it and remove and re-add the build label. If a PR already exists, work on that PR instead of starting another build.
 
-| Step | Who | Starts on | What happens | Workflow |
-|---|---|---|---|---|
-| 1. Idea | you | | Open an issue with the **Idea** form. It gets the label `idee`. | |
-| 2. Refine | refine agent | the label `idee` | Reads the code and answers with a plan: how it works, which files, acceptance criteria, test plan, open questions. Adds `uitgewerkt`. Changes no code. | `agent-refine.yml` |
-| Discuss | you + Claude | `@claude …` in the issue | Ask questions, change the plan, until you are happy. | `claude.yml` |
-| 3. Build | build agent | **you add `klaar-om-te-bouwen`** (ready to build) | Builds the plan on `agent/issue-N`, adds tests, runs `npm test` until it passes, updates the docs, opens a PR with the label `agent-pr` that closes the issue. | `agent-build.yml` |
-| 4. Review (on demand) | review agent | **you put the label `agent-review` on the PR** (or Actions → Run workflow) | Checks the change against AGENTS.md and the acceptance criteria. Leaves comments and a ✅/❌ summary. | `agent-review.yml` |
-| 5. Test | "Play the game" (always) + playtest agent (on demand: label `agent-speeltest`) | the PR | All Playwright tests run on every PR. On request, the playtest agent plays the changed parts on computer and phone size, in English and Dutch, and reports with screenshots. | `tests.yml`, `agent-playtest.yml` |
-| Improve | you + Claude | `@claude …` on the PR | For example "@claude fix the review comments". Claude pushes to the branch and starts the tests again. | `claude.yml` |
-| Done | you | | Merge the PR. The issue closes, and *Publish the game* publishes the new version. | `pages.yml` |
+## What blocks a change
+
+1. **Before Claude starts:** only the repository owner's issue or label event can start a build. Both issue sections must be nonempty.
+2. **Before a PR is opened:** the build workflow checks the changed paths and runs `npm test`. Automated changes can cover the web game, its tests and documentation. Dependencies, Android-native code, the privacy policy, workflows and release tooling require a separate manual PR. If a check fails, see **Actions → Agent: build**; the workflow does not open a PR.
+3. **Before merging:** inspect the diff and the acceptance criteria. If GitHub shows **Approve workflows to run** on the PR, inspect the diff first and then approve the workflow runs. The PR's **Play every day** check tests the change against `main`. Optionally add `agent-review` or `agent-speeltest` to request feedback; neither replaces your review. Merge in GitHub yourself. The normal website deployment runs after that.
 
 ## One-time setup
 
-1. **GitHub Pages:** Settings → Pages → Source: **GitHub Actions**. See [domain.md](domain.md).
-2. **Give the agents access to Claude.** Add **one** of these repository secrets (Settings → Secrets and variables → Actions → New repository secret):
-   - `CLAUDE_CODE_OAUTH_TOKEN`: uses your Claude Pro or Max subscription. Make it on your computer with:
-     ```bash
-     claude setup-token
-     ```
-   - `ANTHROPIC_API_KEY`: pay per use, via https://console.anthropic.com.
-   Without either, the agent workflows fail; *Play the game* still works.
-3. **Let workflows open pull requests.** Settings → Actions → General → Workflow permissions: **Read and write permissions** and tick **Allow GitHub Actions to create and approve pull requests**.
-4. **Create the labels.** Actions → **Labels for the agents** → Run workflow.
-5. **Optional, recommended: `AGENT_GITHUB_TOKEN`.** Pull requests opened with the default Actions token do not start other workflows (a GitHub safety rule). The build agent works around that by starting the tests itself. With a fine-grained personal access token as `AGENT_GITHUB_TOKEN` (this repository only; Contents, Pull requests and Issues: read and write), the PR is opened in your name and everything starts by itself.
-6. **Optional: protect `main`.** Settings → Branches → a rule for `main` that requires the check **Play every day**.
-7. **Renovate:** install the Renovate app for this repository; `renovate.json` keeps Playwright and the actions up to date.
-
-## Good to know
-
-- **Who can start agents:** only the owner, members and collaborators of the repository. Issues and comments from others are ignored.
-- **Costs:** each step is one Claude session. Refining and review are small; building can take a while for big ideas. Small, clear ideas work best.
-- **The plan is the contract:** the build agent follows the plan of the refine agent *plus everything decided in the issue*.
-- **Review and playtest are on demand.** Put the label `agent-review` or `agent-speeltest` on a PR; to run again, remove the label and add it back.
-- **Where everything is:** the agents' instructions are the `prompt` in each workflow file. The project knowledge they rely on is in [AGENTS.md](../AGENTS.md); keep it up to date and every agent gets better.
+1. **Protect Android signing before enabling the agent.** Follow [Android signing setup](android-key.md#5-put-the-key-in-github) to put the existing key and password in the `android-release` environment restricted to `main`. After the workflow change is merged, confirm that a build on `main` signs successfully, then remove the repository-level copies. Do not approve agent PR workflows until those copies are gone.
+2. **Install the [Claude GitHub App](https://github.com/apps/claude)** for `w3nl/cabin-week` only. Run `claude setup-token` locally while signed in with Claude Pro. In **Settings → Secrets and variables → Actions**, add the token as `CLAUDE_CODE_OAUTH_TOKEN`. Do not paste it in an issue, PR or chat. Alternatively, use `ANTHROPIC_API_KEY` from the Claude Console instead. See [Anthropic's setup guide](https://code.claude.com/docs/en/github-actions).
+3. In **Settings → Actions → General → Workflow permissions**, enable **Allow GitHub Actions to create and approve pull requests** so the build can open a PR. Leave the default token permissions read-only; the workflow requests the permissions it needs. No personal GitHub token is required for this build route.
+4. After the workflow changes are on `main`, run **Actions → Labels for the agents → Run workflow** once. Then protect `main` with a ruleset that requires a pull request and the **Play every day** status check. If you are the sole maintainer, do not require a separate approving reviewer that you cannot supply.
+5. Open a small documentation-only **Build ticket** as the owner. Check that the **Agent: build** run starts, that it opens a single PR linking the issue, and that **Play every day** runs after any approval prompt. Review and merge it manually.

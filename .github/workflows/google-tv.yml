@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: google-tv-${{ github.ref }}
@@ -20,15 +20,18 @@ concurrency:
 jobs:
   build:
     name: Build the Android app
+    environment: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && 'android-release' || 'android-preview' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
       # Is there a fixed key? Then we also build the bundle for Google Play.
-      HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      HAS_KEY: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && secrets.ANDROID_KEYSTORE_BASE64 != '' }}
       # The alias of the key: "cabinweek" by default; set the repository variable ANDROID_KEY_ALIAS to reuse a key with another alias.
       ANDROID_KEY_ALIAS: ${{ vars.ANDROID_KEY_ALIAS || 'cabinweek' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v7
         with:
@@ -53,9 +56,10 @@ jobs:
           cp -r _site android-tv/app/src/main/assets/game
 
       - name: Fixed key (optional, so updates install over the old app)
+        if: env.HAS_KEY == 'true'
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ env.HAS_KEY == 'true' && secrets.ANDROID_KEYSTORE_PASSWORD || '' }}
         run: |
           if [ -z "$KEYSTORE" ]; then exit 0; fi
           # Tolerates line breaks (also Windows), spaces, the header and footer lines of certutil and URL-safe base64.
@@ -86,7 +90,7 @@ jobs:
 
       - name: Build the app
         env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ env.HAS_KEY == 'true' && secrets.ANDROID_KEYSTORE_PASSWORD || '' }}
         run: |
           gradle -p android-tv assembleDebug --no-daemon
           cp android-tv/app/build/outputs/apk/debug/app-debug.apk cabin-week.apk
@@ -97,15 +101,15 @@ jobs:
       # only with a key do we keep the bundle.
       - name: Build the bundle for Google Play (.aab)
         env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ env.HAS_KEY == 'true' && secrets.ANDROID_KEYSTORE_PASSWORD || '' }}
         run: |
           gradle -p android-tv bundleRelease --no-daemon
           if [ "$HAS_KEY" = "true" ]; then cp android-tv/app/build/outputs/bundle/release/app-release.aab cabin-week.aab; fi
 
-      - name: Notice when there is no key
-        if: env.HAS_KEY != 'true'
+      - name: Notice when a main build has no key
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.HAS_KEY != 'true'
         run: |
-          echo "::notice::No .aab for Google Play built: first set the secrets ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD (see docs/google-tv.md)."
+          echo "::notice::No .aab for Google Play built: set ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD in android-release (see docs/android-key.md)."
 
       - name: Keep the app
         uses: actions/upload-artifact@v7
@@ -137,11 +141,22 @@ jobs:
           path: cabin-week-google-play.7z
           retention-days: 7
 
+  publish:
+    name: Publish the Android APK
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: cabin-week-google-tv
+
       - name: Attach the app to the release "google-tv"
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view google-tv >/dev/null 2>&1 || gh release create google-tv --title "Android app" --latest=false \
+          gh release view google-tv --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create google-tv --repo "$GITHUB_REPOSITORY" --title "Android app" --latest=false \
             --notes "Cabin Week for Android (phone, tablet, Google TV). On the TV, install with the Downloader app: see docs/google-tv.md."
-          gh release upload google-tv cabin-week.apk --clobber
+          gh release upload google-tv cabin-week.apk --repo "$GITHUB_REPOSITORY" --clobber

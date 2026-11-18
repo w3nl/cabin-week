@@ -58,7 +58,7 @@ The workflow *Build the Android app* (`google-tv.yml`) builds **one Android app*
 
 **Install or update:** open Downloader, type the address above, choose **Go** and then **Install**.
 
-**Updating:** without a fixed key GitHub signs every version with a different key, so remove the old app first (your progress goes too). To install over the old one, make a fixed key once and store it as repository secrets.
+**Updating:** without a fixed key GitHub signs every version with a different key, so remove the old app first (your progress goes too). To install over the old one, [store a fixed key in the `android-release` environment](android-key.md#5-put-the-key-in-github).
 
 ### A fixed (upload) key
 
