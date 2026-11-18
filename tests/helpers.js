@@ -57,7 +57,12 @@ async function playDay(page) {
     expect(await page.evaluate(() => L.hasQuest)).toBe(true);
     await talk();
   } else if (info.task === 'levers' || info.task === 'lights') {
-    for (const s of info.switches) { await put(page, s.x + 5, s.y + 32); await page.keyboard.press('e'); await page.waitForTimeout(80); await skip(page); }
+    // An animal can bump you away before the key is handled (on a slow machine): try each lever again until it is on.
+    for (const [i, s] of info.switches.entries()) await expect.poll(async () => {
+      await skip(page); await put(page, s.x + 5, s.y + 32); await page.keyboard.press('e'); await page.waitForTimeout(120);
+      return page.evaluate(i => L.switches[i].on, i);
+    }, { timeout: 15000 }).toBe(true);
+    await skip(page);
   } else if (info.task === 'timer') {
     await put(page, info.bell.x + 5, info.bell.y + 32); await page.keyboard.press('e');
     await expect.poll(() => page.evaluate(() => L.gateOpen)).toBe(true);

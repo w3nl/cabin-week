@@ -125,6 +125,7 @@ const isTouch = matchMedia("(pointer: coarse)").matches;
    DIALOOG
    ===================================================================== */
 function say(name, lines, cb, calm) {
+  if (typeof lines === "string") lines = [lines]; // one text is one balloon, never one letter at a time
   dialog = { name, lines, i: 0, cb };
   $("dialog").classList.toggle("calm", !!calm);
   $("dName").textContent = name; $("dText").textContent = lines[0];

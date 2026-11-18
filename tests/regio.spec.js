@@ -262,3 +262,22 @@ test('Tirol: the cable car goes up the mountain on a slanted cable, and takes yo
   expect(end.on).toBe(true);
   expect(Math.abs(end.feet - end.top)).toBeLessThan(2);
 });
+
+test('every text balloon is a list of sentences, never one letter at a time', async ({ page }) => {
+  for (const lang of ['en', 'nl']) {
+    await seed(page, { unlocked: 8, lang });
+    const bad = await page.evaluate(() => {
+      const out = [], chk = (w, v) => { if (v != null && !(Array.isArray(v) && v.every(x => typeof x === 'string' && x.length > 1))) out.push(w); };
+      REGIONS.forEach(r => r.levels.forEach((l, i) => {
+        const w = `${r.id} ${i + 1}`;
+        chk(w + ' intro', l.intro);
+        (l.ents || []).forEach(e => {
+          if (e[0] === 'sign') chk(w + ' sign', e[3]);
+          if (e[0] === 'npc' && e[3]) { chk(w + ' npc', e[3].lines); for (const t of [e[3].quest, e[3].task]) if (t) ['need', 'done', 'after'].forEach(k => chk(`${w} ${k}`, t[k])); }
+        });
+      }));
+      return out;
+    });
+    expect(bad).toEqual([]);
+  }
+});
