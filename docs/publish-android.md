@@ -59,7 +59,7 @@ Full explanation: [android-key.md](android-key.md). In short:
 5. **Store listing:** **Grow users → Store presence → Main store listing**:
    - Name, short description and full description: copy from [play-store/README.md](play-store/README.md).
    - App icon: `icons/icon-512.png`. Feature graphic: `docs/play-store/feature-graphic.png`.
-   - Phone screenshots: the five `docs/play-store/screenshot-*.png`. The same five for tablet and Android TV, plus `docs/play-store/tv-banner.png` as TV banner.
+   - Phone screenshots: the eight `docs/play-store/screenshot-*.png`, in order. The same eight for tablet and Android TV, plus `docs/play-store/tv-banner.png` as TV banner.
    - **Save.** Then **Manage translations → Add translations → Dutch – nl-NL** and paste the Dutch texts.
 6. **Store settings:** **Grow users → Store presence → Store settings**: category **Adventure**, an email address, website `https://cabinweek.online/`.
 
