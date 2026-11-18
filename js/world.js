@@ -317,6 +317,140 @@ function getLayers(theme) {
   }
   return LAYERS[theme] = out;
 }
+/* ---------- Scenes of the other regions: North Pole, Tirol (Alps) and Norway (fjord) ---------- */
+function chaletShape(x, y, s, wall, roof) {
+  g.fillStyle = wall; g.fillRect(x, y - 22 * s, 30 * s, 22 * s);
+  g.fillStyle = "rgba(0,0,0,.18)"; for (let i = 1; i < 5; i++) g.fillRect(x, y - 22 * s + i * 4.4 * s, 30 * s, 1);
+  g.fillStyle = roof; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.fill();
+  g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 30 * s); g.fill();
+  g.fillStyle = "#ffd27a"; g.fillRect(x + 5 * s, y - 15 * s, 5 * s, 5 * s); g.fillRect(x + 20 * s, y - 15 * s, 5 * s, 5 * s);
+}
+function getSceneLayers(scene) {
+  if (LAYERS[scene]) return LAYERS[scene];
+  const R = rng({ pole: 9001, alps: 9002, fjord: 9003 }[scene] || 1), out = {};
+  if (scene === "pole") {
+    // ice floes and icebergs far away
+    out.far = layerCanvas(() => {
+      g.fillStyle = "#9fc2de"; g.fillRect(0, 300, LW, 200);
+      for (let x = 0; x < LW; x += 70 + R() * 90) {
+        const w = 50 + R() * 90, h = 30 + R() * 60, y = 304;
+        g.fillStyle = "#cfe4f5"; g.beginPath(); g.moveTo(x, y); g.lineTo(x + w * .2, y - h * .8); g.lineTo(x + w * .45, y - h); g.lineTo(x + w * .7, y - h * .6); g.lineTo(x + w, y); g.fill();
+        g.fillStyle = "#a9cbe6"; g.beginPath(); g.moveTo(x + w * .45, y - h); g.lineTo(x + w * .7, y - h * .6); g.lineTo(x + w, y); g.lineTo(x + w * .5, y); g.fill();
+      }
+      g.fillStyle = "rgba(255,255,255,.35)"; for (let x = 0; x < LW; x += 18) g.fillRect(x, 306 + R() * 20, 10, 1.5);
+    });
+    // Santa's village: red houses with snowy roofs, warm windows and candy-cane poles
+    out.mid = layerCanvas(() => {
+      const a = [[12, 3, 1], [6, 8, 2]];
+      fillRidge(338, a, "#dbe8f6", "#ffffff");
+      for (let x = 30; x < LW - 60; x += 64 + R() * 50) {
+        const y = ridge(338, a, x + 20) + 6, w = 34 + R() * 16, h = 22 + R() * 10;
+        g.fillStyle = ["#b8372f", "#a52f2a", "#2f6a4a"][Math.floor(R() * 3)]; g.fillRect(x, y - h, w, h);
+        g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 4, y - h); g.lineTo(x + w / 2, y - h - w * .42); g.lineTo(x + w + 4, y - h); g.fill();
+        g.fillStyle = "#ffd27a"; g.fillRect(x + 6, y - h + 7, 6, 6); g.fillRect(x + w - 12, y - h + 7, 6, 6);
+        if (R() < .4) { g.fillStyle = "#e9e3d6"; g.fillRect(x + w - 2, y + 2, 3, -38); for (let i = 0; i < 6; i++) { g.fillStyle = "#d33"; g.fillRect(x + w - 2, y - 36 + i * 6, 3, 3); } }
+      }
+      // the big tree in the middle of the village
+      pineShape(760, ridge(338, a, 760) + 8, 120, "#1f5a3a", "#174a2f", "#f4f8ff");
+      for (let i = 0; i < 16; i++) { g.fillStyle = i % 2 ? "#ffd25e" : "#ff6b6b"; g.beginPath(); g.arc(760 + (R() - .5) * 60 * (1 - i / 18), ridge(338, a, 760) - 10 - i * 6, 2, 0, 7); g.fill(); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[14, 4, 2], [8, 9, 4]];
+      fillRidge(386, a, "#e6effa", "#ffffff");
+      g.fillStyle = "#c9dbef"; for (let x = 0; x < LW; x += 30) { const y = ridge(386, a, x) + 16; g.beginPath(); g.ellipse(x, y, 22, 4, 0, 0, 7); g.fill(); }
+      for (let x = 0; x < LW; x += 60) { const r = R(), y = ridge(386, a, x) + 10; if (r < .45) continue; wrapAt(x, xx => pineShape(xx, y, 60 + r * 40, "#1f4152", "#173444", "#f4f8ff", "#0f2230")); }
+    });
+  } else if (scene === "alps") {
+    // high, sharp peaks with snow caps
+    out.far = layerCanvas(() => {
+      const pts = []; let x = -40; while (x < LW + 80) { pts.push([x, 120 + R() * 90]); x += 70 + R() * 90; pts.push([x, 230 + R() * 50]); x += 50 + R() * 60; }
+      g.fillStyle = "#5b6f9e"; g.beginPath(); g.moveTo(0, VIEW_H); pts.forEach(([px, py]) => g.lineTo(px, py)); g.lineTo(LW, VIEW_H); g.fill();
+      g.fillStyle = "#4b5d88"; for (let i = 0; i < pts.length - 1; i += 2) { const [x1, y1] = pts[i], [x2, y2] = pts[i + 1]; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.lineTo(x1 + 10, VIEW_H); g.fill(); }
+      g.fillStyle = "#eef4fc";
+      for (let i = 0; i < pts.length; i += 2) {
+        const [px, py] = pts[i], prev = pts[i - 1] || [px - 60, py + 90], next = pts[i + 1] || [px + 60, py + 90];
+        const k = .38; g.beginPath(); g.moveTo(px, py);
+        g.lineTo(px + (next[0] - px) * k, py + (next[1] - py) * k); g.lineTo(px + (next[0] - px) * k * .5, py + (next[1] - py) * k * .7);
+        g.lineTo(px, py + (next[1] - py) * k * .9); g.lineTo(px + (prev[0] - px) * k * .5, py + (prev[1] - py) * k * .7);
+        g.lineTo(px + (prev[0] - px) * k, py + (prev[1] - py) * k); g.fill();
+      }
+    });
+    // slopes with chalets, an onion-dome church and the cable car
+    out.mid = layerCanvas(() => {
+      const a = [[30, 2, 1], [14, 6, 3]];
+      fillRidge(330, a, "#c3d4ec", "#f2f7fd");
+      g.strokeStyle = "#2a2f3c"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(120, ridge(330, a, 120) - 10); g.lineTo(700, 150); g.stroke();
+      g.fillStyle = "#2a2f3c"; g.fillRect(118, ridge(330, a, 120) - 14, 4, 14); g.fillRect(698, 150, 4, 30);
+      [.35, .7].forEach(t => { const cx = 120 + (580 * t), cy = ridge(330, a, 120) - 10 + (150 - ridge(330, a, 120) + 10) * t; g.fillStyle = "#2a2f3c"; g.fillRect(cx - 1, cy, 2, 8); g.fillStyle = "#d8423a"; g.fillRect(cx - 9, cy + 8, 18, 13); g.fillStyle = "#ffe7a8"; g.fillRect(cx - 6, cy + 11, 12, 5); });
+      for (let x = 820; x < LW - 60; x += 46 + R() * 40) chaletShape(x, ridge(330, a, x + 15) + 6, .9 + R() * .3, "#8a5a34", "#4a2f22");
+      for (let x = 140; x < 600; x += 70 + R() * 50) chaletShape(x, ridge(330, a, x + 15) + 6, .8, "#9a6338", "#4a2f22");
+      const cx = 1250, cy = ridge(330, a, 1256) + 6;
+      g.fillStyle = "#f1ece0"; g.fillRect(cx, cy - 46, 12, 46); g.fillRect(cx + 12, cy - 22, 26, 22);
+      g.fillStyle = "#4a6a3a"; g.beginPath(); g.ellipse(cx + 6, cy - 52, 8, 9, 0, 0, 7); g.fill(); g.fillRect(cx + 5, cy - 66, 2, 8);
+      g.fillStyle = "#4a2f22"; g.beginPath(); g.moveTo(cx + 10, cy - 22); g.lineTo(cx + 25, cy - 32); g.lineTo(cx + 40, cy - 22); g.fill();
+      for (let x = 0; x < LW; x += 24) { if ((x > 100 && x < 620) || (x > 800 && x < 1320)) continue; const r = R(); if (r < .4) continue; wrapAt(x, xx => pineShape(xx, ridge(330, a, x) + 8, 30 + r * 26, "#2a4a5e", "#203a4c", "#e8f0fb")); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[14, 4, 3], [8, 10, 1]];
+      fillRidge(384, a, "#dfe9f7", "#ffffff");
+      for (let x = 0; x < LW; x += 38) { const r = R(), y = ridge(384, a, x) + 10; if (r < .3) continue; wrapAt(x, xx => pineShape(xx, y, 80 + r * 50, "#1f4152", "#173444", "#f4f8ff", "#0f2230")); }
+    });
+  } else if (scene === "fjord") {
+    // steep mountain walls on both sides of a calm fjord
+    out.far = layerCanvas(() => {
+      const a = [[60, 2, 2], [34, 5, 1], [12, 11, 3]];
+      fillRidge(250, a, "#2c3a5e");
+      g.fillStyle = "#dfe8f5"; g.beginPath();
+      for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(250, a, x));
+      for (let x = LW; x >= 0; x -= 6) { const y = ridge(250, a, x); g.lineTo(x, y + Math.max(3, (220 - y) * .5)); }
+      g.fill();
+      // the water: dark, with the reflection of the snowy tops
+      g.fillStyle = "#18264a"; g.fillRect(0, 330, LW, 200);
+      g.fillStyle = "rgba(200,220,255,.18)"; for (let x = 0; x < LW; x += 10) { const y = 2 * 330 - ridge(250, a, x); if (y > 332) g.fillRect(x, 332 + (y - 332) * .25, 8, 1.5); }
+      g.fillStyle = "rgba(255,255,255,.25)"; for (let x = 0; x < LW; x += 26) g.fillRect(x + R() * 10, 340 + R() * 50, 14, 1);
+    });
+    // red fishermen's cabins (rorbuer) on stilts along the shore, and little boats
+    out.mid = layerCanvas(() => {
+      const a = [[10, 3, 1], [6, 7, 2]];
+      fillRidge(352, a, "#cdd9ec", "#f4f8ff");
+      for (let x = 40; x < LW - 50; x += 80 + R() * 70) {
+        const y = 346, w = 34 + R() * 10;
+        g.fillStyle = "#3a2a22"; for (let i = 0; i < 4; i++) g.fillRect(x + 3 + i * (w - 6) / 3, y - 2, 2, 14);
+        g.fillStyle = "#b2322a"; g.fillRect(x, y - 24, w, 22);
+        g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 4, y - 24); g.lineTo(x + w / 2, y - 40); g.lineTo(x + w + 4, y - 24); g.fill();
+        g.fillStyle = "#ffd27a"; g.fillRect(x + 6, y - 17, 6, 6); g.fillRect(x + w - 12, y - 17, 6, 6);
+        if (R() < .5) { const bx = x + w + 14; g.fillStyle = "#e9e3d6"; g.beginPath(); g.moveTo(bx, 356); g.lineTo(bx + 30, 356); g.lineTo(bx + 24, 364); g.lineTo(bx + 6, 364); g.fill(); g.fillStyle = "#3a2a22"; g.fillRect(bx + 14, 330, 2, 26); }
+      }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[14, 4, 3], [8, 10, 1]];
+      fillRidge(384, a, "#dfe9f7", "#ffffff");
+      for (let x = 0; x < LW; x += 36) { const r = R(), y = ridge(384, a, x) + 10; if (r < .25) continue; wrapAt(x, xx => pineShape(xx, y, 80 + r * 60, "#1a3a3a", "#132e2e", "#f4f8ff", "#0b1c1c")); }
+    });
+  }
+  return LAYERS[scene] = out;
+}
+/** Northern lights: a few slow, wavy green and purple curtains (cheap: three paths per frame). */
+function drawAurora(strength) {
+  const cols = [["rgba(90,255,170,", 150], ["rgba(120,230,255,", 110], ["rgba(190,120,255,", 80]];
+  for (let k = 0; k < 3; k++) {
+    const [c, base] = cols[k], amp = 26 + k * 8;
+    g.fillStyle = grad("aurora" + k, () => { const gr = g.createLinearGradient(0, base - 70, 0, base + 60); gr.addColorStop(0, c + "0)"); gr.addColorStop(.55, c + (.38 * strength).toFixed(2) + ")"); gr.addColorStop(1, c + "0)"); return gr; });
+    g.beginPath(); g.moveTo(0, base + 60);
+    for (let x = 0; x <= viewW + 24; x += 24) g.lineTo(x, base - 50 + Math.sin(x * .006 + frame * .008 + k * 2) * amp + Math.sin(x * .017 - frame * .011) * 10);
+    g.lineTo(viewW + 24, base + 60); g.fill();
+  }
+}
+function drawSceneSky(scene) {
+  const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"] }[scene];
+  g.fillStyle = grad("sky-" + scene, () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, skies[0]); gr.addColorStop(.62, skies[1]); gr.addColorStop(1, skies[2]); return gr; });
+  g.fillRect(0, 0, viewW, VIEW_H);
+  g.fillStyle = "#fff";
+  for (let i = 0; i < 70; i++) { g.globalAlpha = (.3 + .6 * Math.abs(Math.sin(frame / (30 + i % 13) + i))) * (scene === "alps" ? .5 : 1); g.fillRect(((hash(i * 3) * 3000) % viewW + viewW) % viewW, hash(i * 7) * 220, 2, 2); }
+  g.globalAlpha = 1;
+  if (scene !== "alps") drawAurora(scene === "fjord" ? 1 : .8);
+}
+
 /** De rijen van een laag waar iets op staat (de rest is doorzichtig), met 2 lege rijen marge zodat de randen precies hetzelfde blijven. */
 function layerBand(cnv) {
   if (cnv._band) return cnv._band;
@@ -451,6 +585,15 @@ function grad(key, make) {
   return GRADS[key] || (GRADS[key] = make());
 }
 function drawBackground(theme, camX) {
+  const scene = arguments.length > 2 ? arguments[2] : L && L.d.scene;
+  if (scene === "pole" || scene === "alps" || scene === "fjord") {
+    const Ls = getSceneLayers(scene);
+    drawSceneSky(scene);
+    drawLayer(Ls.far, camX * .15);
+    drawLayer(Ls.mid, camX * .3);
+    drawLayer(Ls.near, camX * .5);
+    return;
+  }
   if (theme === "huis") {
     if (!L.interior) L.interior = buildInterior();
     const sx = Math.max(0, camX), w = Math.min(viewW, L.interior.width - sx);
@@ -569,7 +712,81 @@ function drawDeco(kind, x, theme) {
   const by = groundTop(x) * TS, px = x * TS;
   g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const H = hash(x * 5.3);
-  if (kind === "tree") {
+  if (kind === "candycane") {
+    // a candy-cane pole, red and white
+    g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(px + 16, by); g.lineTo(px + 16, by - 64); g.arc(px + 26, by - 64, 10, Math.PI, 0); g.stroke();
+    g.lineWidth = 6; g.strokeStyle = "#f8f4ec"; g.stroke();
+    g.strokeStyle = "#d8232a"; g.lineWidth = 6; g.setLineDash([6, 6]); g.stroke(); g.setLineDash([]);
+    g.lineWidth = 2; g.strokeStyle = OUT;
+  } else if (kind === "presents") {
+    shadowAt(px + 22, by, 26);
+    [[0, 22, 20, "#d8232a", "#ffd25e"], [24, 18, 16, "#2a9a4a", "#ffffff"], [8, 14, 14, "#1e5aa8", "#ff9b45"]].forEach(([dx, w, h, c, rib], i) => {
+      const yy = by - h - (i === 2 ? 20 : 0);
+      g.fillStyle = c; g.fillRect(px + dx, yy, w, h); g.strokeRect(px + dx, yy, w, h);
+      g.fillStyle = rib; g.fillRect(px + dx + w / 2 - 2, yy, 4, h); g.fillRect(px + dx, yy + h / 2 - 2, w, 4);
+      g.beginPath(); g.ellipse(px + dx + w / 2 - 4, yy - 2, 4, 2.5, -.4, 0, 7); g.ellipse(px + dx + w / 2 + 4, yy - 2, 4, 2.5, .4, 0, 7); g.fill();
+    });
+  } else if (kind === "igloo") {
+    shadowAt(px + 30, by, 40);
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.arc(px + 30, by, 38, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = "#b9cde6"; g.lineWidth = 1.5;
+    for (let r = 1; r < 4; r++) { const yy = by - r * 10; const hw = Math.sqrt(38 * 38 - (r * 10) ** 2); g.beginPath(); g.moveTo(px + 30 - hw, yy); g.lineTo(px + 30 + hw, yy); g.stroke(); }
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#24324a"; g.beginPath(); g.arc(px + 52, by, 12, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "rgba(255,210,120,.5)"; g.beginPath(); g.arc(px + 52, by, 8, Math.PI, 0); g.fill();
+  } else if (kind === "sleigh") {
+    shadowAt(px + 30, by, 40);
+    g.strokeStyle = "#e8c45a"; g.lineWidth = 3; g.beginPath(); g.moveTo(px - 4, by - 3); g.lineTo(px + 58, by - 3); g.quadraticCurveTo(px + 70, by - 3, px + 66, by - 14); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#b8232a"; g.beginPath(); g.moveTo(px, by - 10); g.lineTo(px + 52, by - 10); g.quadraticCurveTo(px + 62, by - 22, px + 56, by - 38); g.lineTo(px + 44, by - 30); g.lineTo(px + 8, by - 30); g.quadraticCurveTo(px - 4, by - 40, px, by - 10); g.fill(); g.stroke();
+    g.fillStyle = "#e8c45a"; g.fillRect(px + 6, by - 22, 42, 3);
+    [["#2a9a4a", 10], ["#1e5aa8", 24], ["#ffd25e", 36]].forEach(([c, dx]) => { g.fillStyle = c; g.fillRect(px + dx, by - 42, 12, 12); g.strokeRect(px + dx, by - 42, 12, 12); });
+  } else if (kind === "chalet") {
+    // an Alpine chalet: wooden walls, a wide snowy roof and a balcony
+    shadowAt(px + 50, by, 60);
+    g.fillStyle = "#f1ece0"; g.fillRect(px, by - 44, 100, 44); g.strokeRect(px, by - 44, 100, 44);
+    g.fillStyle = "#8a5a34"; g.fillRect(px, by - 96, 100, 52); g.strokeRect(px, by - 96, 100, 52);
+    g.fillStyle = "#6e4426"; for (let yy = by - 90; yy < by - 44; yy += 8) g.fillRect(px, yy, 100, 1.5);
+    g.fillStyle = "#4a2f22"; g.beginPath(); g.moveTo(px - 16, by - 92); g.lineTo(px + 50, by - 132); g.lineTo(px + 116, by - 92); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(px - 16, by - 92); g.lineTo(px + 50, by - 132); g.lineTo(px + 116, by - 92); g.lineTo(px + 106, by - 96); g.lineTo(px + 50, by - 126); g.lineTo(px - 6, by - 96); g.closePath(); g.fill();
+    g.fillStyle = "#5a3a22"; g.fillRect(px - 4, by - 58, 108, 5); for (let xx = px; xx < px + 100; xx += 8) g.fillRect(xx, by - 70, 3, 12); g.fillRect(px - 4, by - 72, 108, 3);
+    g.fillStyle = "#d8423a"; for (let xx = px + 6; xx < px + 96; xx += 14) { g.beginPath(); g.arc(xx, by - 74, 3, 0, 7); g.fill(); }
+    [[px + 12, by - 36], [px + 70, by - 36], [px + 20, by - 88], [px + 62, by - 88]].forEach(([wx, wy]) => { g.fillStyle = "#ffd88a"; g.fillRect(wx, wy, 18, 14); g.strokeRect(wx, wy, 18, 14); g.fillStyle = "#3a5a2a"; g.fillRect(wx - 5, wy, 4, 14); g.fillRect(wx + 19, wy, 4, 14); });
+    g.fillStyle = "#6e4426"; g.fillRect(px + 40, by - 30, 18, 30); g.strokeRect(px + 40, by - 30, 18, 30);
+  } else if (kind === "skis") {
+    // skis and poles stuck in the snow
+    [[0, "#d8423a"], [9, "#1e5aa8"]].forEach(([dx, c]) => { g.fillStyle = c; g.save(); g.translate(px + 12 + dx, by); g.rotate(-.08 + dx * .012); g.beginPath(); rp(-3, -62, 6, 62, 3); g.fill(); g.stroke(); g.restore(); });
+    g.strokeStyle = "#3a3f4b"; g.lineWidth = 2; [[30, .12], [36, .2]].forEach(([dx, a]) => { g.beginPath(); g.moveTo(px + dx, by); g.lineTo(px + dx + Math.sin(a) * 56, by - 56); g.stroke(); });
+    g.strokeStyle = OUT; g.fillStyle = "#f4f8ff"; g.beginPath(); g.ellipse(px + 22, by - 2, 22, 4, 0, 0, 7); g.fill();
+  } else if (kind === "rorbu") {
+    // a red Norwegian cabin with a turf roof under the snow
+    shadowAt(px + 44, by, 52);
+    g.fillStyle = "#b2322a"; g.fillRect(px, by - 54, 88, 54); g.strokeRect(px, by - 54, 88, 54);
+    g.fillStyle = "#952820"; for (let xx = px + 6; xx < px + 88; xx += 8) g.fillRect(xx, by - 54, 1.5, 54);
+    g.fillStyle = "#4a3a2a"; g.beginPath(); g.moveTo(px - 10, by - 50); g.lineTo(px + 44, by - 82); g.lineTo(px + 98, by - 50); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(px - 10, by - 50); g.lineTo(px + 44, by - 82); g.lineTo(px + 98, by - 50); g.lineTo(px + 90, by - 54); g.lineTo(px + 44, by - 76); g.lineTo(px - 2, by - 54); g.closePath(); g.fill();
+    [[px + 10, by - 40], [px + 62, by - 40]].forEach(([wx, wy]) => { g.fillStyle = "#f8f4ec"; g.fillRect(wx - 2, wy - 2, 20, 18); g.fillStyle = "#ffd27a"; g.fillRect(wx, wy, 16, 14); g.strokeRect(wx, wy, 16, 14); g.fillStyle = "#f8f4ec"; g.fillRect(wx + 7, wy, 2, 14); g.fillRect(wx, wy + 6, 16, 2); });
+    g.fillStyle = "#f8f4ec"; g.fillRect(px + 34, by - 32, 20, 32); g.fillStyle = "#3a5a7a"; g.fillRect(px + 36, by - 30, 16, 30); g.strokeRect(px + 34, by - 32, 20, 32);
+    g.fillStyle = "#ffe08a"; star(px + 44, by - 62, 6);
+  } else if (kind === "kicksled") {
+    // a Norwegian kicksled: a little chair on long runners
+    g.strokeStyle = "#3a3f4b"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px - 6, by - 2); g.lineTo(px + 52, by - 2); g.quadraticCurveTo(px + 60, by - 2, px + 58, by - 8); g.stroke();
+    g.beginPath(); g.moveTo(px + 6, by - 2); g.lineTo(px + 6, by - 46); g.lineTo(px + 14, by - 52); g.moveTo(px + 30, by - 2); g.lineTo(px + 30, by - 20); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2; g.fillStyle = "#b2322a"; g.fillRect(px + 6, by - 24, 26, 5); g.strokeRect(px + 6, by - 24, 26, 5); g.fillRect(px + 6, by - 40, 5, 18); g.strokeRect(px + 6, by - 40, 5, 18);
+  } else if (kind === "stave") {
+    // a stave church: dark wood, stacked roofs and dragon heads
+    const w = 120, top = by - 120;
+    shadowAt(px + w / 2, by, 70);
+    g.fillStyle = "#4a3020"; g.fillRect(px, top + 40, w, 80); g.strokeRect(px, top + 40, w, 80);
+    g.fillStyle = "#3a2418"; for (let xx = px + 6; xx < px + w; xx += 9) g.fillRect(xx, top + 40, 2, 80);
+    [[0, 40, 1], [16, 10, .75], [34, -18, .45]].forEach(([inset, y, s]) => {
+      g.fillStyle = "#2e1e14"; g.beginPath(); g.moveTo(px + inset - 10, top + y + 6); g.lineTo(px + w / 2, top + y - 34 * s); g.lineTo(px + w - inset + 10, top + y + 6); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(px + inset - 10, top + y + 6); g.lineTo(px + w / 2, top + y - 34 * s); g.lineTo(px + w - inset + 10, top + y + 6); g.lineTo(px + w / 2, top + y - 26 * s); g.closePath(); g.fill();
+    });
+    g.strokeStyle = "#2e1e14"; g.lineWidth = 3; [[px + 24, top + 2, -1], [px + w - 24, top + 2, 1]].forEach(([dx, dy, d]) => { g.beginPath(); g.moveTo(dx, dy + 10); g.quadraticCurveTo(dx + d * 6, dy - 4, dx + d * 14, dy - 2); g.stroke(); });
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#ffd88a"; g.beginPath(); rp(px + w / 2 - 12, by - 40, 24, 40, 10); g.fill(); g.stroke();
+  } else if (kind === "tree") {
     shadowAt(px + 16, by, 26);
     g.fillStyle = "#4a2e18"; g.beginPath(); g.moveTo(px + 9, by); g.lineTo(px + 13, by - 70); g.lineTo(px + 20, by - 70); g.lineTo(px + 24, by); g.closePath(); g.fill(); g.stroke();
     g.fillStyle = "#6b4426"; g.fillRect(px + 15, by - 60, 3, 56);
@@ -595,7 +812,7 @@ function drawDeco(kind, x, theme) {
     g.save(); g.translate(px + 92, by - 6); g.scale(.22, .22); drawSaab("900", -72, 0, { tree: false, color: "#d8232a" }); g.restore();
   } else if (kind === "stall") {
     // kerstmarktkraam
-    const names = ["Glühwein", "Wafels", "Frieten", "Kerstballen", "Chocolade", "Krakelingen"], name = names[Math.floor(H * names.length)];
+    const names = T(["Mulled wine", "Waffles", "Chips", "Baubles", "Chocolate", "Pretzels"], ["Glühwein", "Wafels", "Frieten", "Kerstballen", "Chocolade", "Krakelingen"]), name = names[Math.floor(H * names.length)];
     shadowAt(px + 48, by, 50);
     g.fillStyle = "#7a4a26"; g.fillRect(px, by - 70, 96, 70); g.strokeRect(px, by - 70, 96, 70);
     g.fillStyle = "#6b3f20"; for (let x = px + 8; x < px + 96; x += 12) g.fillRect(x, by - 70, 2, 70);
@@ -954,18 +1171,21 @@ function drawSign(s) {
   g.fillStyle = "#e0e0d8"; g.fillRect(s.x, s.y - 15, 2, 2); g.fillRect(s.x + 30, s.y - 15, 2, 2);
   if (L.d.theme === "sneeuw" || L.d.theme === "stad") { g.fillStyle = "#f4f8ff"; g.beginPath(); rp(s.x - 4, s.y - 22, 40, 6, 3); g.fill(); }
 }
+/** Checkpoint flags: white until you pass, then the flag of the region (Belgium, Austria, Norway, or a North Pole flag). */
+const FLAGS = {
+  ardennes: [3, (i, r) => ["#1d1d1d", "#fdda24", "#ef3340"][fl(i / 4)]],
+  tirol: [3, (i, r) => r === 1 ? "#ffffff" : "#c8102e"],
+  norway: [7, (i, r) => { const v = i === 4 || r === 3, w = i >= 3 && i <= 5 || r >= 2 && r <= 4; return v ? "#00205b" : w ? "#ffffff" : "#ba0c2f"; }],
+  pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]]
+};
 function drawCheck(c) {
   g.strokeStyle = OUT; g.lineWidth = 1.5;
   g.fillStyle = "#d8d8d8"; g.fillRect(c.x + 13, c.y - 30, 4, TS + 30); g.strokeRect(c.x + 13, c.y - 30, 4, TS + 30);
   g.fillStyle = "#ffd25e"; g.beginPath(); g.arc(c.x + 15, c.y - 32, 3.5, 0, 7); g.fill(); g.stroke();
-  const cols = c.on ? ["#ae1c28", "#ffffff", "#21468b"] : ["#1d1d1d", "#fdda24", "#ef3340"];
+  const [rows, col] = FLAGS[REGION.id] || FLAGS.ardennes, h = 18 / rows;
   for (let i = 0; i < 12; i++) {
     const wav = Math.sin(frame / 8 - i * .5) * (1 + i * .25);
-    for (let b = 0; b < 3; b++) {
-      g.fillStyle = c.on ? cols[b] : cols[b];
-      if (c.on) g.fillRect(c.x + 17 + i * 2, c.y - 28 + b * 6 + wav, 2.2, 6);
-      else if (b === 0) { for (let k = 0; k < 3; k++) { g.fillStyle = cols[fl(i / 4)]; g.fillRect(c.x + 17 + i * 2, c.y - 28 + k * 6 + wav, 2.2, 6); } }
-    }
+    for (let r = 0; r < rows; r++) { g.fillStyle = c.on ? col(i, r) : r % 2 ? "#b9c6d6" : "#d6dee8"; g.fillRect(c.x + 17 + i * 2, c.y - 28 + r * h + wav, 2.2, h + .3); }
   }
 }
 function drawPad() {
@@ -1040,8 +1260,8 @@ function render() {
   g.setTransform(scale, 0, 0, scale, 0, 0);
   g.imageSmoothingEnabled = true;
 
-  if (!L || state === "title") {
-    drawBackground("sneeuw", frame * .6);
+  if (!L || state === "title" || state === "map") {
+    drawBackground("sneeuw", frame * .6, REGION.scene);
     drawFlakes(); vignette();
     return;
   }

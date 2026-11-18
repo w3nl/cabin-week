@@ -9,9 +9,9 @@ test('er is voor elke dag van de week een level, op volgorde', async ({ page }) 
   expect(labels.map(l => l.split(' · ').slice(0, 2).join(' · '))).toEqual(DAYS);
 });
 
-DAYS.forEach((day, i) => {
-  test(`${day}: alles is bereikbaar en de dag is uit te spelen`, async ({ page }) => {
-    await seed(page, { unlocked: 8 });
+for (const region of ['ardennes', 'pole', 'tirol', 'norway']) DAYS.forEach((day, i) => {
+  test(`${region}, ${day}: alles is bereikbaar en de dag is uit te spelen`, async ({ page }) => {
+    await seed(page, { unlocked: 8, region });
     await startDay(page, i);
     await expect(page.locator('#hLvl')).toContainText(day);
     // Elke sleutel, het opdrachtvoorwerp en de uitgang zijn te bereiken met de sprongen die het poppetje echt kan maken.
@@ -40,7 +40,7 @@ DAYS.forEach((day, i) => {
     });
     expect(bad).toEqual([]);
     await playDay(page);
-    await expect(page.locator('#card')).toContainText(i === DAYS.length - 1 ? 'What a week' : DAYS[i + 1].split(' · ')[1]);
+    await expect(page.locator('#card')).toContainText(i === DAYS.length - 1 ? 'All 8 days done' : DAYS[i + 1].split(' · ')[1]);
   });
 });
 

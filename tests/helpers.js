@@ -3,14 +3,16 @@ const { expect } = require('@playwright/test');
 
 const KEY = 'cabin-week';
 
-/** Start with a clean browser, optionally with unlocked days, a chosen character and a language (en by default). */
-async function seed(page, { unlocked = 1, char = 0, lang = 'en' } = {}) {
+/** Start with a clean browser, optionally with unlocked days, a chosen character, a language (en by default) and a region. */
+async function seed(page, { unlocked = 1, char = 0, lang = 'en', region = 'ardennes' } = {}) {
   await page.goto('/?lang=' + lang);
-  await page.evaluate(([KEY, unlocked, char, lang]) => {
+  await page.evaluate(([KEY, unlocked, char, lang, region]) => {
     localStorage.clear();
     localStorage.setItem('cabin-week-lang', lang);
-    localStorage.setItem(KEY, JSON.stringify({ unlocked, char, best: {} }));
-  }, [KEY, unlocked, char, lang]);
+    const save = { unlocked, char, best: {} };
+    if (region !== 'ardennes') Object.assign(save, { unlocked: 1, region, regions: { [region]: { unlocked, best: {} } } });
+    localStorage.setItem(KEY, JSON.stringify(save));
+  }, [KEY, unlocked, char, lang, region]);
   await page.reload();
   await expect(page.locator('html')).toHaveClass(/ready/);
 }
