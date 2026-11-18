@@ -31,12 +31,14 @@ function buildLevel(idx) {
     if (type === "coin" || type === "key" || type === "heart" || type === "quest") {
       lv.items.push({ type, x: px, y: py, w: TS, h: TS, taken: false });
       if (type === "coin") lv.coinTotal++;
-    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3, marmot: -1.2, speelgoed: -.9, pakje: -1.1, poolvos: -1.5, lemming: -1.7 }[d.enemy] || -1, dead: 0 });
+    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3, marmot: -1.2, speelgoed: -.9, pakje: -1.1, poolvos: -1.5, lemming: -1.7, mygga: -1.3, bever: -1 }[d.enemy] || -1, dead: 0 });
     else if (type === "npc") lv.npcs.push({ x: px + 5, y: py, who: others[(idx * 3 + npcN++) % others.length], ...extra, talked: false });
     else if (type === "sign") lv.signs.push({ x: px, y: py, lines: extra });
     else if (type === "check") lv.checks.push({ x: px, y: py, on: false });
     else if (type === "exit") lv.exit = { x: px, y: py - TS, w: TS, h: TS * 2 };
     else if (type === "lantern") lv.lantern = { x: px, y: py, lit: false };
+    // A moose (Småland): too big to knock over, but you can bounce high off its back
+    else if (type === "moose") lv.enemies.push({ kind: "alg", x: px, y: py + TS - 50, w: 56, h: 50, vx: -.5, dead: 0 });
     // The gate halfway: levers or lamps to switch on, a bell that opens the gate for a moment, or an animal that follows you.
     else if (type === "switch") lv.switches.push({ x: px, y: py, i: extra.i, on: false });
     else if (type === "bell") lv.bell = { x: px, y: py, swing: 0 };
@@ -397,15 +399,22 @@ function step() {
     const ftx = Math.floor(front / TS), fty = Math.floor((e.y + e.h - 1) / TS);
     const below = cell(ftx, fty + 1);
     if (isSolid(ftx, fty) || !(isSolid(ftx, fty + 1) || below === "=")) e.vx = -e.vx; else e.x = nx;
+    if (overlap(P, e) && e.kind === "alg") {
+      // the moose: land on its back and you fly up high; bump into it and it gently pushes you away
+      if (P.vy > 0 && prevBottom <= e.y + 16) { P.y = e.y - P.h; P.vy = -15.5; P.slide = 0; tone(220, .18, "triangle", .06); tone(330, .2, "triangle", .04); pop(e.x + e.w / 2, e.y - 14, T("Boing!", "Boing!"), "#fff"); }
+      else { const left = P.x + P.w / 2 < e.x + e.w / 2; P.vx = left ? -5 : 5; P.x = left ? Math.min(P.x, e.x - P.w) : Math.max(P.x, e.x + e.w); P.slide = 0;
+        if (!e.said || L.time - e.said > 120) { e.said = L.time; pop(e.x + e.w / 2, e.y - 14, T("Mmmooh?", "Mmmoeh?"), "#fff"); } }
+      continue;
+    }
     if (overlap(P, e)) {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
         e.dead = 1; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!") }[e.kind], "#fff");
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
         e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!") }[e.kind], "#fff");
-      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!") }[e.kind]);
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
+      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!"), mygga: T("Itchy!", "Jeuk!"), bever: T("Gnaw!", "Knaag!") }[e.kind]);
     }
   }
   L.enemies = L.enemies.filter(e => e.dead < 30);

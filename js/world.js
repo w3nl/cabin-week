@@ -371,7 +371,7 @@ function chaletShape(x, y, s, wall, roof) {
   g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 30 * s); g.fill();
   g.fillStyle = "#ffd27a"; g.fillRect(x + 5 * s, y - 15 * s, 5 * s, 5 * s); g.fillRect(x + 20 * s, y - 15 * s, 5 * s, 5 * s);
 }
-const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls"]);
+const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls", "smaland"]);
 /** A small windmill in the background (sails do not turn there: the layer is drawn once). */
 function farMill(x, y, s, body, sail) {
   g.fillStyle = body; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x - 3 * s, y - 26 * s); g.lineTo(x + 3 * s, y - 26 * s); g.lineTo(x + 6 * s, y); g.fill();
@@ -380,7 +380,7 @@ function farMill(x, y, s, body, sail) {
 }
 function getSceneLayers(scene) {
   if (LAYERS[scene]) return LAYERS[scene];
-  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009 }[scene] || 1), out = {};
+  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009, smaland: 9010 }[scene] || 1), out = {};
   if (scene === "pole") {
     // ice floes and icebergs far away
     out.far = layerCanvas(() => {
@@ -557,6 +557,41 @@ function getSceneLayers(scene) {
       for (let x = 0; x < LW; x += 70) { const r = R(), y = ridge(386, a, x) + 10; if (r < .5) continue; wrapAt(x, xx => pineShape(xx, y, 70 + r * 50, "#2d5a3a", "#21482c", "#f4f8ff", "#173220")); }
     });
   }
+  else if (scene === "smaland") {
+    // Småland in summer: a blue lake, endless forest of pines and birches, red cottages with white corners
+    out.far = layerCanvas(() => {
+      fillRidge(262, [[44, 2, 1], [20, 6, 3], [9, 12, 2]], "#5a7a6a");
+      g.fillStyle = "#2a6a9a"; g.fillRect(0, 300, LW, 200);
+      g.fillStyle = "rgba(255,255,255,.45)"; for (let x = 0; x < LW; x += 18) g.fillRect(x + R() * 10, 304 + R() * 30, 10, 1.5);
+      // the far shore: a dark line of spruce
+      for (let x = 0; x < LW; x += 9) { const h = 14 + R() * 18; g.fillStyle = "#2a4a3a"; g.beginPath(); g.moveTo(x - 5, 300); g.lineTo(x, 300 - h); g.lineTo(x + 5, 300); g.fill(); }
+    });
+    out.mid = layerCanvas(() => {
+      const a = [[12, 3, 1], [6, 8, 2]];
+      fillRidge(338, a, "#5a9a4a", "#7ab85a");
+      for (let x = 20; x < LW; x += 40 + R() * 46) {
+        const y = ridge(338, a, x) + 6, r = R();
+        if (r < .3) {
+          // a red cottage with white corners and a white door
+          const w = 34 + R() * 12, h = 22 + R() * 6;
+          g.fillStyle = "#a8322a"; g.fillRect(x, y - h, w, h);
+          g.fillStyle = "#f4f1ea"; g.fillRect(x, y - h, 3, h); g.fillRect(x + w - 3, y - h, 3, h); g.fillRect(x + 6, y - h + 6, 6, 6); g.fillRect(x + w - 12, y - h + 6, 6, 6); g.fillRect(x + w / 2 - 3, y - 12, 6, 12);
+          g.fillStyle = "#3a3a3a"; g.beginPath(); g.moveTo(x - 4, y - h); g.lineTo(x + w / 2, y - h - 14); g.lineTo(x + w + 4, y - h); g.fill();
+        } else if (r < .7) { pineShape(x, y + 4, 50 + R() * 40, "#2a5a3a", "#21482c", null, "#173220"); }
+        else {
+          // a birch: white trunk with black marks
+          g.fillStyle = "#f4f1ea"; g.fillRect(x - 2, y - 46, 4, 46); g.fillStyle = "#2a2a2a"; for (let i = 0; i < 5; i++) g.fillRect(x - 2, y - 40 + i * 8, 2 + (i % 2) * 2, 1.5);
+          g.fillStyle = "#6aa84a"; g.beginPath(); g.ellipse(x, y - 52, 13, 18, 0, 0, 7); g.fill(); g.fillStyle = "#8ac85a"; g.beginPath(); g.ellipse(x - 3, y - 56, 7, 10, 0, 0, 7); g.fill();
+        }
+      }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[10, 4, 2], [6, 9, 1]];
+      fillRidge(392, a, "#6aa84a", "#8ac85a");
+      for (let x = 0; x < LW; x += 7) { const y = ridge(392, a, x) + 4; g.strokeStyle = "#4a8a3a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 2, y - 5 - R() * 7); g.stroke();
+        if (R() < .12) { g.fillStyle = ["#f5d23a", "#f4f4f0", "#9a5ad8", "#e8423a"][Math.floor(R() * 4)]; g.beginPath(); g.arc(x + 2, y - 8, 2, 0, 7); g.fill(); } }
+    });
+  }
   else if (scene === "adriatic") {
     // the summer sea with islands, the grey coastal mountains behind (like the Velebit and the Biokovo)
     out.far = layerCanvas(() => {
@@ -640,11 +675,11 @@ function drawAurora(strength) {
 function drawSceneSky(scene) {
   const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"],
     polder: ["#4a6488", "#8ea6c4", "#d8c8b8"], grachten: ["#0a1430", "#2a3466", "#6a5a82"], duinen: ["#5a7ca8", "#a8c4dc", "#f0dcc0"],
-    adriatic: ["#2a7ad8", "#7ac0f0", "#d8f0fa"], oldtown: ["#3a7ad0", "#f0b878", "#f8d8a8"], falls: ["#3a8ad8", "#9ad0f0", "#e0f4f8"] }[scene];
+    adriatic: ["#2a7ad8", "#7ac0f0", "#d8f0fa"], smaland: ["#3a7ad8", "#9ad0f0", "#eef8f4"], oldtown: ["#3a7ad0", "#f0b878", "#f8d8a8"], falls: ["#3a8ad8", "#9ad0f0", "#e0f4f8"] }[scene];
   g.fillStyle = grad("sky-" + scene, () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, skies[0]); gr.addColorStop(.62, skies[1]); gr.addColorStop(1, skies[2]); return gr; });
   g.fillRect(0, 0, viewW, VIEW_H);
   g.fillStyle = "#fff";
-  if (scene === "adriatic" || scene === "oldtown" || scene === "falls") {
+  if (scene === "adriatic" || scene === "oldtown" || scene === "falls" || scene === "smaland") {
     // summer: a big warm sun, no stars
     const sx = viewW * (scene === "oldtown" ? .78 : .2), sy = scene === "oldtown" ? 150 : 80;
     g.fillStyle = grad("sun-" + scene, () => { const sg = g.createRadialGradient(sx, sy, 10, sx, sy, 160); sg.addColorStop(0, "rgba(255,250,210,1)"); sg.addColorStop(.25, "rgba(255,236,160,.7)"); sg.addColorStop(1, "rgba(255,236,160,0)"); return sg; });
@@ -1237,6 +1272,74 @@ function drawDeco(kind, x, theme) {
   } else if (kind === "pine") {
     shadowAt(px + 16, by, 22);
     pineShape(px + 16, by, 110 + H * 30, "#24543f", "#1b4332", theme === "sneeuw" ? "#f4f8ff" : null, OUT);
+  } else if (kind === "redhouse") {
+    // a Falu-red cottage with white corners, white windows and a small Swedish flag
+    shadowAt(px + 40, by, 46);
+    g.fillStyle = "#a8322a"; g.fillRect(px, by - 54, 80, 54); g.strokeRect(px, by - 54, 80, 54);
+    g.fillStyle = "#93291f"; for (let i = 1; i < 8; i++) g.fillRect(px + i * 10, by - 54, 1.5, 54);
+    g.fillStyle = "#f4f1ea"; g.fillRect(px, by - 54, 5, 54); g.fillRect(px + 75, by - 54, 5, 54);
+    g.fillStyle = "#3a3a40"; g.beginPath(); g.moveTo(px - 8, by - 54); g.lineTo(px + 40, by - 82); g.lineTo(px + 88, by - 54); g.closePath(); g.fill(); g.stroke();
+    [[12], [56]].forEach(([dx]) => { g.fillStyle = "#f4f1ea"; g.fillRect(px + dx - 2, by - 44, 16, 18); g.fillStyle = "#9ad0f0"; g.fillRect(px + dx, by - 42, 5, 6); g.fillRect(px + dx + 7, by - 42, 5, 6); g.fillRect(px + dx, by - 34, 5, 6); g.fillRect(px + dx + 7, by - 34, 5, 6); });
+    g.fillStyle = "#f4f1ea"; g.fillRect(px + 33, by - 28, 14, 28); g.strokeRect(px + 33, by - 28, 14, 28);
+    g.fillStyle = "#e8e4dc"; g.fillRect(px + 92, by - 76, 2.5, 76);
+    const w = Math.sin(frame / 10) * 1.5; g.fillStyle = "#006aa7"; g.fillRect(px + 94, by - 76 + w, 16, 10); g.fillStyle = "#fecc02"; g.fillRect(px + 99, by - 76 + w, 3, 10); g.fillRect(px + 94, by - 72.5 + w, 16, 3);
+  } else if (kind === "birch") {
+    // a birch: white trunk with black marks, bright green leaves
+    g.fillStyle = "#f4f1ea"; g.fillRect(px + 14, by - 96, 7, 96); g.strokeRect(px + 14, by - 96, 7, 96);
+    g.fillStyle = "#2a2a2a"; for (let i = 0; i < 9; i++) g.fillRect(px + 14 + (i % 2) * 2, by - 88 + i * 10, 3 + (i % 3), 2);
+    [[17, -112, 22, 26, "#5a9a3a"], [6, -100, 14, 16, "#6aa84a"], [30, -98, 14, 16, "#6aa84a"], [17, -122, 14, 14, "#8ac85a"]].forEach(([dx, dy, rx, ry, c]) => { g.fillStyle = c; g.beginPath(); g.ellipse(px + dx, by + dy, rx, ry, 0, 0, 7); g.fill(); });
+  } else if (kind === "dalahorse") {
+    // a big red Dala horse with its painted harness
+    shadowAt(px + 20, by, 22);
+    g.fillStyle = "#6b4528"; g.fillRect(px + 2, by - 6, 38, 6); g.strokeRect(px + 2, by - 6, 38, 6);
+    g.fillStyle = "#c8232a"; g.beginPath(); g.moveTo(px + 6, by - 6); g.lineTo(px + 8, by - 26); g.lineTo(px + 28, by - 26); g.lineTo(px + 32, by - 40); g.lineTo(px + 38, by - 44); g.lineTo(px + 42, by - 36); g.lineTo(px + 36, by - 30); g.lineTo(px + 34, by - 6); g.lineTo(px + 28, by - 6); g.lineTo(px + 27, by - 16); g.lineTo(px + 14, by - 16); g.lineTo(px + 13, by - 6); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = "#2a5ab0"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 9, by - 20); g.quadraticCurveTo(px + 18, by - 14, px + 27, by - 20); g.stroke();
+    g.strokeStyle = "#f5d23a"; g.beginPath(); g.moveTo(px + 30, by - 30); g.lineTo(px + 36, by - 38); g.stroke();
+    g.fillStyle = "#f4f4f0"; [[12, -22], [18, -20], [24, -22]].forEach(([dx, dy]) => { g.beginPath(); g.arc(px + dx, by + dy, 1.6, 0, 7); g.fill(); });
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(px + 37, by - 39, 1.3, 0, 7); g.fill();
+    g.strokeStyle = OUT;
+  } else if (kind === "moosedeco") {
+    // a moose standing in the trees (scenery)
+    shadowAt(px + 34, by, 36);
+    g.fillStyle = "#3a2a1e"; [[12], [20], [44], [52]].forEach(([dx]) => { g.fillRect(px + dx, by - 34, 5, 34); });
+    g.fillStyle = "#5a4030"; g.beginPath(); rp(px + 6, by - 62, 54, 30, 12); g.fill(); g.stroke();
+    g.fillStyle = "#4a3426"; g.beginPath(); g.moveTo(px + 52, by - 58); g.lineTo(px + 66, by - 66); g.lineTo(px + 82, by - 54); g.lineTo(px + 80, by - 46); g.lineTo(px + 64, by - 48); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#c8a878"; g.beginPath(); g.moveTo(px + 60, by - 66); g.lineTo(px + 52, by - 82); g.lineTo(px + 58, by - 76); g.lineTo(px + 60, by - 86); g.lineTo(px + 64, by - 76); g.lineTo(px + 70, by - 84); g.lineTo(px + 68, by - 68); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#1d1d26"; g.fillRect(px + 70, by - 58, 2.5, 2.5);
+  } else if (kind === "volvo") {
+    // a classic boxy Volvo estate in dark blue
+    shadowAt(px + 70, by, 70);
+    g.fillStyle = "#24477a"; g.beginPath(); g.moveTo(px + 2, by - 12); g.lineTo(px + 2, by - 58); g.lineTo(px + 96, by - 58); g.lineTo(px + 112, by - 38); g.lineTo(px + 140, by - 36); g.lineTo(px + 142, by - 12); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#2a3542"; g.fillRect(px + 8, by - 53, 26, 14); g.fillRect(px + 38, by - 53, 26, 14); g.fillRect(px + 68, by - 53, 26, 14);
+    g.fillStyle = "#c9ced6"; g.fillRect(px + 2, by - 22, 140, 4); g.fillRect(px + 128, by - 32, 14, 6);
+    g.fillStyle = "#fff6d8"; g.fillRect(px + 134, by - 31, 7, 4); g.fillStyle = "#c4202a"; g.fillRect(px + 2, by - 40, 4, 12);
+    [[30], [118]].forEach(([dx]) => { g.fillStyle = "#1c1c20"; g.beginPath(); g.arc(px + dx, by - 12, 12, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#c9ced6"; g.beginPath(); g.arc(px + dx, by - 12, 6, 0, 7); g.fill(); });
+  } else if (kind === "scania") {
+    // a Scania timber truck: a red cab and a load of logs from the forest
+    shadowAt(px + 100, by, 100);
+    g.fillStyle = "#3a3a40"; g.fillRect(px, by - 26, 196, 10);
+    g.fillStyle = "#c4202a"; g.beginPath(); rp(px + 150, by - 76, 48, 56, 5); g.fill(); g.stroke();
+    g.fillStyle = "#2a3542"; g.fillRect(px + 158, by - 70, 34, 18); g.fillStyle = "#e8e4dc"; g.fillRect(px + 186, by - 38, 12, 14);
+    g.fillStyle = "#c9ced6"; g.fillRect(px + 196, by - 44, 3, 20);
+    for (let row = 0; row < 3; row++) for (let i = 0; i < 4 - row; i++) { const cx = px + 30 + i * 30 + row * 15, cy = by - 38 - row * 22; g.fillStyle = "#8a5a32"; g.fillRect(cx - 28, cy - 11, 110 - i * 26 - row * 8, 22); g.fillStyle = "#d8b07a"; g.beginPath(); g.arc(cx - 28, cy, 11, 0, 7); g.fill(); g.stroke(); g.strokeStyle = "#a8743e"; g.beginPath(); g.arc(cx - 28, cy, 5, 0, 7); g.stroke(); g.strokeStyle = OUT; }
+    g.fillStyle = "#3a3a40"; g.fillRect(px + 140, by - 96, 4, 76);
+    [[30], [64], [170]].forEach(([dx]) => { g.fillStyle = "#1c1c20"; g.beginPath(); g.arc(px + dx, by - 12, 12, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#8a9099"; g.beginPath(); g.arc(px + dx, by - 12, 5, 0, 7); g.fill(); });
+  } else if (kind === "maypole") {
+    // the midsummer pole with leaves, flowers and two rings
+    g.fillStyle = "#6b4528"; g.fillRect(px + 30, by - 150, 6, 150); g.fillRect(px + 8, by - 140, 50, 5);
+    g.strokeStyle = "#4a8a3a"; g.lineWidth = 5; g.beginPath(); g.moveTo(px + 33, by - 150); g.lineTo(px + 33, by); g.stroke();
+    [[14, -118], [52, -118]].forEach(([dx, dy]) => { g.strokeStyle = "#4a8a3a"; g.lineWidth = 4; g.beginPath(); g.arc(px + dx, by + dy, 12, 0, 7); g.stroke(); });
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    for (let i = 0; i < 18; i++) { g.fillStyle = ["#f5d23a", "#f4f4f0", "#9a5ad8", "#e8423a", "#2a6ad8"][i % 5]; g.beginPath(); g.arc(px + 33 + (i % 2 ? 3 : -3), by - 146 + i * 8, 2.5, 0, 7); g.fill(); }
+    g.fillStyle = "#006aa7"; g.fillRect(px + 36, by - 160, 14, 9); g.fillStyle = "#fecc02"; g.fillRect(px + 40, by - 160, 3, 9); g.fillRect(px + 36, by - 157, 14, 3);
+  } else if (kind === "fika") {
+    // a fika table: a checked cloth, cinnamon buns, a cake and a teapot (Paul and Laura drink tea)
+    g.fillStyle = "#6b4528"; g.fillRect(px + 4, by - 26, 4, 26); g.fillRect(px + 56, by - 26, 4, 26);
+    g.fillStyle = "#f4f4f0"; g.fillRect(px - 2, by - 32, 68, 8); g.strokeRect(px - 2, by - 32, 68, 8);
+    g.fillStyle = "#3a7ad8"; for (let i = 0; i < 9; i++) if (i % 2) g.fillRect(px - 2 + i * 7.5, by - 32, 7.5, 8);
+    [[10], [22]].forEach(([dx]) => { g.fillStyle = "#c8894a"; g.beginPath(); g.arc(px + dx, by - 36, 5, 0, 7); g.fill(); g.stroke(); g.strokeStyle = "#8a5a2a"; g.beginPath(); g.arc(px + dx, by - 36, 2.5, 0, 5); g.stroke(); g.strokeStyle = OUT; });
+    g.fillStyle = "#8ac85a"; g.beginPath(); rp(px + 32, by - 46, 14, 14, 3); g.fill(); g.stroke(); g.fillStyle = "#ff9ab8"; g.beginPath(); g.arc(px + 39, by - 47, 2.5, 0, 7); g.fill();
+    g.fillStyle = "#f4f1ea"; g.beginPath(); g.ellipse(px + 56, by - 40, 7, 7, 0, 0, 7); g.fill(); g.stroke(); g.fillRect(px + 62, by - 42, 5, 2);
   } else if (kind === "saab93") { drawSaab("93", px, by);
   } else if (kind === "saab900") { drawSaab("900", px, by);
   } else if (kind === "saab96") { drawSaab("96", px, by);
@@ -1616,6 +1719,7 @@ const FLAGS = {
   norway: [7, (i, r) => { const v = i === 4 || r === 3, w = i >= 3 && i <= 5 || r >= 2 && r <= 4; return v ? "#00205b" : w ? "#ffffff" : "#ba0c2f"; }],
   pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]],
   netherlands: [3, (i, r) => ["#ae1c28", "#ffffff", "#21468b"][r]],
+  smaland: [5, (i, r) => r === 2 || i === 3 || i === 4 ? "#fecc02" : "#006aa7"],
   dalmatia: [6, (i, r) => i >= 5 && i <= 6 && r >= 1 && r <= 3 ? ((i + r) % 2 ? "#ffffff" : "#d8232a") : ["#d8232a", "#d8232a", "#ffffff", "#ffffff", "#1a3a8a", "#1a3a8a"][r]]
 };
 function drawCheck(c) {
@@ -1774,6 +1878,20 @@ function drawCandles(l) {
 /* ---------- Sfeer-deeltjes ---------- */
 let leaves = [], motes = [];
 function drawAmbient(theme) {
+  const summerWood = theme === "bos" && !!(L && L.d.summer);
+  if (leaves.summer !== summerWood) { leaves = []; leaves.summer = summerWood; }
+  if (summerWood) {
+    // a summer forest: butterflies instead of autumn leaves
+    while (leaves.length < 10) leaves.push({ x: Math.random() * viewW, y: 60 + Math.random() * (VIEW_H - 160), vy: 0, r: Math.random() * 6, c: ["#f5d23a", "#f4f4f0", "#e8823a", "#9ad0f0"][leaves.length % 4] });
+    for (const l of leaves) {
+      if (state === "play" && !dialog) { l.x += .6 + Math.sin(frame / 30 + l.r) * .8; l.y += Math.sin(frame / 17 + l.r * 3) * .7; }
+      if (l.x > viewW + 10) { l.x = -10; l.y = 60 + Math.random() * (VIEW_H - 160); }
+      const f = Math.abs(Math.sin(frame / 4 + l.r)) * 4 + 1;
+      g.fillStyle = l.c; g.beginPath(); g.ellipse(l.x - 2.5, l.y, f, 3.5, 0, 0, 7); g.ellipse(l.x + 2.5, l.y, f, 3.5, 0, 0, 7); g.fill();
+      g.fillStyle = "#2a2a2a"; g.fillRect(l.x - .7, l.y - 3, 1.4, 6);
+    }
+    return;
+  }
   if (theme === "bos") {
     while (leaves.length < 14) leaves.push({ x: Math.random() * viewW, y: -Math.random() * VIEW_H, vy: .5 + Math.random() * .6, r: Math.random() * 6, c: ["#e0862e", "#f2b53c", "#c9562b"][leaves.length % 3] });
     for (const l of leaves) {
@@ -1806,7 +1924,7 @@ function drawWater(cx) {
   const x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1), top = 12 * TS + 14;
   for (let x = x0; x <= x1; x++) {
     if (L.grid[ROWS - 1][x] === "#") continue;
-    g.fillStyle = L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; g.fillRect(x * TS, top, TS, VIEW_H - top);
+    g.fillStyle = L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : L.d.scene === "smaland" ? "#2a6a9a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; g.fillRect(x * TS, top, TS, VIEW_H - top);
     g.fillStyle = "rgba(255,255,255,.45)"; for (let i = 0; i < 2; i++) g.fillRect(x * TS + ((frame * .4 + i * 16 + x * 7) % TS), top + 3 + i * 9, 8, 1.5);
   }
 }

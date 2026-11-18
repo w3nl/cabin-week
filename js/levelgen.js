@@ -129,6 +129,8 @@ function genLevel(o) {
   if (o.lantern) { const lx = free(w * .7); lanternX = lx; ents.push(["lantern", lx, yAt(lx)]); for (let dd = -3; dd <= 3; dd++) used.add(lx + dd); }
   ents.push(["exit", w - 6, yAt(w - 6)]);
   if (o.enemyExtra) o.enemyExtra.forEach(f => { const c = free(w * f); ents.push(["enemy", c, yAt(c)]); });
+  // moose (Småland): big friendly obstacles on flat ground; their back is a springboard
+  (o.moose || []).forEach(f => { let c = free(w * f); for (let k = 0; k < 4 && [0, 1, 2].some(d => topAt[c + d] !== topAt[c]); k++) c = free(w * f + 3 * (k + 1)); ents.push(["moose", c, yAt(c)]); });
 
   // A counting lock: things to count are placed in exact numbers, and never as random decoration.
   const counted = o.code && o.code.kind === "count" ? o.code.count.map(c => c[0]) : [];
