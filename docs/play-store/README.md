@@ -23,12 +23,12 @@ Winter trips through Europe: one level a day, with puzzles and code locks.
 **Full description** (max. 4000 characters)
 
 ```text
-Two families, nine people, five winter trips. Choose a trip on the map of Europe: the Ardennes, the North Pole, Tirol, Norway or the Netherlands. Every day of the week you play a new level.
+Two families, nine people, six trips. Choose a trip on the map of Europe: the Ardennes, the North Pole, Tirol, Norway, the Netherlands, or Dalmatia in summer. Every day of the week you play a new level.
 
 Choose your hero and walk, jump and find your way through the forest, the cabin, the snow and a Christmas market. Find the three lost things, help the others with a task and crack the code lock with the clues on the signs along the way.
 
-• 40 levels: five trips of eight days
-• The North Pole with Santa's workshop, ski school in Tirol, huskies and northern lights in Norway, windmills, canals and skating in the Netherlands
+• 48 levels: six trips of eight days
+• The North Pole with Santa's workshop, ski school in Tirol, huskies and northern lights in Norway, windmills, canals and skating in the Netherlands, and swimming, waterfalls and old towns in summery Dalmatia
 • 9 characters to choose from
 • Code locks, with hints if you get stuck
 • Chips, chocolate and Christmas biscuits to collect
@@ -58,12 +58,12 @@ Wintertripjes door Europa: elke dag een level met puzzels en codesloten.
 **Volledige beschrijving**
 
 ```text
-Twee gezinnen, negen personen, vijf winterreizen. Kies een reis op de kaart van Europa: de Ardennen, de Noordpool, Tirol, Noorwegen of Nederland. Elke dag van de week speel je een nieuw level.
+Twee gezinnen, negen personen, zes reizen. Kies een reis op de kaart van Europa: de Ardennen, de Noordpool, Tirol, Noorwegen, Nederland, of Dalmatië in de zomer. Elke dag van de week speel je een nieuw level.
 
 Kies je held en loop, spring en zoek je een weg door het bos, het huisje, de sneeuw en een kerstmarkt. Vind de drie verdwenen dingen, help de anderen met een opdracht en kraak het codeslot met de aanwijzingen die onderweg op bordjes staan.
 
-• 40 levels: vijf reizen van acht dagen
-• De Noordpool met de werkplaats van de Kerstman, skiles in Tirol, husky's en noorderlicht in Noorwegen, molens, grachten en schaatsen in Nederland
+• 48 levels: zes reizen van acht dagen
+• De Noordpool met de werkplaats van de Kerstman, skiles in Tirol, husky's en noorderlicht in Noorwegen, molens, grachten en schaatsen in Nederland, en zwemmen, watervallen en oude stadjes in zonnig Dalmatië
 • 9 poppetjes om uit te kiezen
 • Codesloten, met tips als je vastzit
 • Frietjes, chocolade en kerstkoekjes om te verzamelen

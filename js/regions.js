@@ -44,6 +44,16 @@ const REGIONS = [
     finale: [T("Doei, Netherlands! 🌷🚗", "Doei, Nederland! 🌷🚗"),
       T("Windmills, dikes and a headwind, Amsterdam by boat, Gouda by candlelight, skating in Giethoorn, the white bikes, herring on the island and a cheese for the neighbours.",
         "Molens, dijken en tegenwind, Amsterdam per boot, Gouda bij kaarslicht, schaatsen in Giethoorn, de witte fietsen, haring op het eiland en een kaas voor de buren.")] }
+,
+  { id: "dalmatia", name: T("Dalmatia", "Dalmatië"), icon: "☀️", lon: 16.4, lat: 43.5, scene: "adriatic", summer: true,
+    place: T("Camp Lavanda", "Camping Lavanda"), blurb: T("A summer week at Camp Lavanda on the Croatian coast: islands, waterfalls, old towns and a warm sea to swim in.",
+      "Een zomerweek op Camping Lavanda aan de Kroatische kust: eilanden, watervallen, oude stadjes en een warme zee om in te zwemmen."),
+    levels: DALMATIA_LEVELS,
+    week: regionWeek([["🏕️", "Camping", "Camping"], ["💧", "Krka", "Krka"], ["🏰", "Dubrovnik", "Dubrovnik"], ["🏝️", "Islands", "Eilanden"],
+      ["🌲", "Plitvice", "Plitvice"], ["🎵", "Zadar", "Zadar"], ["🩴", "Beach", "Strand"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Doviđenja, Dalmatia! ☀️🚗", "Doviđenja, Dalmatië! ☀️🚗"),
+      T("Camp Lavanda, the Krka waterfalls, the walls of Dubrovnik, island hopping, the lakes of Plitvice, the sea organ in Zadar and the rocky beach. Salty, sunny and happy.",
+        "Camping Lavanda, de watervallen van Krka, de muren van Dubrovnik, eilandhoppen, de meren van Plitvice, het zeeorgel in Zadar en het rotsstrand. Zout, zonnig en blij.")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [
@@ -51,7 +61,6 @@ const SOON = [
   { name: T("Scania", "Skåne"), lon: 13.6, lat: 55.9 },
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
   { name: "Veneto", lon: 12.3, lat: 45.5 },
-  { name: T("Dalmatia", "Dalmatië"), lon: 16.4, lat: 43.5 },
   { name: T("Scotland", "Schotland"), lon: -4.3, lat: 57.0 },
   { name: T("Catalonia", "Catalonië"), lon: 1.8, lat: 41.9 },
   { name: T("Ardèche", "Ardèche"), lon: 4.4, lat: 44.7 },

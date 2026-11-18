@@ -13,7 +13,8 @@ const PAL = {
   bos: { base: "#7b4a2b", dark: "#5f381f", light: "#946038", edge: "#2a1708" },
   sneeuw: { base: "#566b8f", dark: "#40527a", light: "#7189b0", edge: "#25324d" },
   huis: { base: "#d5c7b0", dark: "#b9a98e", light: "#e6dbc8", edge: "#7d6b52" },
-  stad: { base: "#7c7882", dark: "#615d68", light: "#9894a0", edge: "#2e2b34" }
+  stad: { base: "#7c7882", dark: "#615d68", light: "#9894a0", edge: "#2e2b34" },
+  kust: { base: "#d8c9a8", dark: "#bfae8a", light: "#ebe1c9", edge: "#6e5e44" }
 };
 function fillTex(theme, R) {
   const p = PAL[theme];
@@ -27,6 +28,11 @@ function fillTex(theme, R) {
       g.fillStyle = "#9b958a"; pxr(x + 1, y + 1, 4, 2); g.fillStyle = "#c8c2b5"; pxr(x + 1, y + 1, 2, 1); g.fillStyle = "#726c62"; pxr(x + 3, y + 2, 2, 1);
     }
     if (R() < .25) { g.fillStyle = "#4b2b16"; let x = fl(R() * 12), y = fl(R() * 6) + 6; for (let i = 0; i < 6; i++) { pxr(x, y); x++; if (R() < .5) y++; } }
+  } else if (theme === "kust") {
+    // sunny limestone (the Dalmatian coast): pale blocks, thin cracks, little holes
+    for (let i = 0; i < 26; i++) { g.fillStyle = R() < .5 ? p.dark : p.light; pxr(fl(R() * 16), fl(R() * 16)); }
+    g.fillStyle = p.dark; let cx = fl(R() * 16), cy = 0; for (let i = 0; i < 10; i++) { pxr(cx % 16, cy); cy++; if (R() < .4) cx++; }
+    for (let i = 0; i < 2; i++) { g.fillStyle = "#a8977a"; pxr(fl(R() * 14), fl(R() * 14), 2, 1); }
   } else if (theme === "sneeuw") {
     for (let row = 0; row < 4; row++) {
       const off = row % 2 ? 4 : 0;
@@ -61,6 +67,14 @@ function topTex(theme, R) {
       if (R() < .15) { g.fillStyle = "#a9c6ea"; pxr(x, 3); }
     }
     g.fillStyle = "#8ea6c9"; g.fillRect(0, 0, 32, 2);
+  } else if (theme === "kust") {
+    for (let x = 0; x < 16; x++) {
+      const h = 3 + (R() < .5 ? 1 : 0);
+      g.fillStyle = R() < .5 ? "#b9a95a" : "#a39a4a"; pxr(x, 0, 1, h); g.fillStyle = "#8a7a3a"; pxr(x, h, 1, 1);
+      if (R() < .25) { g.fillStyle = "#d8cf7a"; pxr(x, 0); }
+      if (R() < .12) { g.fillStyle = "#f4f1ea"; pxr(x, h + 1); }
+    }
+    g.fillStyle = "#6e6a32"; g.fillRect(0, 0, 32, 2);
   } else if (theme === "stad") {
     // kasseien met een laagje sneeuw
     g.fillStyle = "#3e3a44"; g.fillRect(0, 0, 32, 12);
@@ -113,7 +127,7 @@ function blockTex(theme, R) {
   g.fillStyle = "#64625a"; g.fillRect(2, 27, 28, 3); g.fillRect(27, 2, 3, 28);
   g.fillStyle = "#55534c"; g.fillRect(10, 10, 2, 6); g.fillRect(12, 16, 4, 2); g.fillRect(20, 18, 2, 4);
   if (theme === "bos") { g.fillStyle = "#5c9a3e"; g.fillRect(2, 2, 12, 3); g.fillRect(4, 5, 4, 2); g.fillRect(20, 2, 8, 2); g.fillStyle = "#86c45c"; g.fillRect(4, 2, 6, 1); }
-  else { g.fillStyle = "#f4f8ff"; g.fillRect(2, 2, 28, 3); }
+  else if (theme !== "kust") { g.fillStyle = "#f4f8ff"; g.fillRect(2, 2, 28, 3); }
 }
 function spikeTex(theme, R) {
   if (theme === "bos") {
@@ -122,6 +136,13 @@ function spikeTex(theme, R) {
     g.fillStyle = "#3e7a2c"; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(i * 8 + 2, 32); g.lineTo(i * 8 + 4, 14 + (i % 2) * 4); g.lineTo(i * 8 + 6, 32); g.fill(); }
     g.fillStyle = "#d9d0b0"; [[6, 20], [14, 16], [22, 22], [27, 18]].forEach(([x, y]) => g.fillRect(x, y, 2, 2));
     [[9, 22], [19, 18], [25, 25]].forEach(([x, y]) => { g.fillStyle = "#1e1030"; g.fillRect(x - 1, y - 1, 6, 6); g.fillStyle = "#5a2a7a"; g.fillRect(x, y, 4, 4); g.fillStyle = "#b37ad9"; g.fillRect(x, y, 2, 2); });
+  } else if (theme === "kust") {
+    // sea urchins: black spiky balls on the rocks
+    [[6, 26, 6], [17, 25, 7], [27, 27, 5]].forEach(([x, y, r]) => {
+      g.strokeStyle = "#1a1424"; g.lineWidth = 1.2;
+      for (let i = 0; i < 12; i++) { const a = Math.PI + i * Math.PI / 11; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * (r + 5), y + Math.sin(a) * (r + 5)); g.stroke(); }
+      g.fillStyle = "#2a1f3a"; g.beginPath(); g.arc(x, y, r, Math.PI, 0); g.fill(); g.fillStyle = "#5a4a7a"; g.fillRect(x - 2, y - r + 2, 2, 2);
+    });
   } else if (theme === "huis") {
     const br = (x, y, c) => { g.fillStyle = OUT; g.fillRect(x - 1, y - 1, 14, 9); g.fillStyle = c; g.fillRect(x, y, 12, 7); g.fillRect(x + 1, y - 3, 3, 3); g.fillRect(x + 7, y - 3, 3, 3); g.fillStyle = "rgba(255,255,255,.4)"; g.fillRect(x, y, 12, 2); };
     br(2, 24, "#e8423a"); br(17, 24, "#2f7fe0"); br(9, 17, "#f5c22b"); br(21, 14, "#3bb35a");
@@ -325,7 +346,7 @@ function chaletShape(x, y, s, wall, roof) {
   g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 30 * s); g.fill();
   g.fillStyle = "#ffd27a"; g.fillRect(x + 5 * s, y - 15 * s, 5 * s, 5 * s); g.fillRect(x + 20 * s, y - 15 * s, 5 * s, 5 * s);
 }
-const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen"]);
+const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls"]);
 /** A small windmill in the background (sails do not turn there: the layer is drawn once). */
 function farMill(x, y, s, body, sail) {
   g.fillStyle = body; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x - 3 * s, y - 26 * s); g.lineTo(x + 3 * s, y - 26 * s); g.lineTo(x + 6 * s, y); g.fill();
@@ -334,7 +355,7 @@ function farMill(x, y, s, body, sail) {
 }
 function getSceneLayers(scene) {
   if (LAYERS[scene]) return LAYERS[scene];
-  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006 }[scene] || 1), out = {};
+  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009 }[scene] || 1), out = {};
   if (scene === "pole") {
     // ice floes and icebergs far away
     out.far = layerCanvas(() => {
@@ -511,6 +532,73 @@ function getSceneLayers(scene) {
       for (let x = 0; x < LW; x += 70) { const r = R(), y = ridge(386, a, x) + 10; if (r < .5) continue; wrapAt(x, xx => pineShape(xx, y, 70 + r * 50, "#2d5a3a", "#21482c", "#f4f8ff", "#173220")); }
     });
   }
+  else if (scene === "adriatic") {
+    // the summer sea with islands, the grey coastal mountains behind (like the Velebit and the Biokovo)
+    out.far = layerCanvas(() => {
+      fillRidge(250, [[50, 2, 1], [26, 5, 3], [10, 11, 2]], "#8a9ab0");
+      fillRidge(275, [[30, 3, 2], [14, 8, 1]], "#7a8aa0");
+      g.fillStyle = "#2aa0c8"; g.fillRect(0, 300, LW, 200);
+      for (let x = 40; x < LW; x += 220 + R() * 160) { const w = 80 + R() * 140, h = 14 + R() * 22; g.fillStyle = "#6a8a6a"; g.beginPath(); g.moveTo(x, 302); g.quadraticCurveTo(x + w / 2, 302 - h * 2, x + w, 302); g.fill(); }
+      g.fillStyle = "rgba(255,255,255,.55)"; for (let x = 0; x < LW; x += 16) g.fillRect(x + R() * 10, 306 + R() * 40, 10, 1.5);
+    });
+    out.mid = layerCanvas(() => {
+      const a = [[12, 3, 1], [6, 8, 2]];
+      fillRidge(340, a, "#c8b896", "#e8dcc0");
+      for (let x = 20; x < LW; x += 46 + R() * 50) { const y = ridge(340, a, x) + 6, r = R();
+        if (r < .45) { g.fillStyle = "#3a5a2a"; g.beginPath(); g.ellipse(x, y - 34, 26, 12, 0, 0, 7); g.fill(); g.fillStyle = "#5a4030"; g.fillRect(x - 2, y - 26, 4, 26); }
+        else if (r < .7) { g.fillStyle = "#2a4a2a"; g.beginPath(); g.ellipse(x, y - 30, 6, 30, 0, 0, 7); g.fill(); }
+        else { g.fillStyle = "#f1e8d6"; g.fillRect(x, y - 24, 30, 24); g.fillStyle = "#c8583a"; g.beginPath(); g.moveTo(x - 3, y - 24); g.lineTo(x + 15, y - 34); g.lineTo(x + 33, y - 24); g.fill(); g.fillStyle = "#3a6a4a"; g.fillRect(x + 5, y - 18, 5, 7); g.fillRect(x + 19, y - 18, 5, 7); } }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[10, 4, 2], [6, 9, 1]];
+      fillRidge(392, a, "#d8c8a6", "#efe4cc");
+      for (let x = 0; x < LW; x += 9) { const y = ridge(392, a, x) + 4; g.strokeStyle = "#8a8a3a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 2, y - 6 - R() * 6); g.stroke(); }
+    });
+  } else if (scene === "oldtown") {
+    // a walled old town of pale stone with terracotta roofs, a bell tower and the sea
+    out.far = layerCanvas(() => {
+      fillRidge(220, [[40, 2, 2], [20, 6, 1]], "#9aa6b2");
+      g.fillStyle = "#2aa0c8"; g.fillRect(0, 330, LW, 200);
+    });
+    out.mid = layerCanvas(() => {
+      // the city wall with towers
+      g.fillStyle = "#d8c8a6"; g.fillRect(0, 300, LW, 40);
+      for (let x = 0; x < LW; x += 14) { g.fillStyle = "#c8b896"; g.fillRect(x, 292, 9, 8); }
+      for (let x = 80; x < LW; x += 300) { g.fillStyle = "#d0c09e"; g.fillRect(x, 248, 46, 92); for (let i = 0; i < 4; i++) g.fillRect(x + i * 12, 240, 8, 8); g.fillStyle = "#8a7a5a"; g.fillRect(x + 20, 270, 6, 12); }
+      // roofs inside the walls
+      for (let x = 0; x < LW; x += 28 + R() * 14) { const h = 10 + R() * 26, w = 26 + R() * 10; g.fillStyle = ["#f1e8d6", "#e8dcc0", "#ece4d2"][Math.floor(R() * 3)]; g.fillRect(x, 300 - h, w, h); g.fillStyle = ["#c8583a", "#b84a30", "#d8683a"][Math.floor(R() * 3)]; g.beginPath(); g.moveTo(x - 3, 300 - h); g.lineTo(x + w / 2, 300 - h - 10); g.lineTo(x + w + 3, 300 - h); g.fill(); }
+      // the bell tower
+      const bx = 760; g.fillStyle = "#e8dcc0"; g.fillRect(bx, 170, 30, 130); g.fillStyle = "#3a2a1a"; g.fillRect(bx + 10, 190, 10, 16); g.fillStyle = "#4a7a6a"; g.beginPath(); g.moveTo(bx - 4, 170); g.lineTo(bx + 15, 140); g.lineTo(bx + 34, 170); g.fill();
+    });
+    out.near = layerCanvas(() => {
+      g.fillStyle = "#e6dac0"; g.fillRect(0, 392, LW, 40);
+      for (let x = 30; x < LW; x += 140 + R() * 80) { g.fillStyle = "#2a4a2a"; g.beginPath(); g.ellipse(x, 340, 9, 52, 0, 0, 7); g.fill(); g.fillStyle = "#3a5a3a"; g.beginPath(); g.ellipse(x - 2, 336, 5, 44, 0, 0, 7); g.fill(); }
+    });
+  } else if (scene === "falls") {
+    // green hills, waterfalls tumbling into turquoise lakes (Krka, Plitvice)
+    out.far = layerCanvas(() => {
+      fillRidge(230, [[40, 2, 1], [20, 5, 2], [8, 13, 3]], "#5a8a5a");
+      fillRidge(270, [[24, 3, 2], [10, 9, 1]], "#4a7a4a");
+    });
+    out.mid = layerCanvas(() => {
+      const a = [[18, 3, 1], [8, 7, 2]];
+      fillRidge(300, a, "#3f6f3f", "#5a8a4a");
+      g.fillStyle = "#3ab0a0"; g.fillRect(0, 330, LW, 200);
+      for (let x = 60; x < LW; x += 200 + R() * 120) {
+        const top = ridge(300, a, x + 20) + 4, w = 30 + R() * 30;
+        const wg = g.createLinearGradient(0, top, 0, 334); wg.addColorStop(0, "#e8fbff"); wg.addColorStop(1, "#9ae0e8");
+        g.fillStyle = wg; g.fillRect(x, top, w, 334 - top);
+        g.fillStyle = "rgba(255,255,255,.7)"; for (let i = 0; i < 5; i++) g.fillRect(x + 3 + i * w / 5, top, 2, 334 - top);
+        g.fillStyle = "#f4ffff"; g.beginPath(); g.ellipse(x + w / 2, 336, w * .7, 5, 0, 0, 7); g.fill();
+      }
+      for (let x = 0; x < LW; x += 22) { const r = R(); if (r < .5) continue; g.fillStyle = "#2a5a3a"; g.beginPath(); g.arc(x, ridge(300, a, x) - 4, 10 + r * 8, 0, 7); g.fill(); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[10, 4, 2], [6, 9, 1]];
+      fillRidge(392, a, "#4a7a3a", "#6a9a4a");
+      for (let x = 0; x < LW; x += 40) { const r = R(); if (r < .4) continue; g.fillStyle = "#2e5a2e"; g.beginPath(); g.arc(x, ridge(392, a, x) - 10, 18 + r * 10, 0, 7); g.fill(); g.fillStyle = "#3a6a34"; g.beginPath(); g.arc(x - 5, ridge(392, a, x) - 16, 10, 0, 7); g.fill(); }
+    });
+  }
   return LAYERS[scene] = out;
 }
 /** Northern lights: a few slow, wavy green and purple curtains (cheap: three paths per frame). */
@@ -526,10 +614,19 @@ function drawAurora(strength) {
 }
 function drawSceneSky(scene) {
   const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"],
-    polder: ["#4a6488", "#8ea6c4", "#d8c8b8"], grachten: ["#0a1430", "#2a3466", "#6a5a82"], duinen: ["#5a7ca8", "#a8c4dc", "#f0dcc0"] }[scene];
+    polder: ["#4a6488", "#8ea6c4", "#d8c8b8"], grachten: ["#0a1430", "#2a3466", "#6a5a82"], duinen: ["#5a7ca8", "#a8c4dc", "#f0dcc0"],
+    adriatic: ["#2a7ad8", "#7ac0f0", "#d8f0fa"], oldtown: ["#3a7ad0", "#f0b878", "#f8d8a8"], falls: ["#3a8ad8", "#9ad0f0", "#e0f4f8"] }[scene];
   g.fillStyle = grad("sky-" + scene, () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, skies[0]); gr.addColorStop(.62, skies[1]); gr.addColorStop(1, skies[2]); return gr; });
   g.fillRect(0, 0, viewW, VIEW_H);
   g.fillStyle = "#fff";
+  if (scene === "adriatic" || scene === "oldtown" || scene === "falls") {
+    // summer: a big warm sun, no stars
+    const sx = viewW * (scene === "oldtown" ? .78 : .2), sy = scene === "oldtown" ? 150 : 80;
+    g.fillStyle = grad("sun-" + scene, () => { const sg = g.createRadialGradient(sx, sy, 10, sx, sy, 160); sg.addColorStop(0, "rgba(255,250,210,1)"); sg.addColorStop(.25, "rgba(255,236,160,.7)"); sg.addColorStop(1, "rgba(255,236,160,0)"); return sg; });
+    g.fillRect(sx - 160, sy - 160, 320, 320);
+    g.fillStyle = "#fff8d8"; g.beginPath(); g.arc(sx, sy, 30, 0, 7); g.fill();
+    return;
+  }
   const starA = { alps: .5, polder: .15, duinen: 0 }[scene] ?? 1;
   if (starA) for (let i = 0; i < 70; i++) { g.globalAlpha = (.3 + .6 * Math.abs(Math.sin(frame / (30 + i % 13) + i))) * starA; g.fillRect(((hash(i * 3) * 3000) % viewW + viewW) % viewW, hash(i * 7) * 220, 2, 2); }
   g.globalAlpha = 1;
@@ -669,6 +766,11 @@ function drawGroundDecor(d, th) {
     else if (d.k === 3) { g.fillStyle = OUT; g.fillRect(x + 2, y - 7, 2.5, 7); g.fillStyle = "#f4ead8"; g.fillRect(x + 2.5, y - 7, 1.5, 7); g.fillStyle = OUT; g.beginPath(); g.arc(x + 3.2, y - 7, 5.5, Math.PI, 0); g.fill(); g.fillStyle = "#d8323a"; g.beginPath(); g.arc(x + 3.2, y - 7, 4.5, Math.PI, 0); g.fill(); g.fillStyle = "#fff"; g.fillRect(x + 1, y - 10, 1.5, 1.5); g.fillRect(x + 4.5, y - 9.5, 1.5, 1.5); }
     else if (d.k === 4) { g.fillStyle = "#2a1a10"; g.beginPath(); g.ellipse(x + 5, y - 2, 6.5, 4, 0, Math.PI, 0); g.fill(); g.fillStyle = "#9b958a"; g.beginPath(); g.ellipse(x + 5, y - 2, 5.5, 3, 0, Math.PI, 0); g.fill(); g.fillStyle = "#c8c2b5"; g.fillRect(x + 2, y - 4, 3, 1); }
     else { g.strokeStyle = "#4f9e3c"; g.lineWidth = 1.3; g.beginPath(); g.moveTo(x + 4, y); g.quadraticCurveTo(x - 2, y - 6, x - 3, y - 10); g.moveTo(x + 4, y); g.quadraticCurveTo(x + 10, y - 6, x + 11, y - 10); g.moveTo(x + 4, y); g.lineTo(x + 4, y - 12); g.stroke(); }
+  } else if (th === "kust") {
+    if (d.k < 2) { g.strokeStyle = "#a89a4a"; g.lineWidth = 1.2; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(x + i * 2.5, y); g.lineTo(x + i * 2.5 + 1.5, y - 6 - (i % 2) * 3); g.stroke(); } }
+    else if (d.k === 2) { g.fillStyle = "#f4f1ea"; g.beginPath(); g.ellipse(x + 3, y - 1.5, 3, 2, 0, 0, 7); g.ellipse(x + 8, y - 1, 2, 1.5, 0, 0, 7); g.fill(); }
+    else if (d.k === 3) { g.strokeStyle = "#6a8a4a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x + 4, y); g.lineTo(x + 4, y - 9); g.stroke(); g.fillStyle = "#9a7ad9"; for (let i = 0; i < 4; i++) g.fillRect(x + 3, y - 9 - i * 2, 2.5, 1.5); }
+    else if (d.k === 4) { g.fillStyle = "#e8a8a0"; g.beginPath(); g.arc(x + 4, y - 1, 3, Math.PI, 0); g.fill(); g.strokeStyle = "#b8786a"; g.lineWidth = .8; g.beginPath(); g.moveTo(x + 4, y - 1); g.lineTo(x + 2, y - 3.5); g.moveTo(x + 4, y - 1); g.lineTo(x + 6, y - 3.5); g.stroke(); }
   } else {
     if (d.k < 2) { g.fillStyle = "#ffffff"; g.beginPath(); g.ellipse(x + 5, y, 8, 4, 0, Math.PI, 0); g.fill(); g.fillStyle = "#d6e3f4"; g.fillRect(x - 2, y - 1, 14, 1); }
     else if (d.k === 2 && th === "sneeuw") pineShape(x + 4, y, 22, "#1f4152", "#173444", "#f4f8ff", "#0f2230");
@@ -753,8 +855,8 @@ function drawTile(c, px, py, theme, tx, ty, T) {
     const v = fl(hash(tx * 31 + ty * 17) * 4);
     tile(T, top ? T.top[v] : T.fill[v], px, py);
     const pe = PAL[theme].edge;
-    if (cell(tx - 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : "#f4f8ff"; g.fillRect(px - 3, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px - 3, py + 10, 5, 2); g.fillRect(px - 5, py + 2, 2, 8); } }
-    if (cell(tx + 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px + TS - 2, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : "#f4f8ff"; g.fillRect(px + TS - 2, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px + TS - 2, py + 10, 5, 2); g.fillRect(px + TS + 3, py + 2, 2, 8); } }
+    if (cell(tx - 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : "#f4f8ff"; g.fillRect(px - 3, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px - 3, py + 10, 5, 2); g.fillRect(px - 5, py + 2, 2, 8); } }
+    if (cell(tx + 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px + TS - 2, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : "#f4f8ff"; g.fillRect(px + TS - 2, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px + TS - 2, py + 10, 5, 2); g.fillRect(px + TS + 3, py + 2, 2, 8); } }
   } else if (c === "=") tile(T, T.plat, px, py);
   else if (c === "S") tile(T, T.block, px, py);
   else if (c === "^") tile(T, T.spike, px, py);
@@ -814,7 +916,73 @@ function drawDeco(kind, x, theme) {
   const by = groundTop(x) * TS, px = x * TS;
   g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const H = hash(x * 5.3);
-  if (kind === "windmill") {
+  if (kind === "tent") {
+    // a dome tent with guy lines
+    const c = ["#e8823a", "#3a8ad8", "#4aa860"][Math.floor(H * 3)];
+    shadowAt(px + 32, by, 40);
+    g.fillStyle = c; g.beginPath(); g.moveTo(px, by); g.quadraticCurveTo(px + 32, by - 80, px + 64, by); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = shade(c, -.25); g.beginPath(); g.moveTo(px + 22, by); g.quadraticCurveTo(px + 32, by - 34, px + 42, by); g.closePath(); g.fill();
+    g.strokeStyle = "#f4f1ea"; g.lineWidth = 1; g.beginPath(); g.moveTo(px + 32, by - 60); g.lineTo(px + 32, by - 30); g.moveTo(px + 6, by - 20); g.lineTo(px - 14, by); g.moveTo(px + 58, by - 20); g.lineTo(px + 78, by); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+  } else if (kind === "caravan") {
+    // a white caravan with an awning
+    shadowAt(px + 50, by, 56);
+    g.fillStyle = "#f4f1ea"; g.beginPath(); rp(px, by - 62, 100, 52, 14); g.fill(); g.stroke();
+    g.fillStyle = "#3a8ad8"; g.fillRect(px + 2, by - 30, 96, 5);
+    g.fillStyle = "#9ad0f0"; g.beginPath(); rp(px + 12, by - 52, 30, 16, 4); g.fill(); g.stroke(); g.beginPath(); rp(px + 70, by - 52, 20, 30, 3); g.fill(); g.stroke();
+    g.fillStyle = "#2a2f3c"; g.beginPath(); g.arc(px + 40, by - 8, 9, 0, 7); g.fill(); g.fillStyle = "#9aa"; g.beginPath(); g.arc(px + 40, by - 8, 4, 0, 7); g.fill();
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#e8823a"; g.beginPath(); g.moveTo(px + 100 + i * 8, by - 62); g.lineTo(px + 108 + i * 8, by - 62); g.lineTo(px + 112 + i * 8, by - 48); g.lineTo(px + 104 + i * 8, by - 48); g.fill(); }
+    g.fillStyle = "#6a6a6a"; g.fillRect(px + 146, by - 50, 3, 50);
+  } else if (kind === "lavender") {
+    shadowAt(px + 20, by, 22);
+    for (let i = 0; i < 12; i++) { const lx = px + 4 + i * 3, h = 18 + (i % 3) * 5; g.strokeStyle = "#6a8a4a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(lx, by); g.lineTo(lx + (i - 6) * .6, by - h); g.stroke(); g.fillStyle = "#9a6ad8"; g.fillRect(lx + (i - 6) * .6 - 1.5, by - h - 6, 3, 7); }
+    g.strokeStyle = OUT; g.lineWidth = 2;
+  } else if (kind === "parasol") {
+    // a striped beach umbrella with a towel
+    g.fillStyle = "#4a3a2a"; g.fillRect(px + 22, by - 70, 3, 70);
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#e8323a"; g.beginPath(); g.moveTo(px + 23, by - 74); g.lineTo(px - 14 + i * 12.5, by - 54); g.lineTo(px - 1.5 + i * 12.5, by - 54); g.closePath(); g.fill(); }
+    g.beginPath(); g.moveTo(px + 23, by - 74); g.lineTo(px - 14, by - 54); g.lineTo(px + 61, by - 54); g.closePath(); g.stroke();
+    g.fillStyle = "#3aa0d8"; g.fillRect(px + 30, by - 4, 40, 4); g.fillStyle = "#f2c230"; g.fillRect(px + 30, by - 4, 40, 1.5);
+  } else if (kind === "cypress") {
+    shadowAt(px + 16, by, 12);
+    g.fillStyle = "#1f4a2a"; g.beginPath(); g.ellipse(px + 16, by - 60, 12, 60, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#2e6a3a"; g.beginPath(); g.ellipse(px + 13, by - 64, 6, 50, 0, 0, 7); g.fill();
+  } else if (kind === "olive") {
+    // an old olive tree: twisted trunk, silvery leaves
+    shadowAt(px + 20, by, 30);
+    g.fillStyle = "#6a5a48"; g.beginPath(); g.moveTo(px + 12, by); g.quadraticCurveTo(px + 22, by - 30, px + 14, by - 54); g.lineTo(px + 24, by - 54); g.quadraticCurveTo(px + 32, by - 28, px + 26, by); g.closePath(); g.fill(); g.stroke();
+    [[20, -66, 22], [2, -58, 16], [38, -58, 16], [20, -82, 14]].forEach(([dx, dy, r]) => { g.fillStyle = OUT; g.beginPath(); g.arc(px + dx, by + dy, r + 2, 0, 7); g.fill(); });
+    [[20, -66, 22], [2, -58, 16], [38, -58, 16], [20, -82, 14]].forEach(([dx, dy, r], i) => { g.fillStyle = i % 2 ? "#8a9a6a" : "#9aaa7a"; g.beginPath(); g.arc(px + dx, by + dy, r, 0, 7); g.fill(); });
+  } else if (kind === "palm") {
+    shadowAt(px + 16, by, 18);
+    g.strokeStyle = "#8a6a42"; g.lineWidth = 8; g.beginPath(); g.moveTo(px + 14, by); g.quadraticCurveTo(px + 22, by - 60, px + 12, by - 110); g.stroke();
+    g.strokeStyle = "#6a4e30"; g.lineWidth = 1.5; for (let y = 8; y < 108; y += 8) { g.beginPath(); g.moveTo(px + 9 + (y / 108) * 4, by - y); g.lineTo(px + 19 + (y / 108) * 2, by - y - 2); g.stroke(); }
+    for (let i = 0; i < 7; i++) { const a = -Math.PI + i * Math.PI / 6 + Math.sin(frame / 50 + i) * .04; g.strokeStyle = "#2e7a3a"; g.lineWidth = 5; g.beginPath(); g.moveTo(px + 12, by - 110); g.quadraticCurveTo(px + 12 + Math.cos(a) * 28, by - 124 + Math.sin(a) * 10, px + 12 + Math.cos(a) * 52, by - 104 + Math.sin(a) * 30 + 14); g.stroke(); }
+    g.strokeStyle = OUT; g.lineWidth = 2;
+  } else if (kind === "stonehouse") {
+    // a Dalmatian stone house: pale stone, terracotta roof, green shutters, a bougainvillea
+    shadowAt(px + 40, by, 46);
+    g.fillStyle = "#e8dcc0"; g.fillRect(px, by - 90, 80, 90); g.strokeRect(px, by - 90, 80, 90);
+    g.fillStyle = "#d4c6a6"; for (let y = by - 84; y < by; y += 12) for (let xx = px + ((y / 12) % 2) * 8; xx < px + 80; xx += 16) g.fillRect(xx, y, 14, 1);
+    g.fillStyle = "#c8583a"; g.beginPath(); g.moveTo(px - 8, by - 88); g.lineTo(px + 40, by - 114); g.lineTo(px + 88, by - 88); g.closePath(); g.fill(); g.stroke();
+    [[px + 12, by - 74], [px + 52, by - 74], [px + 12, by - 38]].forEach(([wx, wy]) => { g.fillStyle = "#3a2a1a"; g.fillRect(wx, wy, 16, 22); g.fillStyle = "#3a7a4a"; g.fillRect(wx - 7, wy, 6, 22); g.fillRect(wx + 17, wy, 6, 22); });
+    g.fillStyle = "#6a4a2a"; g.fillRect(px + 50, by - 34, 18, 34); g.strokeRect(px + 50, by - 34, 18, 34);
+    g.fillStyle = "#d83a8a"; for (let i = 0; i < 14; i++) { g.beginPath(); g.arc(px + 72 + Math.sin(i * 2.1) * 8, by - 20 - i * 4, 3, 0, 7); g.fill(); }
+  } else if (kind === "waterfall") {
+    // a waterfall over limestone, splashing into a pool (Krka, Plitvice)
+    const h = 150, w = 46;
+    g.fillStyle = "#b8a888"; g.beginPath(); g.moveTo(px - 10, by); g.lineTo(px - 6, by - h - 10); g.lineTo(px + w + 6, by - h - 10); g.lineTo(px + w + 10, by); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#4a7a3a"; g.beginPath(); g.ellipse(px + w / 2, by - h - 12, w / 2 + 14, 9, 0, 0, 7); g.fill();
+    const wg = g.createLinearGradient(0, by - h, 0, by); wg.addColorStop(0, "#e8fbff"); wg.addColorStop(1, "#8ad8e8");
+    g.fillStyle = wg; g.fillRect(px + 4, by - h - 6, w - 8, h + 6);
+    g.fillStyle = "rgba(255,255,255,.8)"; for (let i = 0; i < 5; i++) { const sx = px + 8 + i * (w - 16) / 4; for (let k = 0; k < 4; k++) { const yy = by - h + ((frame * 3 + k * 40 + i * 13) % h); g.fillRect(sx, yy, 2, 14); } }
+    g.fillStyle = "#f4ffff"; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(px + w / 2 + Math.sin(frame / 7 + i * 1.7) * (w / 2), by - 4 - Math.abs(Math.sin(frame / 9 + i)) * 6, 4, 0, 7); g.fill(); }
+  } else if (kind === "boatdeco") {
+    // a little wooden fishing boat pulled up on the shore
+    shadowAt(px + 36, by, 40);
+    g.fillStyle = "#f4f1ea"; g.beginPath(); g.moveTo(px, by - 18); g.lineTo(px + 74, by - 18); g.quadraticCurveTo(px + 70, by, px + 54, by); g.lineTo(px + 14, by); g.quadraticCurveTo(px + 2, by - 4, px, by - 18); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#3a8ad8"; g.fillRect(px + 4, by - 16, 68, 4); g.fillStyle = "#d8402e"; g.fillRect(px + 10, by - 8, 50, 2);
+    g.strokeStyle = "#5a3a22"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px + 30, by - 18); g.lineTo(px + 50, by - 30); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+  } else if (kind === "windmill") {
     // a Dutch windmill: a dark octagonal body, a thatched cap, a stage around it and sails that turn in the wind
     shadowAt(px + 30, by, 44);
     g.fillStyle = "#3e4a3a"; g.beginPath(); g.moveTo(px + 6, by); g.lineTo(px + 16, by - 120); g.lineTo(px + 44, by - 120); g.lineTo(px + 54, by); g.closePath(); g.fill(); g.stroke();
@@ -1279,7 +1447,7 @@ function drawExit(theme) {
   g.lineJoin = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const style = L.d.exitStyle;
   if (style === "arch") {
-    const sn = theme !== "bos";
+    const sn = theme !== "bos" && theme !== "kust";
     [x - 26, x + 50].forEach(px => { g.fillStyle = "#6b4528"; g.fillRect(px, by - 110, 10, 110); g.strokeRect(px, by - 110, 10, 110); g.fillStyle = "#8a5a32"; g.fillRect(px + 2, by - 108, 3, 106); });
     g.font = "700 14px Fredoka, sans-serif"; const w = Math.max(96, g.measureText(L.d.exitLabel).width + 24);
     g.fillStyle = "#c9955a"; g.beginPath(); rp(x + 14 - w / 2, by - 132, w, 30, 4); g.fill(); g.stroke();
@@ -1390,7 +1558,8 @@ const FLAGS = {
   tirol: [3, (i, r) => r === 1 ? "#ffffff" : "#c8102e"],
   norway: [7, (i, r) => { const v = i === 4 || r === 3, w = i >= 3 && i <= 5 || r >= 2 && r <= 4; return v ? "#00205b" : w ? "#ffffff" : "#ba0c2f"; }],
   pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]],
-  netherlands: [3, (i, r) => ["#ae1c28", "#ffffff", "#21468b"][r]]
+  netherlands: [3, (i, r) => ["#ae1c28", "#ffffff", "#21468b"][r]],
+  dalmatia: [6, (i, r) => i >= 5 && i <= 6 && r >= 1 && r <= 3 ? ((i + r) % 2 ? "#ffffff" : "#d8232a") : ["#d8232a", "#d8232a", "#ffffff", "#ffffff", "#1a3a8a", "#1a3a8a"][r]]
 };
 function drawCheck(c) {
   g.strokeStyle = OUT; g.lineWidth = 1.5;
@@ -1474,7 +1643,7 @@ function drawWater(cx) {
   const x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1), top = 12 * TS + 14;
   for (let x = x0; x <= x1; x++) {
     if (L.grid[ROWS - 1][x] === "#") continue;
-    g.fillStyle = L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; g.fillRect(x * TS, top, TS, VIEW_H - top);
+    g.fillStyle = L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; g.fillRect(x * TS, top, TS, VIEW_H - top);
     g.fillStyle = "rgba(255,255,255,.45)"; for (let i = 0; i < 2; i++) g.fillRect(x * TS + ((frame * .4 + i * 16 + x * 7) % TS), top + 3 + i * 9, 8, 1.5);
   }
 }
@@ -1532,7 +1701,8 @@ function render() {
 
   if (!L || state === "title" || state === "map" || state === "hero") {
     drawBackground("sneeuw", frame * .6, REGION.scene);
-    drawFlakes(); vignette();
+    if (!REGION.summer) drawFlakes();
+    vignette();
     return;
   }
   const theme = L.d.theme, cx = Math.round(cam);
@@ -1572,12 +1742,12 @@ function render() {
     } else drawItem(it.type === "key" ? L.d.keyType : L.d.questType, cx2, cy2, frame * 16);
   }
 
-  const hat = theme === "sneeuw" ? "xmas" : null;
+  const hat = theme === "sneeuw" ? "xmas" : null, summer = !!L.d.summer;
   const scarf = theme === "sneeuw" || theme === "stad";
   for (const n of L.npcs) {
     const face = P.x > n.x ? 1 : -1;
     shadowAt(n.x + 11, n.y + TS, 11);
-    drawPerson(n.who, n.x + 11, n.y + TS, 1, face, 0, false, hat, { t: frame * 16 + n.x * 7, scarf, indoor: theme === "huis" });
+    drawPerson(n.who, n.x + 11, n.y + TS, 1, face, 0, false, hat, { t: frame * 16 + n.x * 7, scarf, summer, indoor: theme === "huis" });
     g.font = "600 12px Fredoka, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
     const tw = g.measureText(n.who.name).width + 12;
     g.fillStyle = OUT; g.beginPath(); rp(n.x + 11 - tw / 2 - 1.5, n.y - 33.5, tw + 3, 19, 6); g.fill();
@@ -1603,11 +1773,13 @@ function render() {
       shadowAt(cx, gy, 20);
       const m0 = g.getTransform();
       g.translate(cx - P.face * P.h / 2, gy - 9 + Math.sin(frame / 3) * .4); g.rotate(P.face * Math.PI / 2);
-      drawPerson(ch, 0, 0, 1, P.face, 0, false, pHat, { t: frame * 16, scarf, indoor: theme === "huis", slide: true });
+      drawPerson(ch, 0, 0, 1, P.face, 0, false, pHat, { t: frame * 16, scarf, summer, indoor: theme === "huis", slide: true });
       g.setTransform(m0);
     } else {
       if (P.onGround) shadowAt(P.x + P.w / 2, P.y + P.h, 11);
-      drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3, scarf, indoor: theme === "huis" });
+      drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3, scarf, summer, indoor: theme === "huis" });
+      // swimming: the water covers you up to your chest
+      if (P.swim) { g.fillStyle = "rgba(42,170,190,.8)"; g.fillRect(P.x - 10, SWIM_Y, P.w + 20, P.h); g.fillStyle = "#e8fbff"; g.fillRect(P.x - 10, SWIM_Y - 1 + Math.sin(frame / 8) * 1, P.w + 20, 2.5); }
     }
   }
 
