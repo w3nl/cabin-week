@@ -28,7 +28,7 @@ function buildLevel(idx) {
     if (type === "coin" || type === "key" || type === "heart" || type === "quest") {
       lv.items.push({ type, x: px, y: py, w: TS, h: TS, taken: false });
       if (type === "coin") lv.coinTotal++;
-    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: d.enemy === "robot" ? -1.4 : -1, dead: 0 });
+    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8 }[d.enemy] || -1, dead: 0 });
     else if (type === "npc") lv.npcs.push({ x: px + 5, y: py, who: others[(idx * 3 + npcN++) % others.length], ...extra, talked: false });
     else if (type === "sign") lv.signs.push({ x: px, y: py, lines: extra });
     else if (type === "check") lv.checks.push({ x: px, y: py, on: false });
@@ -90,7 +90,7 @@ addEventListener("keydown", e => {
   // In menu's: pijltjes kiezen een knop, Enter/OK drukt (gamepad.js). Zo werkt ook een tv-afstandsbediening.
   if (state !== "play" && menuKey(e)) return;
   if (state === "pad") { padKey(e); return; }
-  if (e.code === "Escape") { if (state === "play" || state === "intro") toTitle(); return; }
+  if (e.code === "Escape") { if (state === "play" || state === "intro" || state === "map") toTitle(); return; }
   const a = KEYMAP[e.code];
   if (!a) return;
   if (state === "play") e.preventDefault();
@@ -307,11 +307,11 @@ function step() {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
         e.dead = 1; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!") }[e.kind], "#fff");
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
         e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!") }[e.kind], "#fff");
-      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!" }[e.kind]);
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!") }[e.kind], "#fff");
+      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!") }[e.kind]);
     }
   }
   L.enemies = L.enemies.filter(e => e.dead < 30);

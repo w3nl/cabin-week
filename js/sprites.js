@@ -230,6 +230,49 @@ function drawEnemy(e, t) {
     g.strokeStyle = "#e1e6ee"; g.lineWidth = 1.4; const sp = t / 50;
     for (let i = 0; i < 3; i++) { const a = sp + i * 2.1; g.beginPath(); g.moveTo(13, -2); g.lineTo(13 + Math.cos(a) * 7, -2 + Math.sin(a) * 2.5); g.stroke(); }
     g.fillStyle = "rgba(160,150,140,.35)"; for (let i = 0; i < 3; i++) g.fillRect(-18 - i * 4 - (t / 40 % 4), -3 - i, 2, 2);
+  } else if (e.kind === "pinguin") {
+    // a penguin that took a wrong turn: it waddles
+    const wob = Math.sin(e.x * .25) * .12; g.rotate(wob);
+    blob("#ff9a2a", () => { g.ellipse(-5, -1.5, 5, 2, 0, 0, 7); });
+    blob("#ff9a2a", () => { g.ellipse(5, -1.5, 5, 2, 0, 0, 7); });
+    blob("#1f2433", () => g.ellipse(0, -14, 10, 13, 0, 0, 7));
+    g.fillStyle = "#f6f8fc"; g.beginPath(); g.ellipse(3, -12, 6.5, 10, 0, 0, 7); g.fill();
+    blob("#1f2433", () => g.ellipse(-8, -14, 3, 8, .3, 0, 7));
+    blob("#1f2433", () => g.arc(2, -27, 7, 0, 7));
+    g.fillStyle = "#f6f8fc"; g.beginPath(); g.arc(4.5, -27, 4, 0, 7); g.fill();
+    g.fillStyle = "#1d1d26"; g.fillRect(5, -29, 2, 2.4);
+    blob("#ff9a2a", () => { g.moveTo(8, -27.5); g.lineTo(14, -26); g.lineTo(8, -24.5); g.closePath(); });
+    // a little red scarf: it's cold, even for a penguin
+    blob("#d8232a", () => rp(-5, -22, 13, 3.5, 1.5));
+  } else if (e.kind === "geit") {
+    // an Alpine mountain goat with curved horns and a beard
+    const st = Math.sin(e.x * .35) * 3;
+    [[-10, st], [-5, -st], [6, st], [11, -st]].forEach(([x, d], i) => { blob(i % 2 ? "#cfc7b8" : "#e2dccd", () => g.rect(x - 1.8, -9, 3.6, 8 + d * .3)); g.fillStyle = "#3a3026"; g.fillRect(x - 1.8, -2 + d * .3, 3.6, 2); });
+    blob("#ece6d8", () => g.ellipse(0, -14, 15, 8.5, 0, 0, 7));
+    g.fillStyle = "#d8d0bf"; g.beginPath(); g.ellipse(-2, -10, 12, 3, 0, 0, 7); g.fill();
+    blob("#ece6d8", () => { g.moveTo(-15, -17); g.lineTo(-19, -21); g.lineTo(-14, -14); g.closePath(); });
+    blob("#ece6d8", () => g.ellipse(15, -20, 6.5, 6, -.3, 0, 7));
+    blob("#ece6d8", () => g.ellipse(20, -16, 4, 3.5, 0, 0, 7));
+    g.fillStyle = "#e6dfcf"; g.beginPath(); g.moveTo(17, -13); g.lineTo(19, -6); g.lineTo(21, -13); g.fill(); g.stroke();
+    g.strokeStyle = "#8a7a5a"; g.lineWidth = 2.6; g.beginPath(); g.moveTo(13, -25); g.quadraticCurveTo(8, -36, 2, -28); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 1.6;
+    g.fillStyle = "#1d1d26"; g.fillRect(16.5, -22, 2, 2);
+    g.fillStyle = "#d8a050"; g.beginPath(); g.arc(9, -10, 2.5, 0, 7); g.fill(); g.stroke();
+  } else if (e.kind === "troll") {
+    // a small, grumpy forest troll with a big nose, a mossy tuft and a tail
+    const st = Math.sin(e.x * .3) * 2.5;
+    g.strokeStyle = "#5a4a3a"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(-10, -8); g.quadraticCurveTo(-20, -6, -19, -15); g.stroke();
+    g.fillStyle = "#3a2e22"; g.beginPath(); g.arc(-19, -16, 2.5, 0, 7); g.fill();
+    g.strokeStyle = OUT; g.lineWidth = 1.6;
+    blob("#6d7a52", () => g.rect(-6 + st * .3, -6, 4.5, 6));
+    blob("#6d7a52", () => g.rect(2 - st * .3, -6, 4.5, 6));
+    blob("#7d8a5e", () => g.ellipse(0, -15, 11, 11, 0, 0, 7));
+    blob("#8a6a46", () => rp(-11, -12, 22, 8, 3));
+    blob("#7d8a5e", () => g.ellipse(9, -17, 6, 4.5, .2, 0, 7));
+    g.fillStyle = "#1d1d26"; g.fillRect(3, -20, 2, 2); g.fillRect(-2, -20, 2, 2);
+    g.lineWidth = 1.2; g.beginPath(); g.moveTo(-3, -22.5); g.lineTo(1, -21.5); g.moveTo(2, -21.5); g.lineTo(6, -22.5); g.stroke(); g.lineWidth = 1.6;
+    blob("#4f6a3a", () => { g.moveTo(-6, -25); g.lineTo(-2, -32); g.lineTo(0, -26); g.lineTo(4, -31); g.lineTo(5, -25); g.closePath(); });
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.ellipse(0, -26, 6, 1.8, 0, 0, 7); g.fill();
   } else {
     g.strokeStyle = "#4a6a95";
     const wob = Math.sin(e.x * .12) * .08; // waggelen met de afgelegde weg (niet t + e.x: dat springt elke stap)

@@ -17,21 +17,22 @@ Cabin Week
 **Short description** (max. 80 characters)
 
 ```text
-A Christmas week in a holiday cabin: one level a day, with puzzles and codes.
+Winter trips through Europe: one level a day, with puzzles and code locks.
 ```
 
 **Full description** (max. 4000 characters)
 
 ```text
-Two families, nine people, one holiday cabin in the snowy hills. Every day of the Christmas week you play a new level.
+Two families, nine people, four winter trips. Choose a trip on the map of Europe: the Ardennes, the North Pole, Tirol or Norway. Every day of the week you play a new level.
 
 Choose your hero and walk, jump and find your way through the forest, the cabin, the snow and a Christmas market. Find the three lost things, help the others with a task and crack the code lock with the clues on the signs along the way.
 
-• 8 levels, one for every day of the week
+• 32 levels: four trips of eight days
+• The North Pole with Santa's workshop, ski school in Tirol, huskies and northern lights in Norway
 • 9 characters to choose from
 • Code locks, with hints if you get stuck
 • Chips, chocolate and Christmas biscuits to collect
-• Jump on wild boars, robot vacuums and snowmen, or belly-slide into them
+• Jump on wild boars, robot vacuums, snowmen, lost penguins, mountain goats and little trolls, or belly-slide into them
 • A birthday with Lego, and a Saab with a Christmas tree on the roof
 • Play with the TV remote, a controller (PlayStation, Stadia, Xbox) or the touch screen
 • In English and Dutch
@@ -51,21 +52,22 @@ Cabin Week
 **Korte beschrijving**
 
 ```text
-Een kerstweek in een vakantiehuisje: elke dag een level met puzzels en codes.
+Wintertripjes door Europa: elke dag een level met puzzels en codesloten.
 ```
 
 **Volledige beschrijving**
 
 ```text
-Twee gezinnen, negen personen, één vakantiehuisje in de besneeuwde heuvels. Elke dag van de kerstweek speel je een nieuw level.
+Twee gezinnen, negen personen, vier winterreizen. Kies een reis op de kaart van Europa: de Ardennen, de Noordpool, Tirol of Noorwegen. Elke dag van de week speel je een nieuw level.
 
 Kies je held en loop, spring en zoek je een weg door het bos, het huisje, de sneeuw en een kerstmarkt. Vind de drie verdwenen dingen, help de anderen met een opdracht en kraak het codeslot met de aanwijzingen die onderweg op bordjes staan.
 
-• 8 levels, één voor elke dag van de week
+• 32 levels: vier reizen van acht dagen
+• De Noordpool met de werkplaats van de Kerstman, skiles in Tirol, husky's en noorderlicht in Noorwegen
 • 9 poppetjes om uit te kiezen
 • Codesloten, met tips als je vastzit
 • Frietjes, chocolade en kerstkoekjes om te verzamelen
-• Spring op wilde zwijnen, robotstofzuigers en sneeuwpoppen, of glij er op je buik tegenaan
+• Spring op wilde zwijnen, robotstofzuigers, sneeuwpoppen, verdwaalde pinguïns, berggeiten en kleine trollen, of glij er op je buik tegenaan
 • Een verjaardag met Lego, en een Saab met een kerstboom op het dak
 • Speel met de afstandsbediening, een controller (PlayStation, Stadia, Xbox) of het touchscreen
 • In het Engels en Nederlands

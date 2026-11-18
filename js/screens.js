@@ -21,6 +21,7 @@ function updateHud() {
 function setScreen(s) {
   state = s;
   $("title").hidden = s !== "title";
+  $("mapWrap").hidden = s !== "map";
   $("cardWrap").hidden = !(s === "intro" || s === "card");
   $("padWrap").hidden = s !== "pad";
   $("hud").hidden = !(s === "play" || s === "pad");
@@ -53,8 +54,9 @@ function showIntro() {
 
 function completeLevel() {
   const idx = L.idx, secs = Math.round(L.time / 60), d = L.d, last = idx === LEVELS.length - 1;
-  save.unlocked = Math.max(save.unlocked, Math.min(LEVELS.length, idx + 2));
-  save.best[idx] = Math.max(save.best[idx] || 0, L.coins); persist();
+  const pr = prog();
+  pr.unlocked = Math.max(pr.unlocked || 1, Math.min(LEVELS.length, idx + 2));
+  pr.best[idx] = Math.max(pr.best[idx] || 0, L.coins); persist();
   setScreen("card");
   const next = last ? [] : [[`${T("Next day", "Volgende dag")}: ${DAY_NAMES[idx + 1]}`, () => startLevel(idx + 1)]];
   SFX.win(); confetti(d.quiet ? 0 : 160);
@@ -65,11 +67,10 @@ function completeLevel() {
     card(`<div class="eyebrow">${d.day} · ${T("done", "gehaald")}</div><h2 style="font-size:30px;margin-top:6px">${d.quiet ? d.name : T("You made it! 🎉", "Overleefd! 🎉")}</h2><p>${msg}</p>${stats}${d.quiet ? "" : `<p style="color:var(--muted)">${JOKES[Math.floor(Math.random() * JOKES.length)]}</p>`}`,
       [...next, ["Menu", toTitle, true]]);
   } else {
-    card(`<div class="eyebrow">${T(`All ${LEVELS.length} days done`, `Alle ${LEVELS.length} dagen gehaald`)}</div><h2 style="font-size:34px;margin-top:6px">${T("What a week! 🚗🏠", "Wat een week! 🚗🏠")}</h2>
-      <p>${T("The arrival, the old railway, Luxembourg, Paul's 40th birthday, two Christmas days, raclette and all the socks back in the suitcase.",
-        "De aankomst, het oude spoorpad, Luxemburg, Pauls 40e verjaardag, twee kerstdagen, raclette en alle sokken terug in de koffer.")}</p>
+    card(`<div class="eyebrow">${T(`All ${LEVELS.length} days done`, `Alle ${LEVELS.length} dagen gehaald`)}</div><h2 style="font-size:34px;margin-top:6px">${REGION.finale[0]}</h2>
+      <p>${REGION.finale[1]}</p>
       <p>${T("The Hills and the Woods: two families, one cabin, one big week. Same cabin next year?", "De Hills en de Woods: twee gezinnen, één huis, één grote week. Zelfde huis volgend jaar?")}</p>${stats}`,
-      [[T("Start again", "Opnieuw beginnen"), () => startLevel(0)], ["Menu", toTitle, true]]);
+      [[T("Another trip", "Nog een reis"), openMap], [T("Start again", "Opnieuw beginnen"), () => startLevel(0), true], ["Menu", toTitle, true]]);
   }
 }
 
@@ -140,12 +141,15 @@ function portrait(c, i) {
 }
 function buildTitle() {
   // No dates and no countdown: the title shows how far you are in the week.
-  const done = LEVELS.filter((_, i) => save.best[i] != null).length;
-  const next = Math.min(LEVELS.length - 1, LEVELS.findIndex((_, i) => save.best[i] == null && i + 1 <= save.unlocked));
+  const pr = prog();
+  const done = LEVELS.filter((_, i) => pr.best[i] != null).length;
+  const next = Math.min(LEVELS.length - 1, LEVELS.findIndex((_, i) => pr.best[i] == null && i + 1 <= pr.unlocked));
+  $("eyebrow").textContent = `${T("The Hills × the Woods", "De Hills × de Woods")} · ${REGION.name}`;
+  $("regionName").textContent = REGION.name;
   if (done === 0) {
     $("cdNum").textContent = LEVELS.length;
     $("cdWord").textContent = T("winter days to play", "winterdagen om te spelen");
-    $("cdSub").textContent = T(`A Christmas week in a cabin near ${VILLAGE}.`, `Een kerstweek in een huisje bij ${VILLAGE}.`);
+    $("cdSub").textContent = REGION.blurb;
   } else if (done < LEVELS.length) {
     $("cdNum").textContent = `${done}/${LEVELS.length}`;
     $("cdWord").textContent = T("days played", "dagen gespeeld");
@@ -157,7 +161,7 @@ function buildTitle() {
   const wkEl = $("week"); wkEl.innerHTML = "";
   WEEK.forEach((w, i) => {
     const li = document.createElement("li");
-    li.className = (i === next && done < LEVELS.length ? "today " : save.best[i] != null ? "past " : "") + (LEVELS[i].quiet ? "quiet" : "");
+    li.className = (i === next && done < LEVELS.length ? "today " : pr.best[i] != null ? "past " : "") + (LEVELS[i].quiet ? "quiet" : "");
     li.innerHTML = `<div class="wd">${w.wd}</div><div class="dd">${i + 1}</div><div class="ic">${w.ic}</div><div class="lb"></div>`;
     li.querySelector(".lb").textContent = w.lb;
     wkEl.appendChild(li);
@@ -173,15 +177,76 @@ function buildTitle() {
   });
   const lvEl = $("levels"); lvEl.innerHTML = "";
   LEVELS.forEach((d, i) => {
-    const b = document.createElement("button"); b.type = "button"; b.disabled = i + 1 > save.unlocked;
+    const b = document.createElement("button"); b.type = "button"; b.disabled = i + 1 > pr.unlocked;
     const isNext = i === next && done < LEVELS.length;
     if (isNext) b.classList.add("today");
-    b.innerHTML = `<div class="n">${d.day}${b.disabled ? " · 🔒" : save.best[i] != null ? " · ✓" : ""}</div><div class="t"></div><div class="s"></div>`;
+    b.innerHTML = `<div class="n">${d.day}${b.disabled ? " · 🔒" : pr.best[i] != null ? " · ✓" : ""}</div><div class="t"></div><div class="s"></div>`;
     b.querySelector(".t").textContent = d.name; b.querySelector(".s").textContent = d.sub;
     b.onclick = () => startLevel(i);
     lvEl.appendChild(b);
   });
 }
+/* ---------- The map of Europe: choose a region ---------- */
+// Coastlines in longitude/latitude, simplified by hand. Projected flat: x = (lon + 25) * cos(52°), y = 72 - lat.
+const MAP_W = 431, MAP_H = 380;
+const mapXY = (lon, lat) => [((lon + 25) * .616 * 10), ((72 - lat) * 10)];
+const COASTS = [
+  // mainland Europe, clockwise from Gibraltar
+  [[-5.6, 36], [-2, 36.7], [.2, 38.7], [-.3, 39.5], [.9, 40.8], [3.2, 42], [3.1, 43], [4.8, 43.4], [6.5, 43.1], [7.5, 43.8], [8.8, 44.4], [10.2, 43.9],
+  [10.5, 42.9], [12.2, 41.7], [14.2, 40.8], [15.6, 40], [15.7, 38.2], [16.6, 38.4], [17.1, 39], [16.5, 39.7], [17, 40.5], [18.5, 40.1], [18, 40.6],
+  [16.1, 41.4], [15, 42], [13.6, 43.5], [12.3, 44.5], [12.4, 45.4], [13.7, 45.6], [13.6, 45.1], [14.4, 45.3], [15.2, 44.3], [16.4, 43.5], [18.1, 42.6],
+  [19.4, 41.9], [19.4, 40.4], [20, 39.7], [21.1, 38.3], [21.6, 36.9], [22.9, 36.4], [23.2, 38], [22.9, 39.4], [24, 40.7], [26, 40.9], [26.2, 41.7],
+  [28, 41.6], [29, 41.2], [28, 42], [27.9, 43.2], [28.6, 44.3], [29.6, 45.2], [30.7, 46.5], [31.5, 46.6], [33.5, 46], [33.6, 44.5], [36.5, 45.3],
+  [35, 46.2], [38, 47.1], [39.3, 47.2], [40, 46.5], [45, 45.5], [45, 66.6], [43, 66.3], [40.2, 64.6], [37.5, 64], [35, 64.4], [34.7, 65.8], [36, 66.2],
+  [41, 66.9], [41.3, 67.5], [40, 68.2], [38, 68.8], [33, 69.3], [31, 69.8], [28.5, 70.9], [25.8, 71.1], [23.5, 70.6], [20, 70.1], [17.5, 69.5],
+  [15.5, 68.4], [14.5, 67.5], [12.5, 66], [11.5, 64.6], [10, 63.6], [8, 63], [6, 62.4], [5, 61.5], [5, 60], [5.5, 59], [6.5, 58.1], [8, 58.1],
+  [9.5, 59], [10.7, 59.9], [11.2, 59.1], [11.6, 58.3], [12.3, 57], [12.8, 56.2], [13.2, 55.4], [14.2, 55.4], [14.5, 56.1], [16, 56.2], [16.5, 57],
+  [16.7, 58], [18, 59], [18.8, 59.8], [17.3, 60.6], [17.4, 61.7], [18.5, 62.8], [20.3, 63.8], [21.6, 64.8], [22.5, 65.7], [24.5, 65.8], [25.4, 65],
+  [24.5, 64.3], [22.5, 63.4], [21.4, 62.5], [21.5, 61], [21.4, 60.6], [22.9, 59.9], [25, 60.3], [27, 60.5], [28.7, 60.6], [30, 60], [28, 59.5],
+  [26, 59.5], [24, 59.4], [23.5, 59], [23.4, 58.2], [24.4, 58.3], [24.2, 57.2], [23, 57], [21.6, 57.5], [21, 56.5], [21.2, 55.6], [20.5, 54.9],
+  [19.5, 54.4], [18.6, 54.4], [17, 54.7], [14.4, 53.9], [12.5, 54.4], [11, 54], [10, 54.8], [10.5, 56.5], [10.6, 57.7], [9.5, 57.1], [8.6, 57.1],
+  [8.1, 56.5], [8.2, 55.5], [8.6, 54.9], [8.9, 53.9], [7, 53.5], [5.5, 53.4], [4.7, 52.9], [4.2, 52], [3.4, 51.4], [2.5, 51.1], [1.6, 50.9],
+  [1.6, 50.2], [.2, 49.7], [-1.3, 49.6], [-1.9, 49.7], [-1.5, 48.7], [-3, 48.8], [-4.7, 48.4], [-4.3, 47.8], [-2.5, 47.3], [-1.2, 46.1], [-1.2, 44.5],
+  [-1.8, 43.4], [-3.8, 43.5], [-6, 43.6], [-8, 43.7], [-9.3, 43], [-8.9, 42], [-8.7, 41], [-9.5, 38.8], [-8.8, 37.9], [-9, 37], [-7.4, 37.2], [-6.3, 36.6]],
+  // Great Britain, Ireland, Iceland, Sicily, Sardinia, Corsica, Zealand
+  [[-5.7, 50.1], [-3.5, 50.3], [-1, 50.8], [1.4, 51.2], [1.7, 52.6], [.3, 53.1], [-.1, 54], [-1.5, 55], [-2, 55.9], [-3, 56.2], [-1.8, 57.5], [-3.4, 58.6],
+    [-5, 58.6], [-6.2, 57.5], [-5.6, 56.3], [-4.9, 54.8], [-3.4, 54.9], [-3, 53.4], [-4.6, 53.3], [-4.2, 52.3], [-5.3, 51.8], [-4, 51.6], [-3, 51.4], [-4.2, 51.2]],
+  [[-6, 52.2], [-6.2, 53.4], [-6, 54.6], [-7.3, 55.3], [-8.5, 54.4], [-10, 53.5], [-9.6, 52.2], [-10.4, 51.6], [-8, 51.6]],
+  [[-22.5, 63.9], [-21, 63.8], [-18.5, 63.4], [-15, 64.2], [-13.6, 65.1], [-14.6, 66.3], [-16.4, 66.5], [-19, 66.1], [-22.4, 66.4], [-24, 65.5], [-22, 64.7], [-23.8, 64.8]],
+  [[12.4, 38], [15.6, 38.3], [15.1, 36.7]], [[8.4, 41], [9.8, 41], [9.6, 39.1], [8.4, 39]], [[8.6, 42.9], [9.4, 43], [9.5, 41.4], [8.7, 41.6]],
+  [[11.1, 55.9], [12.6, 56], [12.4, 55.2], [11.2, 55.2]]
+];
+function buildMapSvg() {
+  const pts = sh => sh.map(([lo, la]) => mapXY(lo, la).map(v => v.toFixed(1)).join(",")).join(" ");
+  const land = COASTS.map(sh => `<polygon points="${pts(sh)}"/>`).join("");
+  const soon = SOON.map(p => { const [x, y] = mapXY(p.lon, p.lat); return `<circle class="soon-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4"><title>${p.name}</title></circle>`; }).join("");
+  return `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" role="img" aria-label="${T("Map of Europe", "Kaart van Europa")}"><rect class="sea" width="${MAP_W}" height="${MAP_H}" rx="14"/><g class="land">${land}</g>${soon}</svg>`;
+}
+function buildMap() {
+  const box = $("mapBox");
+  box.innerHTML = buildMapSvg();
+  REGIONS.forEach(r => {
+    const [x, y] = mapXY(r.lon, r.lat), done = regionDone(r.id), total = r.levels.length;
+    const b = document.createElement("button"); b.type = "button"; b.className = "pin" + (r.id === REGION.id ? " here" : "") + (r.labelLeft ? " left" : "");
+    b.style.left = (x / MAP_W * 100).toFixed(2) + "%"; b.style.top = (y / MAP_H * 100).toFixed(2) + "%";
+    b.dataset.region = r.id;
+    b.innerHTML = `<span class="dot">${r.icon}</span><span class="lbl"><b></b><small></small></span>`;
+    b.querySelector("b").textContent = (r.offMap ? "↑ " : "") + r.name;
+    b.querySelector("small").textContent = done >= total ? T("✓ all done", "✓ alles gehaald") : done ? `${done}/${total}` : T(`${total} days`, `${total} dagen`);
+    b.setAttribute("aria-label", `${r.name}: ${r.blurb}`);
+    b.onclick = () => { setRegion(r.id, true); tone(660, .06, "triangle", .05); toTitle(); };
+    b.onfocus = b.onmouseenter = () => mapInfo(r);
+    box.appendChild(b);
+  });
+  mapInfo(REGION);
+  $("mapSoon").textContent = T(`Coming later: ${SOON.map(p => p.name).join(", ")}.`, `Later erbij: ${SOON.map(p => p.name).join(", ")}.`);
+}
+/** The text next to the map: the region that has focus (or the one you are in). */
+function mapInfo(r) { $("mapInfo").innerHTML = `<b>${r.icon} ${r.name}</b><br>${r.blurb}`; }
+function openMap() { hideDialog(); dialog = null; buildMap(); setScreen("map"); }
+$("regionBtn").onclick = openMap;
+$("mapClose").onclick = toTitle;
+
 let jokeOrder = [];
 function nextJoke() {
   if (!jokeOrder.length) jokeOrder = JOKES.map((_, i) => i).sort(() => Math.random() - .5);

@@ -1,0 +1,63 @@
+"use strict";
+// Regions: every region is its own winter week with 8 levels. Choose one on the map; each region keeps its own progress.
+// LEVELS and WEEK (from levels.js and data.js) always hold the days of the active region: setRegion() swaps their contents,
+// so the rest of the game keeps working with LEVELS[i] and WEEK[i].
+const regionWeek = (list) => list.map(([ic, en, nl], i) => ({ wd: DAY_ABBR[i], ic, lb: T(en, nl) }));
+const REGIONS = [
+  { id: "ardennes", name: T("Ardennes", "Ardennen"), icon: "🌲", lon: 5.6, lat: 50.1, labelLeft: true, scene: "sneeuw",
+    place: VILLAGE, blurb: T(`A Christmas week in a cabin near ${VILLAGE}.`, `Een kerstweek in een huisje bij ${VILLAGE}.`),
+    levels: LEVELS.slice(), week: WEEK.slice(),
+    finale: [T("What a week! 🚗🏠", "Wat een week! 🚗🏠"),
+      T("The arrival, the old railway, Luxembourg, Paul's 40th birthday, two Christmas days, raclette and all the socks back in the suitcase.",
+        "De aankomst, het oude spoorpad, Luxemburg, Pauls 40e verjaardag, twee kerstdagen, raclette en alle sokken terug in de koffer.")] },
+  { id: "pole", name: T("North Pole", "Noordpool"), icon: "🎅", lon: 30, lat: 69.4, offMap: true, labelLeft: true, scene: "pole",
+    place: T("Santa's village", "het dorp van de Kerstman"), blurb: T("A week at the North Pole, in Santa's village.", "Een week op de Noordpool, in het dorp van de Kerstman."),
+    levels: POLE_LEVELS,
+    week: regionWeek([["✈️", "Landing", "Landen"], ["🦌", "Reindeer", "Rendieren"], ["🧸", "Workshop", "Werkplaats"], ["🧊", "Igloo", "Iglo"],
+      ["✉️", "Post office", "Postkantoor"], ["🌌", "Northern lights", "Noorderlicht"], ["🎅", "Christmas Eve", "Kerstavond"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Ho ho home! ✈️🏠", "Ho ho naar huis! ✈️🏠"),
+      T("A lost penguin, nine reindeer, a workshop full of elves, an igloo, millions of letters, the northern lights and Santa's sleigh taking off.",
+        "Een verdwaalde pinguïn, negen rendieren, een werkplaats vol elfjes, een iglo, miljoenen brieven, het noorderlicht en de slee van de Kerstman die vertrekt.")] },
+  { id: "tirol", name: "Tirol", icon: "⛷️", lon: 11.4, lat: 47.25, scene: "alps",
+    place: "Lindenalm", blurb: T("A ski week in a chalet in Lindenalm, high in the Alps.", "Een skiweek in een chalet in Lindenalm, hoog in de Alpen."),
+    levels: TIROL_LEVELS,
+    week: regionWeek([["🏔️", "Arrival", "Aankomst"], ["🎿", "Ski school", "Skiles"], ["🚡", "Cable car", "Kabelbaan"], ["🎄", "Innsbruck", "Innsbruck"],
+      ["🛷", "Toboggan", "Rodelen"], ["🍳", "Mountain hut", "Berghut"], ["🧀", "Fondue", "Fondue"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Servus, Tirol! 🏔️🚗", "Servus, Tirol! 🏔️🚗"),
+      T("Ski school, the cable car, the market in Innsbruck, the toboggan run on Christmas Day, Kaiserschmarrn and fondue. And a lot of goats.",
+        "Skiles, de kabelbaan, de markt in Innsbruck, de rodelbaan op eerste kerstdag, Kaiserschmarrn en fondue. En heel veel geiten.")] },
+  { id: "norway", name: T("Norway", "Noorwegen"), icon: "🌌", lon: 6.8, lat: 61.2, labelLeft: true, scene: "fjord",
+    place: "Fjordvik", blurb: T("A week in a red cabin by the fjord, under the northern lights.", "Een week in een rood huisje bij het fjord, onder het noorderlicht."),
+    levels: NORWAY_LEVELS,
+    week: regionWeek([["🌊", "Arrival", "Aankomst"], ["🛷", "Kicksled", "Schopslee"], ["🐕", "Huskies", "Husky's"], ["⛪", "Christmas Eve", "Kerstavond"],
+      ["🐟", "Christmas Day", "1e Kerstdag"], ["🌲", "Troll forest", "Trollenbos"], ["🌌", "Northern lights", "Noorderlicht"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Ha det, Norway! 🌌🚗", "Ha det, Noorwegen! 🌌🚗"),
+      T("A red cabin by the fjord, brown cheese, huskies, the stave church on Christmas Eve, the troll forest and a sky that danced.",
+        "Een rood huisje bij het fjord, bruine kaas, husky's, de staafkerk op kerstavond, het trollenbos en een lucht die danste.")] }
+];
+/** Places on the map that are not playable yet. */
+const SOON = [
+  { name: T("Iceland", "IJsland"), lon: -19, lat: 64.9 },
+  { name: T("Scania", "Skåne"), lon: 13.6, lat: 55.9 },
+  { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
+  { name: "Veneto", lon: 12.3, lat: 45.5 },
+  { name: T("Dalmatia", "Dalmatië"), lon: 16.4, lat: 43.5 }
+];
+let REGION = REGIONS[0];
+/** Progress of a region: the Ardennes keep the top-level unlocked/best (old saves keep working), the others save.regions[id]. */
+function prog(id = REGION.id) {
+  if (id === "ardennes") return save;
+  if (!save.regions || typeof save.regions !== "object") save.regions = {};
+  const p = save.regions[id] || (save.regions[id] = { unlocked: 1, best: {} });
+  if (!p.best) p.best = {};
+  return p;
+}
+function regionDone(id) { const r = REGIONS.find(x => x.id === id), p = prog(id); return r.levels.filter((_, i) => p.best[i] != null).length; }
+/** Make a region active: its levels and week go into LEVELS and WEEK. */
+function setRegion(id, store) {
+  REGION = REGIONS.find(r => r.id === id) || REGIONS[0];
+  LEVELS.length = 0; LEVELS.push(...REGION.levels);
+  WEEK.length = 0; WEEK.push(...REGION.week);
+  if (store) { save.region = REGION.id; persist(); }
+}
+setRegion(save.region);

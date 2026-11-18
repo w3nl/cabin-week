@@ -60,7 +60,7 @@
       <!-- Portrait: everything in one column. Landscape (computer, TV, phone or tablet turned): col-a and col-b
            side by side, and the menu scales with the screen so nothing needs scrolling. -->
       <div class="col-a">
-      <div class="eyebrow" data-nl="De Hills × de Woods · Pinebrook">The Hills × the Woods · Pinebrook</div>
+      <div class="eyebrow" id="eyebrow">The Hills × the Woods</div>
       <h1><span class="a">Cabin</span> <span class="b">Week</span></h1>
 
       <div class="count">
@@ -75,7 +75,10 @@
       <h2 data-nl="Kies je held <small>2 gezinnen · 9 personen · 1 huisje</small>">Choose your hero <small>2 families · 9 people · 1 cabin</small></h2>
       <div class="chars" id="chars"></div>
 
-      <h2 data-nl="Kies je dag <small>elke dag van de week een eigen level</small>">Choose your day <small>every day of the week has its own level</small></h2>
+      <div class="dayhead">
+        <h2 data-nl="Kies je dag <small>elke dag een eigen level</small>">Choose your day <small>every day has its own level</small></h2>
+        <button type="button" class="region-btn" id="regionBtn" title="Choose another trip" data-nl-title="Kies een andere reis">🗺️ <span id="regionName"></span></button>
+      </div>
       <div class="levels" id="levels"></div>
       </div>
 
@@ -113,6 +116,18 @@
     <button class="btn" id="update-reload" type="button" data-nl="Herladen">Reload</button>
   </div>
 
+  <!-- The map of Europe: choose a region (each region is its own week) -->
+  <div class="overlay" id="mapWrap" hidden>
+    <div class="sheet map">
+      <div class="eyebrow" data-nl="Kies je reis">Choose your trip</div>
+      <h2 data-nl="Waar gaan we heen?">Where are we going?</h2>
+      <p class="map-info" id="mapInfo"></p>
+      <div class="mapbox" id="mapBox"></div>
+      <p class="soon" id="mapSoon"></p>
+      <div class="cta"><button class="btn ghost" id="mapClose" type="button" data-nl="Terug">Back</button></div>
+    </div>
+  </div>
+
   <!-- Generic card (intro / complete / finale) -->
   <div class="overlay" id="cardWrap" hidden><div class="sheet card" id="card"></div></div>
 
@@ -134,7 +149,11 @@
 <script src="js/data.js"></script>
 <script src="js/levels.js"></script>
 <script src="js/levelgen.js"></script>
+<script src="js/region-pole.js"></script>
+<script src="js/region-tirol.js"></script>
+<script src="js/region-norway.js"></script>
 <script src="js/core.js"></script>
+<script src="js/regions.js"></script>
 <script src="js/canvas.js"></script>
 <script src="js/sprites.js"></script>
 <script src="js/game.js"></script>

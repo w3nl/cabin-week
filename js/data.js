@@ -20,6 +20,8 @@ const WEEK = [
   { wd: T("Sun", "zo"), ic: "🧖", lb: T("Last night", "Laatste avond") },
   { wd: T("Mon", "ma"), ic: "🏠", lb: T("Home", "Naar huis") }
 ];
+/** Short weekday names (Mon … Mon), for the week strip of every region. */
+const DAY_ABBR = WEEK.map(w => w.wd);
 /** The label for a day: "Day 3 · Wednesday". */
 const DAY_NAMES = T(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday"],
                     ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag", "maandag"]);

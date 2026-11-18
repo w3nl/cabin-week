@@ -49,7 +49,8 @@ test('English by default; Dutch with ?lang=nl and with the language button, and 
 });
 
 // The original game was made for one family. This list holds the first 16 hex digits of the SHA-256 of words
-// (lower case) that must never appear: the real surnames, first names, village and region, and a name from a special day.
+// (lower case) that must never appear: the real surnames, first names and village, and a name from a special day.
+// (The Ardennes is fine: it is one of the regions on the map.)
 // Hashed, so the test itself does not contain the personal information.
 const BANNED = new Set([
   '07c28eb9f259fc93',
@@ -60,11 +61,9 @@ const BANNED = new Set([
   '5a0521604876bda8',
   '68fc8a764bb9de4d',
   '75e80035bd7ece43',
-  '861ffad68d73d5ca',
   '8cc2d053ad847fc1',
   '90b8de4051f02b7a',
   'a5969856c8a57fd0',
-  'bd968638f8abc2ac',
   'c96623c777c68917',
   'e8fb803a42bff958'
 ]);

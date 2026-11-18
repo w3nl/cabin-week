@@ -21,7 +21,11 @@ body:
     attributes:
       label: Where in the game?
       options:
+        - A new trip (region on the map)
         - A new level
+        - North Pole
+        - Tirol
+        - Norway
         - Day 1 · Arrival in Pinebrook
         - Day 2 · Forest & Old Railway
         - Day 3 · Christmas Market in Luxembourg
@@ -30,7 +34,7 @@ body:
         - Day 6 · The Wildlife Park
         - Day 7 · The Last Evening
         - Day 8 · Going Home
-        - Title screen
+        - Title screen or the map
         - Translations (English / Dutch)
         - Everywhere / the whole game
         - Not sure
