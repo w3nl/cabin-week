@@ -106,6 +106,36 @@ test('een tikje telt precies zo lang als hij duurde, ook als het spel hem pas la
   expect(steps).toBe(3); // 50 ms = 3 stappen van 1/60 s, niet meer
 });
 
+test('a key release stamped in the future (another clock) never blocks walking', async ({ page }) => {
+  await seed(page);
+  await startDay(page, 0);
+  const r = await page.evaluate(() => {
+    holdQ.length = 0; held.left = held.right = false;
+    const now = 1000;
+    // a tap on ← whose release carries a time 4 seconds ahead (some Android/TV WebViews use another clock)
+    queueHold(held, 'left', true, now); queueHold(held, 'left', false, now + 4000);
+    // then → is pressed: it must count right away, not after the ← release
+    queueHold(held, 'right', true, now + 20);
+    const steps = [];
+    for (let i = 0; i < 12; i++) { applyHolds(now + 20 + i * 1000 / 60); steps.push(held.right); }
+    return { rightAt: steps.indexOf(true) };
+  });
+  expect(r.rightAt).toBe(0);
+});
+
+test('a release never waits more than a second, even with a wrong timestamp', async ({ page }) => {
+  await seed(page);
+  await startDay(page, 0);
+  await page.evaluate(() => { holdQ.length = 0; held.left = false; const t = simT; queueHold(held, 'left', true, t); queueHold(held, 'left', false, t + 60000); });
+  await expect.poll(() => page.evaluate(() => held.left), { timeout: 3000 }).toBe(false);
+});
+
+test('a timestamp from the future is clamped to now', async ({ page }) => {
+  await seed(page);
+  const ok = await page.evaluate(() => { const now = performance.now(); return eventTime({ timeStamp: now + 3000 }) <= performance.now() + 1; });
+  expect(ok).toBe(true);
+});
+
 test('een heel kort tikje telt toch voor één stap', async ({ page }) => {
   await seed(page);
   await startDay(page, 0);
