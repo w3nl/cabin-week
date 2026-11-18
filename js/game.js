@@ -37,7 +37,9 @@ function buildLevel(idx) {
     else if (type === "exit") lv.exit = { x: px, y: py - TS, w: TS, h: TS * 2 };
     else if (type === "lantern") lv.lantern = { x: px, y: py, lit: false };
     // Something that carries you across a wide gap: an ice floe, a gondola or a boat. It goes back and forth, and waits a bit at each end.
-    else if (type === "mover") lv.movers.push({ x: px, y: py, w: extra.n * TS, x0: px, x1: px + extra.range * TS, dir: 1, wait: 40, speed: d.moverSpeed || 1.1, dx: 0 });
+    // A gondola can go up or down the mountain (rise: rows, negative is up): then it rides on a slanted cable.
+    else if (type === "mover") lv.movers.push({ x: px, y: py, w: extra.n * TS, x0: px, x1: px + extra.range * TS, y0: py, y1: py + (extra.rise || 0) * TS,
+      dir: 1, wait: 40, speed: d.moverSpeed || 1.1, dx: 0, dy: 0 });
   }
   lv.pad = d.code ? { x: d.code.pad * TS, y: d.code.y2 * TS } : null;
   return lv;
@@ -256,12 +258,12 @@ function step() {
 
   // movers (ice floes, gondolas, boats): move, and take along whoever stands on them
   for (const m of L.movers) {
-    if (m.wait > 0) { m.wait--; m.dx = 0; continue; }
-    const nx = Math.max(m.x0, Math.min(m.x1, m.x + m.dir * m.speed));
-    m.dx = nx - m.x; m.x = nx;
+    if (m.wait > 0) { m.wait--; m.dx = m.dy = 0; continue; }
+    const nx = Math.max(m.x0, Math.min(m.x1, m.x + m.dir * m.speed)), ny = m.y0 + (m.y1 - m.y0) * (nx - m.x0) / (m.x1 - m.x0);
+    m.dx = nx - m.x; m.dy = ny - m.y; m.x = nx; m.y = ny;
     if (m.x === m.x0 || m.x === m.x1) { m.dir = -m.dir; m.wait = 50; }
   }
-  if (P.mover && P.onGround) P.x += P.mover.dx;
+  if (P.mover && P.onGround) { P.x += P.mover.dx; P.y += P.mover.dy; }
   // Wind (the Netherlands): gusts that push you, now this way, then the other way. Less in the air than on the ground.
   if (L.d.wind) P.x += windNow() * (P.onGround ? 1 : .6);
 

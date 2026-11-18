@@ -7,6 +7,7 @@ function genLevel(o) {
   // Options that make a region play differently (see AGENTS.md, "Region gameplay"):
   //   hills: [low, high] – the ground goes up and down between those rows (12 = normal ground, 9 = high), like a mountain.
   //   movers: "floe" | "gondola" | "boat" – wide gaps (too wide to jump) with something that carries you across.
+  //     A gondola rides on a slanted cable: up the mountain (2 or 3 rows), or down where the ground is already high.
   //   ice, dark, water, interior – used by the game and the drawing code, not by the generator.
   const R = rng(o.seed), w = o.w;
   const gateX = o.quest ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
@@ -41,9 +42,12 @@ function genLevel(o) {
       ground.push([cur, x + 1, gy]);
       for (let i = 0; i < 7; i++) bad.add(x + 2 + i);
       bad.add(x + 1); bad.add(x + 9);
-      ents.push(["mover", x + 2, gy, { range: 5, n: 2 }]);
-      [3, 5, 7].forEach(i => coin(x + i, 8 + d));
+      let rise = 0;
+      if (o.movers === "gondola") { const up = gy - hHigh, down = hLow - gy; rise = up >= 2 ? -Math.min(3, up) : down >= 2 ? Math.min(3, down) : 0; }
+      ents.push(["mover", x + 2, gy, { range: 5, n: 2, rise }]);
+      [3, 5, 7].forEach(i => coin(x + i, 8 + d + Math.round(rise * (i - 2) / 6)));
       cur = x + 9; ferryDone = true;
+      gy += rise;
     } else if (type === "plat2") {
       plats.push([x + 1, 9 + d, 3], [x + 5, 7 + d, 3]); slots.push([x + 2, 8 + d], [x + 6, 6 + d]);
       coin(x + 1, 10 + d); coin(x + 3, 10 + d); coin(x + 7, 5 + d);
