@@ -972,7 +972,15 @@ function sign2(x, y, w, h, bg, text, fg) {
 }
 
 /* ---------- Decoratie ---------- */
-function drawDeco(kind, x, theme) {
+/** Animals in the scenery that stand still: drawn smaller, a bit higher and a bit faded, as if further away, so you
+ *  can see at once that they are background and not something to bump into or stand on. */
+const BG_ANIMALS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow"]);
+function drawDeco(kind, x, theme, far) {
+  if (!far && BG_ANIMALS.has(kind)) {
+    const bx = x * TS + 32, gy = groundTop(x) * TS;
+    g.save(); g.translate(bx, gy - 8); g.scale(.6, .6); g.translate(-bx, -gy); g.globalAlpha = .88;
+    drawDeco(kind, x, theme, true); g.restore(); return;
+  }
   const by = groundTop(x) * TS, px = x * TS;
   g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const H = hash(x * 5.3);
@@ -1075,8 +1083,8 @@ function drawDeco(kind, x, theme) {
     g.fillStyle = "#2a3a2a"; g.fillRect(px + 18, by - 26, 16, 26); g.strokeRect(px + 18, by - 26, 16, 26);
     g.fillStyle = "#f4f8ff"; g.fillRect(px - 2, by - h - 2, w + 4, 3);
   } else if (kind === "polarbear") {
-    // a polar bear strolling over the ice (scenery: it minds its own business)
-    const st = Math.sin(frame / 14 + px) * 1.5;
+    // a polar bear standing on the ice (scenery: it minds its own business, so its legs stay still)
+    const st = 0;
     shadowAt(px + 30, by, 34);
     g.fillStyle = "#e8eef2"; [[8, st], [18, -st], [40, st], [50, -st]].forEach(([dx, d]) => { g.beginPath(); rp(px + dx, by - 18 + d * .3, 9, 18 - d * .3, 3); g.fill(); g.stroke(); });
     g.beginPath(); g.ellipse(px + 30, by - 28, 30, 16, 0, 0, 7); g.fill(); g.stroke();
