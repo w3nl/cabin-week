@@ -281,3 +281,12 @@ test('every text balloon is a list of sentences, never one letter at a time', as
     expect(bad).toEqual([]);
   }
 });
+
+test('never two checkpoint flags next to each other', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  const close = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map((l, i) => {
+    const xs = l.ents.filter(e => e[0] === 'check').map(e => e[1]).sort((a, b) => a - b);
+    return xs.some((x, j) => j && x - xs[j - 1] < 10) ? `${r.id} ${i + 1}: ${xs.join(',')}` : null;
+  })).filter(Boolean));
+  expect(close).toEqual([]);
+});

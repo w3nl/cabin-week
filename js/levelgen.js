@@ -105,7 +105,7 @@ function genLevel(o) {
     for (let i = 0; i < 3; i++) { const s = slots[Math.floor(slots.length * (i + .5) / 3)]; ents.push(["key", s[0], s[1]]); }
   }
   { const c = free(w * .3); ents.push(["check", c, yAt(c)]); }
-  if (!o.quest) { const c = free(w * .62); ents.push(["check", c, yAt(c)]); }
+  if (!gated) { const c = free(w * .62); ents.push(["check", c, yAt(c)]); } // a gate already has a flag right behind it
   (o.npcs || []).forEach((lines, i) => { const c = free(w * [.2, .46, .8][i]); ents.push(["npc", c, yAt(c), { lines }]); });
   (o.signs || []).forEach(([f, lines]) => { const c = free(w * f); ents.push(["sign", c, yAt(c), lines]); });
   if (o.code) {
