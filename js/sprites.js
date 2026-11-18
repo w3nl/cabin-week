@@ -8,7 +8,8 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   const sweater = opts.indoor && c.sweater;
   // Summer (Dalmatia): a light T-shirt instead of a coat, shorts, and no hat or scarf.
   const summer = !!opts.summer && !sweater;
-  const coat = sweater ? c.sweater : summer ? shade(c.coatCol, .3) : c.coatCol, coatD = shade(coat, -.3), coatL = shade(coat, .25);
+  // In summer a dress is the whole outfit: the top is the colour of the dress.
+  const coat = sweater ? c.sweater : summer ? (c.dress || shade(c.coatCol, .3)) : c.coatCol, coatD = shade(coat, -.3), coatL = shade(coat, .25);
   const pants = c.pants, pantsD = shade(pants, -.28);
   const hairC = c.hairCol, hairL = shade(hairC, .3), hairD = shade(hairC, -.35);
   const bob = (!moving && !air) ? Math.sin(t / 280) * .5 : 0;
@@ -55,7 +56,9 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   // benen
   const leg = (x, a, col) => {
     g.save(); g.translate(x, hip); g.rotate(a);
-    if (summer) { blob(skinD, () => g.rect(-2.4, 0, 4.8, -hip - 2)); blob(col, () => g.rect(-2.9, 0, 5.8, (-hip - 2) * .45)); }
+    // bareSummer (your own hero in a skirt or dress): bare legs in summer, tights otherwise; shorts: bare legs all year
+    if (summer && c.bareSummer) blob(skinD, () => g.rect(-2.4, 0, 4.8, -hip - 2));
+    else if (summer || c.shorts) { blob(skinD, () => g.rect(-2.4, 0, 4.8, -hip - 2)); blob(col, () => g.rect(-2.9, 0, 5.8, (-hip - 2) * .45)); }
     else blob(col, () => g.rect(-2.7, 0, 5.4, -hip - 2));
     blob(shoe, () => rp(-3.2, -hip - 3.6, 8.2, 4.2, 1.6));
     if (c.laces) c.laces.forEach((lc, i) => { g.fillStyle = lc; g.fillRect(-1.5 + i * 2, -hip - 3, 1.4, 1.4); });
@@ -73,6 +76,11 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   if (c.skirt) {
     blob(c.skirt, () => { g.moveTo(-7.5, hip - 2); g.lineTo(7.5, hip - 2); g.lineTo(9.5, hip + 4.5); g.lineTo(-9.5, hip + 4.5); g.closePath(); });
     g.strokeStyle = shade(c.skirt, -.3); g.lineWidth = .9; [-4, 0, 4].forEach(px => { g.beginPath(); g.moveTo(px, hip - 1); g.lineTo(px * 1.25, hip + 4); g.stroke(); }); g.strokeStyle = OUT; g.lineWidth = 1.5;
+  }
+  // jurk: langer en wijder dan het rokje, tot over de knie
+  if (c.dress) {
+    blob(c.dress, () => { g.moveTo(-8, hip - 3); g.lineTo(8, hip - 3); g.lineTo(10.5, hip + 8.5); g.quadraticCurveTo(0, hip + 10, -10.5, hip + 8.5); g.closePath(); });
+    g.strokeStyle = shade(c.dress, -.3); g.lineWidth = .9; [-4.5, 0, 4.5].forEach(px => { g.beginPath(); g.moveTo(px, hip); g.lineTo(px * 1.3, hip + 8); g.stroke(); }); g.strokeStyle = OUT; g.lineWidth = 1.5;
   }
   // jas
   const bodyH = longCoat ? (hip + 8) - top : hip + 2 - top;
@@ -93,7 +101,8 @@ function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   g.lineWidth = 1.5; g.strokeStyle = OUT; g.beginPath(); bodyPath(); g.stroke();
 
   // sjaal: eigen sjaal, of een rode in de sneeuw
-  const scarf = summer ? null : c.scarf || (opts.scarf ? ["#d33a3a", "#ffffff"] : null);
+  // noScarf: your own hero chose no scarf, so no red one in the snow either
+  const scarf = summer ? null : c.scarf || (opts.scarf && !c.noScarf ? ["#d33a3a", "#ffffff"] : null);
   if (scarf) {
     const band = () => rp(-8.8, top - 2.5, 17.6, 5.5, 2.5);
     g.save(); g.beginPath(); band(); g.clip(); scarf.forEach((col, i) => { g.fillStyle = col; g.fillRect(-9 + i * 18 / scarf.length, top - 3, 18 / scarf.length + .5, 6); }); g.restore();

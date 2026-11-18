@@ -92,3 +92,25 @@ for (const [w, h, what] of [[960, 540, 'tv'], [740, 360, 'phone turned'], [412, 
     await expect(page.locator('.hero-row').last()).toBeInViewport({ ratio: .99 });
   });
 }
+
+test('more choices: a skirt or dress, shorts, a bun, bow or hairband, and really no scarf', async ({ page }) => {
+  await seed(page);
+  await page.locator('#ownHero').click();
+  const pick = (key, text) => page.locator(`.hero-row button[data-key="${key}"]`, { hasText: text }).click();
+  await pick('legs', 'Dress');
+  await pick('extra', 'Bun');
+  await page.locator('.hero-row button[data-key="scarf"]').first().click(); // ✕: no scarf
+  await page.locator('#heroDone').click();
+  let c = await page.evaluate(() => heroChar());
+  expect(c).toMatchObject({ bun: '#b67ad9', bareSummer: true, noScarf: true });
+  expect(c.dress).toBeTruthy();
+  expect(c.scarf).toBeUndefined();
+  await page.locator('#ownHero').click();
+  await pick('legs', 'Shorts');
+  await pick('extra', 'Bow');
+  await page.locator('#heroDone').click();
+  c = await page.evaluate(() => heroChar());
+  expect(c).toMatchObject({ shorts: true, bow: '#b67ad9' });
+  expect(c.dress).toBeUndefined();
+  expect(c.bun).toBeUndefined();
+});
