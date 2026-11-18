@@ -34,6 +34,16 @@ const REGIONS = [
     finale: [T("Ha det, Norway! 🌌🚗", "Ha det, Noorwegen! 🌌🚗"),
       T("A red cabin by the fjord, brown cheese, huskies, the stave church on Christmas Eve, the troll forest and a sky that danced.",
         "Een rood huisje bij het fjord, bruine kaas, husky's, de staafkerk op kerstavond, het trollenbos en een lucht die danste.")] }
+,
+  { id: "netherlands", name: T("Netherlands", "Nederland"), icon: "🌷", lon: 5.4, lat: 53.0, scene: "polder",
+    place: "Tulpendam", blurb: T("A winter week in a little house by a windmill near Tulpendam: canals, cheese, skating and the Wadden.",
+      "Een winterweek in een huisje bij een molen bij Tulpendam: grachten, kaas, schaatsen en de Wadden."),
+    levels: NL_LEVELS,
+    week: regionWeek([["🌬️", "Windmills", "Molens"], ["⚙️", "Kinderdijk", "Kinderdijk"], ["🚲", "Amsterdam", "Amsterdam"], ["🕯️", "Gouda", "Gouda"],
+      ["⛸️", "Skating", "Schaatsen"], ["🦌", "Veluwe", "Veluwe"], ["🐚", "Wadden", "Wadden"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Doei, Netherlands! 🌷🚗", "Doei, Nederland! 🌷🚗"),
+      T("Windmills, dikes and a headwind, Amsterdam by boat, Gouda by candlelight, skating in Giethoorn, the white bikes, herring on the island and a cheese for the neighbours.",
+        "Molens, dijken en tegenwind, Amsterdam per boot, Gouda bij kaarslicht, schaatsen in Giethoorn, de witte fietsen, haring op het eiland en een kaas voor de buren.")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [
@@ -41,7 +51,11 @@ const SOON = [
   { name: T("Scania", "Skåne"), lon: 13.6, lat: 55.9 },
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
   { name: "Veneto", lon: 12.3, lat: 45.5 },
-  { name: T("Dalmatia", "Dalmatië"), lon: 16.4, lat: 43.5 }
+  { name: T("Dalmatia", "Dalmatië"), lon: 16.4, lat: 43.5 },
+  { name: T("Scotland", "Schotland"), lon: -4.3, lat: 57.0 },
+  { name: T("Catalonia", "Catalonië"), lon: 1.8, lat: 41.9 },
+  { name: T("Ardèche", "Ardèche"), lon: 4.4, lat: 44.7 },
+  { name: T("Greece", "Griekenland"), lon: 22.0, lat: 39.6 }
 ];
 let REGION = REGIONS[0];
 /** Progress of a region: the Ardennes keep the top-level unlocked/best (old saves keep working), the others save.regions[id]. */
