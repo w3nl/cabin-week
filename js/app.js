@@ -2,7 +2,7 @@
 // Start het spel: versie, service worker, updatebalk en de spellus.
 
 /** Staat op het titelscherm. Altijd hetzelfde getal als CACHE in sw.js (tests/pwa.spec.js controleert dat). */
-const GAME_VERSION = 3;
+const GAME_VERSION = 4;
 $("version").textContent = "v" + GAME_VERSION;
 
 /* ---------- Installeerbare app en updates ---------- */
@@ -88,6 +88,7 @@ function snapshot() {
   if (!L || !P) return;
   before.x = P.x; before.y = P.y; before.cam = cam;
   before.en = L.enemies.map(e => [e.x, e.y]);
+  before.mv = L.movers.map(m => m.x);
 }
 function renderSmooth(a) {
   if (!L || !P || before.L !== L || state !== "play") { render(); return; }
@@ -97,9 +98,12 @@ function renderSmooth(a) {
   const same = before.en.length === en.length;
   P.x = mix(before.x, now.x); P.y = mix(before.y, now.y); cam = mix(before.cam, now.cam);
   if (same) L.enemies.forEach((e, i) => { e.x = mix(before.en[i][0], en[i][0]); e.y = mix(before.en[i][1], en[i][1]); });
+  const mv = L.movers.map(m => m.x), mvSame = before.mv && before.mv.length === mv.length;
+  if (mvSame) L.movers.forEach((m, i) => { m.x = mix(before.mv[i], mv[i]); });
   try { render(); } finally {
     P.x = now.x; P.y = now.y; cam = now.cam;
     if (same) L.enemies.forEach((e, i) => { e.x = en[i][0]; e.y = en[i][1]; });
+    if (mvSame) L.movers.forEach((m, i) => { m.x = mv[i]; });
   }
 }
 function loop(ts) {

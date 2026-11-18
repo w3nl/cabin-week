@@ -4,81 +4,106 @@
    LEVEL GENERATOR (for the days that are not built by hand)
    ===================================================================== */
 function genLevel(o) {
+  // Options that make a region play differently (see AGENTS.md, "Region gameplay"):
+  //   hills: [low, high] – the ground goes up and down between those rows (12 = normal ground, 9 = high), like a mountain.
+  //   movers: "floe" | "gondola" | "boat" – wide gaps (too wide to jump) with something that carries you across.
+  //   ice, dark, water, interior – used by the game and the drawing code, not by the generator.
   const R = rng(o.seed), w = o.w;
   const gateX = o.quest ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
   const ground = [], plats = [], blocks = [], spikes = [], ents = [], slots = [], bad = new Set(), used = new Set();
   const coin = (x, y) => { if (o.coins !== false) ents.push(["coin", x, y]); };
-  let cur = 0, x = 12, towerDone = !o.quest;
+  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers;
+  const [hLow, hHigh] = o.hills || [12, 12];
   const limit = (o.code ? codeX : w - 8) - 10;
   while (x < limit) {
     if (o.quest && x > gateX - 9 && x < gateX + 5) { x = gateX + 5; continue; }
     let type;
     if (!towerDone && x > w * .3) type = "tower";
-    else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
-    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11 }[type];
+    else if (!ferryDone && x > w * .12) type = "ferry";
+    else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .3 && o.movers ? "ferry" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
+    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11 }[type];
     if (x + width > limit || (o.quest && x <= gateX - 9 && x + width > gateX - 9)) { x += 3; continue; }
+    // Hills: before a piece the ground may go up (at most 2 rows, so you can always jump it) or down.
+    if (o.hills && type !== "ferry") {
+      let ny = gy + [-2, -1, 0, 1, 2][Math.floor(R() * 5)];
+      ny = Math.max(hHigh, Math.min(hLow, ny));
+      if (ny !== gy) { ground.push([cur, x, gy]); cur = x + 1; gy = ny; bad.add(x); bad.add(x + 1); }
+    }
+    const d = gy - 12; // everything in a piece is placed relative to the ground here
     if (type === "pit") {
       const gw = R() < .5 ? 2 : 3;
-      ground.push([cur, x + 1, 12]);
-      for (let i = 0; i < gw; i++) { bad.add(x + 2 + i); coin(x + 2 + i, i === 0 || i === gw - 1 ? 9 : 8); }
+      ground.push([cur, x + 1, gy]);
+      for (let i = 0; i < gw; i++) { bad.add(x + 2 + i); coin(x + 2 + i, (i === 0 || i === gw - 1 ? 9 : 8) + d); }
       bad.add(x + 1); bad.add(x + 2 + gw);
       cur = x + 2 + gw;
+    } else if (type === "ferry") {
+      // a gap of 7 tiles: too wide to jump, so you ride across on an ice floe, a gondola or a boat
+      ground.push([cur, x + 1, gy]);
+      for (let i = 0; i < 7; i++) bad.add(x + 2 + i);
+      bad.add(x + 1); bad.add(x + 9);
+      ents.push(["mover", x + 2, gy, { range: 5, n: 2 }]);
+      [3, 5, 7].forEach(i => coin(x + i, 8 + d));
+      cur = x + 9; ferryDone = true;
     } else if (type === "plat2") {
-      plats.push([x + 1, 9, 3], [x + 5, 7, 3]); slots.push([x + 2, 8], [x + 6, 6]);
-      coin(x + 1, 10); coin(x + 3, 10); coin(x + 7, 5);
+      plats.push([x + 1, 9 + d, 3], [x + 5, 7 + d, 3]); slots.push([x + 2, 8 + d], [x + 6, 6 + d]);
+      coin(x + 1, 10 + d); coin(x + 3, 10 + d); coin(x + 7, 5 + d);
     } else if (type === "steps") {
-      blocks.push([x + 1, 11, 1], [x + 2, 10, 2], [x + 3, 9, 3]); [1, 2, 3].forEach(i => bad.add(x + i));
-      plats.push([x + 5, 7, 3]); slots.push([x + 6, 6]);
-      coin(x + 1, 10); coin(x + 2, 9); coin(x + 3, 8);
+      blocks.push([x + 1, 11 + d, 1], [x + 2, 10 + d, 2], [x + 3, 9 + d, 3]); [1, 2, 3].forEach(i => bad.add(x + i));
+      plats.push([x + 5, 7 + d, 3]); slots.push([x + 6, 6 + d]);
+      coin(x + 1, 10 + d); coin(x + 2, 9 + d); coin(x + 3, 8 + d);
     } else if (type === "tower") {
-      plats.push([x + 1, 9, 2], [x + 4, 7, 2], [x + 7, 5, 2]); slots.push([x + 4, 6], [x + 7, 4, "high"]);
-      coin(x + 1, 8); coin(x + 2, 8); towerDone = true;
+      plats.push([x + 1, 9 + d, 2], [x + 4, 7 + d, 2], [x + 7, 5 + d, 2]); slots.push([x + 4, 6 + d], [x + 7, 4 + d, "high"]);
+      coin(x + 1, 8 + d); coin(x + 2, 8 + d); towerDone = true;
     } else {
-      if (o.enemies) ents.push(["enemy", x + 4, 11]);
-      for (let i = 2; i <= 6; i++) coin(x + i, 10);
-      if (o.spikes) { spikes.push([x + 8, 11, 2]); bad.add(x + 8); bad.add(x + 9); }
+      if (o.enemies) ents.push(["enemy", x + 4, 11 + d]);
+      for (let i = 2; i <= 6; i++) coin(x + i, 10 + d);
+      if (o.spikes) { spikes.push([x + 8, 11 + d, 2]); bad.add(x + 8); bad.add(x + 9); }
     }
     x += width;
   }
-  ground.push([cur, w - 1, 12]);
-  const free = (t) => { t = Math.round(t); for (let d = 0; d < 30; d++) for (const c of [t + d, t - d]) if (c > 2 && c < w - 2 && !bad.has(c) && !used.has(c)) { used.add(c); return c; } return t; };
+  ground.push([cur, w - 1, gy]);
+  // The ground row of every column (ROWS where there is no ground: a pit or a gap).
+  const topAt = Array(w).fill(ROWS_GEN);
+  for (const [a, b, t] of ground) for (let c = a; c <= b; c++) topAt[c] = Math.min(topAt[c], t);
+  const yAt = c => (topAt[c] < ROWS_GEN ? topAt[c] : 12) - 1;
+  const free = (t) => { t = Math.round(t); for (let dd = 0; dd < 30; dd++) for (const c of [t + dd, t - dd]) if (c > 2 && c < w - 2 && !bad.has(c) && !used.has(c) && topAt[c] < ROWS_GEN) { used.add(c); return c; } return t; };
   [gateX, gateX - 1, gateX + 1, codeX, codeX - 1, codeX + 1, w - 6].forEach(c => used.add(c));
 
-  if (o.intro) ents.push(["sign", free(5), 11, o.intro]);
+  if (o.intro) { const c = free(5); ents.push(["sign", c, yAt(c), o.intro]); }
   let gate = null, code = null;
   if (o.quest) {
-    gate = [gateX, 2, 11];
-    used.add(gateX - 3); ents.push(["npc", gateX - 3, 11, { quest: o.quest }]);
-    ents.push(["check", gateX + 2, 11]);
+    gate = [gateX, 2, yAt(gateX)];
+    used.add(gateX - 3); ents.push(["npc", gateX - 3, yAt(gateX - 3), { quest: o.quest }]);
+    ents.push(["check", gateX + 2, yAt(gateX + 2)]);
     const pre = slots.filter(s => s[0] < gateX - 6).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
     const q = pre[0]; slots.splice(slots.indexOf(q), 1); ents.push(["quest", q[0], q[1]]);
   }
   const keysNeeded = o.keysNeeded ?? 3;
   if (keysNeeded) {
-    while (slots.length < 3) { const fx = free(w * (.2 + slots.length * .25)); plats.push([fx, 9, 3]); slots.push([fx + 1, 8]); }
+    while (slots.length < 3) { const fx = free(w * (.2 + slots.length * .25)), fy = yAt(fx) - 2; plats.push([fx, fy, 3]); slots.push([fx + 1, fy - 1]); }
     slots.sort((a, b) => a[0] - b[0]);
     for (let i = 0; i < 3; i++) { const s = slots[Math.floor(slots.length * (i + .5) / 3)]; ents.push(["key", s[0], s[1]]); }
   }
-  ents.push(["check", free(w * .3), 11]);
-  if (!o.quest) ents.push(["check", free(w * .62), 11]);
-  (o.npcs || []).forEach((lines, i) => ents.push(["npc", free(w * [.2, .46, .8][i]), 11, { lines }]));
-  (o.signs || []).forEach(([f, lines]) => ents.push(["sign", free(w * f), 11, lines]));
+  { const c = free(w * .3); ents.push(["check", c, yAt(c)]); }
+  if (!o.quest) { const c = free(w * .62); ents.push(["check", c, yAt(c)]); }
+  (o.npcs || []).forEach((lines, i) => { const c = free(w * [.2, .46, .8][i]); ents.push(["npc", c, yAt(c), { lines }]); });
+  (o.signs || []).forEach(([f, lines]) => { const c = free(w * f); ents.push(["sign", c, yAt(c), lines]); });
   if (o.code) {
     const syms = o.code.syms, digits = o.code.answer.split("");
-    code = { x: codeX, y1: 2, y2: 11, pad: codeX - 2, answer: o.code.answer, title: o.code.title,
+    code = { x: codeX, y1: 2, y2: yAt(codeX), pad: codeX - 2, answer: o.code.answer, title: o.code.title,
       riddle: T(`Four symbols: ${syms.join("  ")}. Signs along the way tell you which digit goes with which symbol.`,
         `Vier symbolen: ${syms.join("  ")}. Onderweg staan bordjes die vertellen welk cijfer bij welk symbool hoort.`) };
     used.add(codeX - 2);
-    [.14, .37, .56, .74].forEach((f, i) => { const k = [2, 0, 3, 1][i]; ents.push(["sign", free(w * f), 11, [T(`Someone scratched something on this sign: ${syms[k]} = ${digits[k]}`, `Op dit bordje is iets gekrast: ${syms[k]} = ${digits[k]}`), o.code.flavor[k]]]); });
+    [.14, .37, .56, .74].forEach((f, i) => { const k = [2, 0, 3, 1][i], c = free(w * f); ents.push(["sign", c, yAt(c), [T(`Someone scratched something on this sign: ${syms[k]} = ${digits[k]}`, `Op dit bordje is iets gekrast: ${syms[k]} = ${digits[k]}`), o.code.flavor[k]]]); });
   }
   let lanternX = null;
-  if (o.lantern) { const lx = free(w * .7); lanternX = lx; ents.push(["lantern", lx, 11]); for (let d = -3; d <= 3; d++) used.add(lx + d); }
-  ents.push(["exit", w - 6, 11]);
-  if (o.enemyExtra) o.enemyExtra.forEach(f => { const c = free(w * f); ents.push(["enemy", c, 11]); });
+  if (o.lantern) { const lx = free(w * .7); lanternX = lx; ents.push(["lantern", lx, yAt(lx)]); for (let dd = -3; dd <= 3; dd++) used.add(lx + dd); }
+  ents.push(["exit", w - 6, yAt(w - 6)]);
+  if (o.enemyExtra) o.enemyExtra.forEach(f => { const c = free(w * f); ents.push(["enemy", c, yAt(c)]); });
 
   const deco = [];
   for (let dx = 3; dx < w - 8; dx += 5 + Math.floor(R() * 7)) {
-    if (bad.has(dx) || Math.abs(dx - gateX) < 4 || Math.abs(dx - codeX) < 5) continue;
+    if (bad.has(dx) || topAt[dx] >= ROWS_GEN || Math.abs(dx - gateX) < 4 || Math.abs(dx - codeX) < 5) continue;
     if (o.lantern && o.lanternDeco === "church" && lanternX != null && dx > lanternX - 7 && dx < lanternX + 6) continue;
     deco.push([o.decoKinds[Math.floor(R() * o.decoKinds.length)], dx]);
   }
@@ -86,6 +111,8 @@ function genLevel(o) {
   (o.decoExtra || []).forEach(([k, f]) => deco.push([k, Math.round(w * f)]));
   return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded });
 }
+/** The number of rows (canvas.js has ROWS, but that file loads after this one). */
+const ROWS_GEN = 15;
 
 const DAY22 = genLevel({
   seed: 2212, w: 150, day: dayLabel(1), name: T("Forest & Old Railway", "Bos & oude spoorlijn"), theme: "bos",
