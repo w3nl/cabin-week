@@ -1,6 +1,6 @@
 # The Android key: step by step
 
-The Android app (phone, tablet, Google TV) is built by GitHub, in the workflow *Build the Google TV app*. To sign it, GitHub needs your **upload key**. You make it once on your own computer and give it to GitHub as two **secrets**. Secrets cannot be read back, not even by you, and they never show up in logs.
+The Android app (phone, tablet, Google TV) is built by GitHub, in the workflow *Build the Android app*. To sign it, GitHub needs your **upload key**. You make it once on your own computer and give it to GitHub as two **secrets**. Secrets cannot be read back, not even by you, and they never show up in logs.
 
 What the workflow then makes:
 
@@ -93,14 +93,14 @@ Check: the page [Settings → Secrets and variables → Actions](https://github.
 
 ### 6. Build
 
-Merge a change to `main`, or start it yourself: **Actions** → *Build the Google TV app* → **Run workflow** → branch `main` → **Run workflow**. After a few minutes the run is green. The step *Fixed key* says "The key is fine." If something is wrong, that step says what (wrong password, wrong alias, broken text).
+Merge a change to `main`, or start it yourself: **Actions** → *Build the Android app* → **Run workflow** → branch `main` → **Run workflow**. After a few minutes the run is green. The step *Fixed key* says "The key is fine." If something is wrong, that step says what (wrong password, wrong alias, broken text).
 
 You can also run `npm run build:aab` from the repository root. It starts the same workflow, waits for it, downloads the protected artifact, and prompts for your key password to extract the `.aab` into `dist/android-aab-<run-id>/`. This requires the GitHub CLI (`gh`) to be installed and authenticated, the 7-Zip command (`7z`), and both GitHub secrets to be set.
 
 ### 7. Get the bundle for Google Play
 
 If you used the manual Actions steps above, get the bundle this way:
-1. **Actions** → *Build the Google TV app* → the latest green run on `main`.
+1. **Actions** → *Build the Android app* → the latest green run on `main`.
 2. At the bottom, under **Artifacts**, click `cabin-week-google-play`. You get a zip (the artifact stays 7 days; after that, run the workflow again).
 3. Unzip it. Open `cabin-week-google-play.7z` with your **key password**:
    - Linux: `sudo apt install 7zip`, then

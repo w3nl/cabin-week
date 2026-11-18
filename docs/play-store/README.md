@@ -34,7 +34,8 @@ Choose your hero and walk, jump and find your way through the forest, the cabin,
 • Chips, chocolate and Christmas biscuits to collect
 • Jump on wild boars, robot vacuums, snowmen, lost penguins, mountain goats and little trolls, or belly-slide into them
 • A birthday with Lego, and a Saab with a Christmas tree on the roof
-• Play with the TV remote, a controller (PlayStation, Stadia, Xbox) or the touch screen
+• One app for your phone, tablet and Google TV
+• Play with the touch screen, a controller (PlayStation, Stadia, Xbox) or the TV remote
 • In English and Dutch
 • Works offline
 
@@ -69,7 +70,8 @@ Kies je held en loop, spring en zoek je een weg door het bos, het huisje, de sne
 • Frietjes, chocolade en kerstkoekjes om te verzamelen
 • Spring op wilde zwijnen, robotstofzuigers, sneeuwpoppen, verdwaalde pinguïns, berggeiten en kleine trollen, of glij er op je buik tegenaan
 • Een verjaardag met Lego, en een Saab met een kerstboom op het dak
-• Speel met de afstandsbediening, een controller (PlayStation, Stadia, Xbox) of het touchscreen
+• Eén app voor je telefoon, tablet en Google TV
+• Speel met het touchscreen, een controller (PlayStation, Stadia, Xbox) of de afstandsbediening
 • In het Engels en Nederlands
 • Werkt zonder internet
 
@@ -87,7 +89,7 @@ Geen advertenties, geen aankopen en geen gegevens die het apparaat verlaten.
 | **Android TV:** banner | [`tv-banner.png`](tv-banner.png) | 1280 × 720 |
 | **Android TV:** screenshots (min. 1) | the same five | 1920 × 1080 |
 
-The Android TV fields only appear after adding Android TV in **Test and release → Advanced settings → Form factors**.
+The Android TV fields only appear after adding Android TV in **Test and release → Advanced settings → Form factors**. The app is one listing for every device: phone, tablet and TV (the TV banner and TV screenshots are only the extra TV part).
 
 ## Other fields
 

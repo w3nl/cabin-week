@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Een Android TV-app (Google TV): een tegel op het startscherm (banner), te bedienen met de afstandsbediening of een controller. -->
+<!-- Een Android-app voor telefoon, tablet en Google TV; op de TV een tegel op het startscherm (banner), te bedienen met de afstandsbediening of een controller. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature android:name="android.software.leanback" android:required="false" />

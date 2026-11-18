@@ -52,7 +52,7 @@ Full explanation: [android-key.md](android-key.md). In short:
    - Default language: **English (United Kingdom) – en-GB**
    - App or game: **Game**; Free or paid: **Free**
    - Tick the declarations → **Create app**.
-3. **Android TV:** **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV.
+3. **Form factors:** the app is one Android app for phone, tablet and TV. Phone and tablet need nothing extra. For the TV: **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV. *Optional:* the same page also offers **Google Play Games on PC** (Windows). Check Google's requirements first; it is not turned on for Cabin Week yet.
 4. **App content** (left menu **Policy → App content**). Fill in every item with the answers in [play-store/README.md](play-store/README.md#app-content-the-questionnaires):
    - Privacy policy: `https://cabinweek.online/privacy.html` (until the domain works: `https://w3nl.github.io/cabin-week/privacy.html`)
    - App access, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health.
@@ -71,7 +71,7 @@ Full explanation: [android-key.md](android-key.md). In short:
 
 From the repository root, run `npm run build:aab`. It starts the `main` workflow, waits for it, downloads the protected artifact, and prompts for your key password. The `.aab` is saved in `dist/android-aab-<run-id>/`.
 
-Alternatively, start the workflow manually: GitHub → **Actions** → **Build the Google TV app** → **Run workflow** → branch `main` → **Run workflow**. (A merge to `main` also starts it.) Wait until the run is green (about 5 minutes). The step *Fixed key* says "The key is fine". If it is red, see [android-key.md](android-key.md#something-went-wrong).
+Alternatively, start the workflow manually: GitHub → **Actions** → **Build the Android app** → **Run workflow** → branch `main` → **Run workflow**. (A merge to `main` also starts it.) Wait until the run is green (about 5 minutes). The step *Fixed key* says "The key is fine". If it is red, see [android-key.md](android-key.md#something-went-wrong).
 
 ### C2. Get the .aab
 
@@ -120,7 +120,7 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
 
 ## D. A new version (every update)
 
-1. Merge the change to `main` (the build starts by itself), or run **Build the Google TV app** by hand.
+1. Merge the change to `main` (the build starts by itself), or run **Build the Android app** by hand.
 2. Get the `.aab` (C2).
 3. Play Console → **Internal testing** → **Create new release** → upload → **Next** → **Save and publish**.
 

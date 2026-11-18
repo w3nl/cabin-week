@@ -1,6 +1,6 @@
-# Builds the Google TV app (Android TV) with the game inside. On main the app goes to the release "google-tv",
+# Builds the Android app (phone, tablet and Google TV) with the game inside. On main the app goes to the release "google-tv",
 # so you can install it on the TV with the Downloader app. See docs/google-tv.md.
-name: Build the Google TV app
+name: Build the Android app
 
 on:
   push:
@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build the Google TV app
+    name: Build the Android app
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
@@ -142,6 +142,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view google-tv >/dev/null 2>&1 || gh release create google-tv --title "Google TV-app" --latest=false \
-            --notes "Cabin Week for Google TV. Install with the Downloader app: see docs/google-tv.md."
+          gh release view google-tv >/dev/null 2>&1 || gh release create google-tv --title "Android app" --latest=false \
+            --notes "Cabin Week for Android (phone, tablet, Google TV). On the TV, install with the Downloader app: see docs/google-tv.md."
           gh release upload google-tv cabin-week.apk --clobber
