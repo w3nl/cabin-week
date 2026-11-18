@@ -122,7 +122,9 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
 
 1. Merge the change to `main` (the build starts by itself), or run **Build the Android app** by hand.
 2. Get the `.aab` (C2).
-3. Play Console → **Internal testing** → **Create new release** → upload → **Next** → **Save and publish**.
+3. Play Console → **Internal testing** → **Create new release** → upload.
+4. **Release notes:** every pull request has a section *Release notes* with the text in en-GB and nl-NL. Copy the block of the merged pull request(s) into the release-notes field (combine them if there are several; max. 500 characters per language).
+5. **Next** → **Save and publish**.
 
 The version number goes up by itself (the GitHub build number), so Google always accepts the new bundle. Testers get the update automatically, usually within a day. Right away: Play Store → **Manage apps → Updates**.
 
