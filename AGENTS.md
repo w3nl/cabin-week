@@ -9,7 +9,7 @@ Notes for AI agents and new helpers. The README says what the game is; this file
 A platform game in the browser (walk, jump, find things, do tasks, crack codes) about a Christmas week of two families in a holiday cabin near the **fictional** village of **Pinebrook**, in snowy hills.
 
 - **The Hills:** Paul and Laura with Sophie and Lily. **The Woods:** Rob and Anna with Finn, Tom and Max. **Laura and Anna are sisters.** Lily and Tom are in the same class. 4 adults and 5 kids. You choose one of the nine, or **make your own hero** (the tenth tile, "+ Your hero"); you meet the others in the levels.
-- **Regions:** four winter trips, chosen on a **map of Europe** (the 🗺️ button on the title screen): the **Ardennes** (the original week near Pinebrook), the **North Pole** (Santa's village), **Tirol** (a ski week in the fictional village of Lindenalm) and **Norway** (a red cabin by the fjord near the fictional village of Fjordvik). Each region is its own week of **eight days, one level a day**, with its own progress: you can start any region at day 1. More places are on the map as grey dots (Iceland, Scania, Tuscany, Veneto, Dalmatia: "coming later").
+- **Regions:** five winter trips, chosen on a **map of Europe** (the 🗺️ button on the title screen): the **Ardennes** (the original week near Pinebrook), the **North Pole** (Santa's village), **Tirol** (a ski week in the fictional village of Lindenalm), **Norway** (a red cabin by the fjord near the fictional village of Fjordvik) and the **Netherlands** (a little house by a windmill near the fictional village of Tulpendam). Each region is its own week of **eight days, one level a day**, with its own progress: you can start any region at day 1. More places are on the map as grey dots (Iceland, Scania, Tuscany, Veneto, Dalmatia: "coming later").
 - A day unlocks when you finish the day before. **There are no dates and no countdown**: the title screen shows your progress in the region (`8 winter days to play`, `3/8 days played`, `🏆 The whole week done!`).
 - **English by default, Dutch as an option** (see "Languages").
 - **Plain HTML, CSS and JavaScript with canvas. No build, no framework, no runtime dependencies** (only Google Fonts). All graphics are drawn in code; there are no images except the app icons.
@@ -19,7 +19,7 @@ A platform game in the browser (walk, jump, find things, do tasks, crack codes) 
 
 ### No personal information
 
-Cabin Week is a public version of a game that was made for one family. **Keep it fictional:** no real surnames, no real village or address, no dates or countdown, no birth years, nothing about anyone who passed away. The tests check for a hashed list of words from the original (`tests/titel.spec.js`). Real *places* that anyone visits are fine (the Ardennes as a region, Luxembourg's Christmas market, Innsbruck, the North Pole), and so are the Lego and the Saabs. Villages where the families stay are fictional (Pinebrook, Lindenalm, Fjordvik).
+Cabin Week is a public version of a game that was made for one family. **Keep it fictional:** no real surnames, no real village or address, no dates or countdown, no birth years, nothing about anyone who passed away. The tests check for a hashed list of words from the original (`tests/titel.spec.js`). Real *places* that anyone visits are fine (the Ardennes as a region, Luxembourg's Christmas market, Innsbruck, the North Pole), and so are the Lego and the Saabs. Villages where the families stay are fictional (Pinebrook, Lindenalm, Fjordvik, Tulpendam).
 
 ### Special days
 
@@ -38,7 +38,7 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 | `js/data.js` | `rng()`, `VILLAGE`, the week (`WEEK`, `DAY_NAMES`, `dayLabel()`, `nightsLabel()`), `CHARS` (the nine), `JOKES` |
 | `js/levels.js` | `LEVELS`: the three hand-built levels (days 1, 4 and 5) |
 | `js/levelgen.js` | `genLevel(o)` and the five generated Ardennes days (`DAY22`, `DAY23`, `DAY26`, `DAY27`, `DAY28`: the names come from the original calendar), put in place in `LEVELS` with `splice`/`push` |
-| `js/region-pole.js`, `js/region-tirol.js`, `js/region-norway.js` | `POLE_LEVELS`, `TIROL_LEVELS`, `NORWAY_LEVELS`: eight generated levels per region |
+| `js/region-pole.js`, `js/region-tirol.js`, `js/region-norway.js`, `js/region-netherlands.js` | `POLE_LEVELS`, `TIROL_LEVELS`, `NORWAY_LEVELS`, `NL_LEVELS`: eight generated levels per region |
 | `js/regions.js` | `REGIONS` (id, name, icon, map position `lon`/`lat`, `scene`, `place`, `blurb`, `levels`, `week`, `finale`), `SOON` (grey dots on the map), `REGION` (the active one), `prog()` (progress of a region), `regionDone()`, `setRegion(id, store)`. Loaded after `core.js` |
 | `js/core.js` | `save`/`persist()` (saving), `tone()` and `SFX` (sound with Web Audio) |
 | `js/canvas.js` | `TS` (32), `ROWS` (15), `VIEW_H`, the canvas `cv`, the global drawing context `g`, `resize()`, `hash()`, `$()`, `emoji()`, and the drawing helpers `OUT`, `mk()`, `withCtx()`, `shade()`, `rp()`, `blob()`, `sparkle()` |
@@ -66,7 +66,7 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 
 ## How it fits together
 
-- **Plain scripts in one shared scope**, loaded by `index.html` in this order: `i18n`, `data`, `levels`, `levelgen`, `region-pole`, `region-tirol`, `region-norway`, `core`, `regions`, `canvas`, `sprites`, `game`, `world`, `screens`, `hero`, `gamepad`, `app`. Every top-level name must be unique across all files.
+- **Plain scripts in one shared scope**, loaded by `index.html` in this order: `i18n`, `data`, `levels`, `levelgen`, `region-pole`, `region-tirol`, `region-norway`, `region-netherlands`, `core`, `regions`, `canvas`, `sprites`, `game`, `world`, `screens`, `hero`, `gamepad`, `app`. Every top-level name must be unique across all files.
 - **Order matters while loading.** Functions are only hoisted within their own file, and `const`/`let` only exist after their line. Code that runs while loading (like `genLevel()` in `levelgen.js`) may only use things from earlier files. That is why `rng()` is in `data.js` and `T()` in `i18n.js`.
 - **One drawing context `g`** (a `let`). `withCtx(ctx, fn)` swaps it to another canvas for a moment, so the same drawing functions also draw textures, background layers and portraits.
 - **The world is a grid** of 15 rows of 32 px; the screen always shows all 15 rows and scales (`scale`). Characters in `L.grid`: `#` ground, `=` platform (only from above), `S` block, `^` spikes (brambles, Lego bricks, icicles), `G` task gate, `H` code door. Row 12 is the normal ground; you stand on row 11.
@@ -81,10 +81,12 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
   - `ice: true`: slow to get going, slow to turn, and you keep sliding when you let go (North Pole, the toboggan run, the kicksled).
   - `water: true`: the gaps are water (North Pole, Norway), drawn by `drawWater()`.
   - `dark: { r, key, quest }`: darkness with a circle of light around you of radius `r`, bigger for every thing you find (`key`) and once you have the task item (`quest`). The northern lights night at the North Pole (lanterns) and the troll forest in Norway (the torch). `drawDark()`.
+  - `wind: n`: gusts that push you (`windNow()`: mostly against you, sometimes from behind; `n` is the strength, about .35 to .7), less in the air than on the ground, shown as white streaks (`drawWind()`). The Netherlands.
+  - `stalls`: the names on the market stalls of a level (otherwise mulled wine, waffles, and so on).
   - `interior: "wood" | "workshop"`: indoor levels with pine panelling (Tirol) or red-and-white stripes (Santa's workshop and post office).
   The Ardennes use none of these (a test checks that), so they stay exactly as they were.
-- **Scenery:** `theme` decides the tiles, the snow and the sliding (`bos`, `huis`, `sneeuw`, `stad`); `scene` (optional) replaces only the background: `pole` (ice floes, Santa's village, northern lights), `alps` (sharp peaks, chalets, a cable car) or `fjord` (fjord, red cabins, northern lights), in `getSceneLayers()`, `drawSceneSky()` and `drawAurora()`. The title screen shows the scene of the active region. Checkpoint flags are white until you pass them, then the flag of the region (`FLAGS`: Belgium, a red-white-green North Pole flag, Austria, Norway).
-- **Levels** are objects in `LEVELS` with: `day` (`dayLabel(i)`), `name`, `theme` (`bos`, `huis`, `sneeuw`, `stad`), `w`, `sub`, what you look for (`keyType`, `keyHud`, `keyName`), the task (`questType`, `questHud`, `questName`), `coin`/`coinName`, `enemy` (`zwijn`, `robot`, `sneeuwpop`, `pinguin` (a lost penguin at the North Pole), `geit` (an Alpine goat), `troll` (a small Norwegian troll)), `spikeMsg`, `ground`, `plats`, `blocks`, `spikes`, `gate`, `code`, `ents`, `deco`, `exitStyle` (`house`, `door`, `tree`, `arch`, `car`), `doneMsg`, and optionally `scene`, `quiet`, `birthday`, `keysNeeded`, `fixedInterior`, `labels`, `coinHud`, and for the generator `lantern`, `lanternDeco` (`church`) and `decoExtra`. Theme and enemy names are internal (Dutch) keys; do not translate them.
+- **Scenery:** `theme` decides the tiles, the snow and the sliding (`bos`, `huis`, `sneeuw`, `stad`); `scene` (optional) replaces only the background: `pole` (ice floes, Santa's village, northern lights), `alps` (sharp peaks, chalets, a cable car) `fjord` (fjord, red cabins, northern lights), `polder` (flat land, windmills on the dike, reeds), `grachten` (canal houses with stepped, neck and bell gables, the canal, bridges with lights) or `duinen` (the sea with a lighthouse, dunes with marram grass, pines), in `getSceneLayers()`, `drawSceneSky()` and `drawAurora()`. The title screen shows the scene of the active region. Checkpoint flags are white until you pass them, then the flag of the region (`FLAGS`: Belgium, a red-white-green North Pole flag, Austria, Norway, the Netherlands).
+- **Levels** are objects in `LEVELS` with: `day` (`dayLabel(i)`), `name`, `theme` (`bos`, `huis`, `sneeuw`, `stad`), `w`, `sub`, what you look for (`keyType`, `keyHud`, `keyName`), the task (`questType`, `questHud`, `questName`), `coin`/`coinName`, `enemy` (`zwijn`, `robot`, `sneeuwpop`, `pinguin` (a lost penguin at the North Pole), `geit` (an Alpine goat), `troll` (a small Norwegian troll), `gans` (a cross Dutch goose), `meeuw` (a seagull after your chips)), `spikeMsg`, `ground`, `plats`, `blocks`, `spikes`, `gate`, `code`, `ents`, `deco`, `exitStyle` (`house`, `door`, `tree`, `arch`, `car`), `doneMsg`, and optionally `scene`, `quiet`, `birthday`, `keysNeeded`, `fixedInterior`, `labels`, `coinHud`, and for the generator `lantern`, `lanternDeco` (`church`) and `decoExtra`. Theme and enemy names are internal (Dutch) keys; do not translate them.
 - **The level generator** (`genLevel(o)`) builds a level from pieces (`pit`, `plat2`, `steps`, `tower`, `run`) with a fixed `seed`, so a day always looks the same. It puts the gate at 60% of the width, a tower before the gate for the task item, spreads the 3 things, puts the code door 14 tiles before the end, and four signs with `symbol = digit`. Change a `seed` and the whole level changes; run the tests.
 - **Height** of a character is `40 × size` px; jumping is the same for everyone. Your own hero is a kid (`.76`, bigger head), a teen (`.88`) or an adult (`1`).
 - **Your own hero:** the tenth tile on the title screen. Not made yet: "+ Your hero" opens the creator. Made: the tile chooses it, and pressing it again (when chosen) opens the creator to change it. Every option is a button (chips and colour swatches), so the creator works with a remote and a controller; the name field is optional (max. 12 characters, empty becomes "Me"/"Ik"), and keys typed there go to the field only (Enter saves, Escape goes back). `drawPerson()` takes an optional `skin` colour (the nine keep the default). The creator fits on 960×540, 740×360 and an upright phone (`tests/held.spec.js`).
@@ -151,6 +153,19 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 | 6 | The Troll Forest (5606) | bells 🔔 | torch 🔦 | **7905** | 🌲=7 🔔=9 🔦=0 🌙=5 |
 | 7 | Northern Lights (5707) | cups of hot chocolate ☕ | telescope 🔭 | **2658** | 🌌=2 🔭=6 ☕=5 🦊=8 |
 | 8 | Going Home (5808) | woolly socks 🧦 | backpack 🎒 | **9312** | 🚗=9 🧦=3 🌌=1 🏠=2 |
+
+**Netherlands** (Tulpendam, scenes `polder`, `grachten` and `duinen`, enemy `gans`; `zwijn` on the Veluwe, `meeuw` on the island):
+
+| Day | Level | 3 things | Task | Code | Symbols | Gameplay |
+|---|---|---|---|---|---|---|
+| 1 | Arrival at the Zaanse Schans (6101) | house keys 🔑 | cup of tea 🍵 | **3164** | 🌬️=3 🧀=1 🌷=6 🚲=4 | wind, canals |
+| 2 | The Windmills of Kinderdijk (6202) | tulip bulbs 🌷 | cog ⚙️ | **5827** | ⚙️=5 🌊=8 🐄=2 🌷=7 | dikes (hills), strong wind |
+| 3 | Amsterdam by Canal Boat (6303, `stad`) | bike bells 🔔 | canal-boat ticket 🎫 | **1935** | 🚲=1 🌉=9 🏠=3 🦢=5 | canal boats carry you |
+| 4 | Gouda by Candlelight (6404, `stad`, no enemies) | cheeses 🧀 | big candle 🕯️ | **7492** | 🧀=7 🕯️=4 ⛪=9 🧇=2 | dark, light grows with the candle |
+| 5 | Skating in Giethoorn (6505) | pairs of skates ⛸️ | gloves 🧤 | **2071** | ⛸️=2 ☕=0 🦆=7 ❄️=1 | ice, holes in the ice |
+| 6 | The Hoge Veluwe (6606) | white bikes 🚲 | museum ticket 🖼️ | **8346** | 🚲=8 🦌=3 🌻=4 🌲=6 | drifting-sand hills, wild boar |
+| 7 | A Wadden Island (6707) | shells 🐚 | herring 🐟 | **4589** | 🐚=4 🦭=5 🌊=8 ⛴️=9 | strongest wind, ferry, seagulls, dunes |
+| 8 | Going Home (6808) | pairs of clogs 👞 | Gouda cheese 🧀 | **6713** | 🚗=6 👞=7 🧀=1 🏠=3 | dikes, wind |
 
 Levels with movers, hills or darkness have the same codes; only the way through is different.
 

@@ -258,6 +258,33 @@ function drawEnemy(e, t) {
     g.strokeStyle = OUT; g.lineWidth = 1.6;
     g.fillStyle = "#1d1d26"; g.fillRect(16.5, -22, 2, 2);
     g.fillStyle = "#d8a050"; g.beginPath(); g.arc(9, -10, 2.5, 0, 7); g.fill(); g.stroke();
+  } else if (e.kind === "gans") {
+    // a cross Dutch goose: grey-brown, long neck, orange beak, and it means business
+    const st = Math.sin(e.x * .3) * 2.5;
+    g.strokeStyle = "#e8822a"; g.lineWidth = 2; g.beginPath(); g.moveTo(-3, -9); g.lineTo(-3 + st * .4, 0); g.moveTo(3, -9); g.lineTo(3 - st * .4, 0); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 1.6;
+    blob("#e8822a", () => g.ellipse(-2 + st * .4, 0, 4, 1.6, 0, 0, 7)); blob("#e8822a", () => g.ellipse(4 - st * .4, 0, 4, 1.6, 0, 0, 7));
+    blob("#8f8a80", () => g.ellipse(-2, -13, 13, 8, -.1, 0, 7));
+    g.fillStyle = "#6f6a60"; g.beginPath(); g.ellipse(-5, -15, 8, 4, -.2, 0, 7); g.fill();
+    g.fillStyle = "#f4f1ea"; g.beginPath(); g.ellipse(0, -8, 9, 3.5, 0, 0, 7); g.fill();
+    blob("#4a463f", () => { g.moveTo(6, -16); g.quadraticCurveTo(13, -22, 10, -30); g.lineTo(14, -31); g.quadraticCurveTo(18, -20, 10, -13); g.closePath(); });
+    blob("#4a463f", () => g.ellipse(12, -31, 4.5, 4, 0, 0, 7));
+    g.fillStyle = "#f4f1ea"; g.fillRect(10, -30, 3, 2);
+    blob("#e8822a", () => { g.moveTo(15, -32); g.lineTo(21, -30.5); g.lineTo(15, -29); g.closePath(); });
+    g.fillStyle = "#1d1d26"; g.fillRect(12.5, -33, 1.8, 1.8);
+    g.lineWidth = 1.2; g.beginPath(); g.moveTo(10.5, -35); g.lineTo(14.5, -34); g.stroke(); g.lineWidth = 1.6;
+  } else if (e.kind === "meeuw") {
+    // a seagull on the beach, looking for your chips
+    const st = Math.sin(e.x * .35) * 2;
+    g.strokeStyle = "#e8a53a"; g.lineWidth = 1.8; g.beginPath(); g.moveTo(-2, -8); g.lineTo(-2 + st * .5, 0); g.moveTo(3, -8); g.lineTo(3 - st * .5, 0); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 1.6;
+    blob("#f6f8fc", () => g.ellipse(0, -13, 11, 7, -.15, 0, 7));
+    blob("#9aa6b4", () => { g.moveTo(-12, -16); g.quadraticCurveTo(-2, -22, 7, -15); g.lineTo(-4, -11); g.closePath(); });
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.moveTo(-12, -16); g.lineTo(-18, -15); g.lineTo(-11, -13); g.fill();
+    blob("#f6f8fc", () => g.arc(8, -21, 5.5, 0, 7));
+    blob("#f2c230", () => { g.moveTo(12, -21.5); g.lineTo(19, -20); g.lineTo(12, -18.5); g.closePath(); });
+    g.fillStyle = "#d8232a"; g.fillRect(16, -20.3, 1.5, 1.2);
+    g.fillStyle = "#1d1d26"; g.fillRect(9, -23, 1.8, 1.8);
   } else if (e.kind === "troll") {
     // a small, grumpy forest troll with a big nose, a mossy tuft and a tail
     const st = Math.sin(e.x * .3) * 2.5;

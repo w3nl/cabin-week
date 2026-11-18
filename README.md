@@ -1,6 +1,6 @@
 # Cabin Week
 
-A platform game in the browser about winter trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol or Norway) and play its week: eight days, **one level a day**.
+A platform game in the browser about winter trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway or the Netherlands) and play its week: eight days, **one level a day**.
 
 Play as one of the nine, or **make your own hero** (name, height, skin, hair, coat, glasses, hat and scarf). You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, help the others with a task, and crack a code lock with clues written on signs along the way. Finish a day to unlock the next one.
 
@@ -35,7 +35,7 @@ npm start          # http://127.0.0.1:4180
 
 **With a controller** (PlayStation, Stadia, Xbox; USB or Bluetooth, on computer, tablet and phone): walk with the left stick or the D-pad, run with R1/L1 (or R2/L2), jump with ✕/A, talk with □/X or ○/B, Start for the menu. In menus, choose with the stick or the D-pad and press ✕/A; ○/B goes back. Press a button first after connecting, so the browser sees the controller.
 
-Jump on wild boars, robot vacuums, snowmen, lost penguins, mountain goats and little trolls, or belly-slide into them (you slide furthest in the snow). Watch out for brambles, Lego bricks and icicles. Chocolate gives you a heart back.
+Jump on wild boars, robot vacuums, snowmen, lost penguins, mountain goats, little trolls, cross geese and seagulls, or belly-slide into them (you slide furthest in the snow). Watch out for brambles, Lego bricks and icicles. Chocolate gives you a heart back.
 
 ## The trips
 
@@ -47,6 +47,8 @@ Choose a trip on the **map of Europe** (🗺️ on the title screen). Every trip
 | 🎅 **North Pole** | Santa's village | landing on the ice, the reindeer stables, Santa's workshop, building an igloo, the post office, northern lights, Christmas Eve, going home |
 | ⛷️ **Tirol** | a chalet in Lindenalm | arrival, ski school, the cable car, the Christmas market in Innsbruck, the toboggan run, the mountain hut, fondue night, going home |
 | 🌌 **Norway** | a red cabin by the fjord near Fjordvik | arrival, kicksled shopping, a husky safari, the stave church, the fishing village, the troll forest, northern lights, going home |
+
+| 🌷 **Netherlands** | a little house by a windmill near Tulpendam | the Zaanse Schans, the windmills of Kinderdijk, Amsterdam by canal boat, Gouda by candlelight, skating in Giethoorn, the Hoge Veluwe, a Wadden island, going home |
 
 Coming later: Iceland, Scania, Tuscany, Veneto and Dalmatia.
 

@@ -325,9 +325,16 @@ function chaletShape(x, y, s, wall, roof) {
   g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 30 * s); g.fill();
   g.fillStyle = "#ffd27a"; g.fillRect(x + 5 * s, y - 15 * s, 5 * s, 5 * s); g.fillRect(x + 20 * s, y - 15 * s, 5 * s, 5 * s);
 }
+const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen"]);
+/** A small windmill in the background (sails do not turn there: the layer is drawn once). */
+function farMill(x, y, s, body, sail) {
+  g.fillStyle = body; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x - 3 * s, y - 26 * s); g.lineTo(x + 3 * s, y - 26 * s); g.lineTo(x + 6 * s, y); g.fill();
+  g.strokeStyle = sail; g.lineWidth = 1.6 * s; const a = (x * .37) % 1.6;
+  for (let k = 0; k < 4; k++) { const b = a + k * Math.PI / 2; g.beginPath(); g.moveTo(x, y - 26 * s); g.lineTo(x + Math.cos(b) * 18 * s, y - 26 * s + Math.sin(b) * 18 * s); g.stroke(); }
+}
 function getSceneLayers(scene) {
   if (LAYERS[scene]) return LAYERS[scene];
-  const R = rng({ pole: 9001, alps: 9002, fjord: 9003 }[scene] || 1), out = {};
+  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006 }[scene] || 1), out = {};
   if (scene === "pole") {
     // ice floes and icebergs far away
     out.far = layerCanvas(() => {
@@ -428,6 +435,82 @@ function getSceneLayers(scene) {
       for (let x = 0; x < LW; x += 36) { const r = R(), y = ridge(384, a, x) + 10; if (r < .25) continue; wrapAt(x, xx => pineShape(xx, y, 80 + r * 60, "#1a3a3a", "#132e2e", "#f4f8ff", "#0b1c1c")); }
     });
   }
+  else if (scene === "polder") {
+    // flat polder to the horizon: distant windmills and a church tower, frosty fields with ditches
+    out.far = layerCanvas(() => {
+      g.fillStyle = "#b9c6d6"; g.fillRect(0, 300, LW, 200);
+      for (let x = 30; x < LW; x += 110 + R() * 120) farMill(x, 302, .9 + R() * .4, "#5a6474", "#5a6474");
+      [[420, 46], [1180, 38]].forEach(([x, h]) => { g.fillStyle = "#6a7484"; g.fillRect(x, 302 - h, 10, h); g.beginPath(); g.moveTo(x - 2, 302 - h); g.lineTo(x + 5, 302 - h - 18); g.lineTo(x + 12, 302 - h); g.fill(); });
+      g.fillStyle = "#c9d4e2"; g.fillRect(0, 300, LW, 3);
+    });
+    out.mid = layerCanvas(() => {
+      g.fillStyle = "#dbe5ef"; g.fillRect(0, 330, LW, 200);
+      g.strokeStyle = "#a9bccf"; g.lineWidth = 2; for (let y = 340; y < 420; y += 14) { g.beginPath(); g.moveTo(0, y); g.lineTo(LW, y + (y % 3) * 2); g.stroke(); }
+      // the dike with a row of windmills, like Kinderdijk
+      const a = [[6, 3, 1], [3, 9, 2]];
+      fillRidge(328, a, "#cdd9e6", "#f4f8ff");
+      for (let x = 60; x < LW; x += 150 + R() * 60) farMill(x, ridge(328, a, x) + 2, 1.9, "#3e4a3a", "#f1ece0");
+      for (let x = 0; x < LW; x += 40) { const r = R(); if (r < .5) continue; g.fillStyle = "#6a5a48"; g.fillRect(x, ridge(328, a, x) - 14, 4, 14); g.fillStyle = "rgba(106,90,72,.6)"; g.beginPath(); g.arc(x + 2, ridge(328, a, x) - 18, 8, 0, 7); g.fill(); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[6, 4, 2], [4, 9, 1]];
+      fillRidge(392, a, "#e6effa", "#ffffff");
+      // reeds along the ditch
+      g.strokeStyle = "#b8a77a"; g.lineWidth = 1.5;
+      for (let x = 0; x < LW; x += 5) { const y = ridge(392, a, x) + 6, h = 10 + R() * 18; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 3, y - h); g.stroke(); }
+    });
+  } else if (scene === "grachten") {
+    // canal houses with gables, the canal with reflections and houseboats, trees with lights
+    out.far = layerCanvas(() => {
+      let x = 0;
+      while (x < LW) {
+        const w = 34 + Math.floor(R() * 3) * 6, h = 90 + R() * 60, y = 330, v = Math.floor(R() * 3);
+        g.fillStyle = ["#5a2e26", "#3a3e4a", "#6a4a32", "#4a2a2a", "#2e3a3a"][Math.floor(R() * 5)];
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - h);
+        if (v === 0) { const st = w / 6; [[0, 8], [st, 8], [st, 16], [2 * st, 16], [2 * st, 24], [4 * st, 24], [4 * st, 16], [5 * st, 16], [5 * st, 8], [w, 8], [w, 0]].forEach(([dx, dy]) => g.lineTo(x + dx, y - h - dy)); }
+        else if (v === 1) { g.lineTo(x + w * .25, y - h); g.lineTo(x + w * .3, y - h - 20); g.lineTo(x + w * .7, y - h - 20); g.lineTo(x + w * .75, y - h); g.lineTo(x + w, y - h); }
+        else { g.quadraticCurveTo(x + 2, y - h - 18, x + w / 2, y - h - 24); g.quadraticCurveTo(x + w - 2, y - h - 18, x + w, y - h); }
+        g.lineTo(x + w, y); g.closePath(); g.fill();
+        g.strokeStyle = "#f4f8ff"; g.lineWidth = 1.5; g.stroke();
+        for (let r = 0; r < Math.floor(h / 22); r++) for (let c = 0; c < 2; c++) { g.fillStyle = R() < .55 ? "#ffd88a" : "#22283a"; g.fillRect(x + 6 + c * (w / 2 - 2), y - h + 8 + r * 22, 8, 12); }
+        x += w + 2;
+      }
+    });
+    out.mid = layerCanvas(() => {
+      g.fillStyle = "#1a2a4a"; g.fillRect(0, 330, LW, 200);
+      g.fillStyle = "rgba(255,216,138,.35)"; for (let x = 0; x < LW; x += 9) if (R() < .5) g.fillRect(x, 334 + R() * 40, 5, 1.5);
+      for (let x = 80; x < LW; x += 260 + R() * 120) {
+        g.fillStyle = "#3a5a3a"; g.fillRect(x, 336, 90, 14); g.fillStyle = "#6a4a32"; g.fillRect(x + 10, 322, 60, 14); g.fillStyle = "#ffd88a"; g.fillRect(x + 18, 326, 8, 6); g.fillRect(x + 44, 326, 8, 6);
+      }
+      // a bridge with lights
+      [500, 1240].forEach(bx => { g.fillStyle = "#4a4250"; g.beginPath(); g.moveTo(bx, 330); g.quadraticCurveTo(bx + 70, 300, bx + 140, 330); g.lineTo(bx + 140, 340); g.lineTo(bx + 110, 340); g.quadraticCurveTo(bx + 70, 316, bx + 30, 340); g.lineTo(bx, 340); g.fill(); g.fillStyle = "#ffe08a"; for (let i = 0; i < 9; i++) { const t = i / 8; g.beginPath(); g.arc(bx + t * 140, 330 - Math.sin(t * Math.PI) * 30 + 6, 2, 0, 7); g.fill(); } });
+    });
+    out.near = layerCanvas(() => {
+      for (let x = 20; x < LW; x += 120 + R() * 80) {
+        const y = 404, h = 80 + R() * 30;
+        g.strokeStyle = "#241f2c"; g.lineWidth = 5; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - h); g.stroke();
+        g.lineWidth = 2.5; for (let i = 0; i < 6; i++) { const by2 = y - h * .45 - i * h * .09, d = (i % 2 ? 1 : -1) * (18 + R() * 16); g.beginPath(); g.moveTo(x, by2); g.lineTo(x + d, by2 - 16 - R() * 10); g.stroke(); }
+        for (let i = 0; i < 12; i++) { g.fillStyle = ["#ffe08a", "#ffffff"][i % 2]; g.beginPath(); g.arc(x + (R() - .5) * 60, y - h * .5 - R() * h * .5, 1.6, 0, 7); g.fill(); }
+      }
+    });
+  } else if (scene === "duinen") {
+    // the sea far away (with a lighthouse), dunes with marram grass, and pines
+    out.far = layerCanvas(() => {
+      g.fillStyle = "#6a8aaa"; g.fillRect(0, 290, LW, 200);
+      g.fillStyle = "rgba(255,255,255,.4)"; for (let x = 0; x < LW; x += 20) g.fillRect(x + R() * 10, 296 + R() * 30, 12, 1.5);
+      const lx = 980; for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#c8323a"; g.fillRect(lx, 290 - (i + 1) * 12, 10, 12); } g.fillStyle = "#ffe8a0"; g.fillRect(lx + 1, 212, 8, 6);
+    });
+    out.mid = layerCanvas(() => {
+      const a = [[22, 3, 1], [14, 7, 2], [6, 15, 3]];
+      fillRidge(330, a, "#e2d2a8", "#f4f8ff");
+      g.strokeStyle = "#8a9a5a"; g.lineWidth = 1.2; for (let x = 0; x < LW; x += 7) { const y = ridge(330, a, x) + 4; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 3, y - 8 - R() * 6); g.stroke(); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[12, 4, 3], [7, 10, 1]];
+      fillRidge(386, a, "#ece0bc", "#f8fbff");
+      for (let x = 0; x < LW; x += 70) { const r = R(), y = ridge(386, a, x) + 10; if (r < .5) continue; wrapAt(x, xx => pineShape(xx, y, 70 + r * 50, "#2d5a3a", "#21482c", "#f4f8ff", "#173220")); }
+    });
+  }
   return LAYERS[scene] = out;
 }
 /** Northern lights: a few slow, wavy green and purple curtains (cheap: three paths per frame). */
@@ -442,13 +525,15 @@ function drawAurora(strength) {
   }
 }
 function drawSceneSky(scene) {
-  const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"] }[scene];
+  const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"],
+    polder: ["#4a6488", "#8ea6c4", "#d8c8b8"], grachten: ["#0a1430", "#2a3466", "#6a5a82"], duinen: ["#5a7ca8", "#a8c4dc", "#f0dcc0"] }[scene];
   g.fillStyle = grad("sky-" + scene, () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, skies[0]); gr.addColorStop(.62, skies[1]); gr.addColorStop(1, skies[2]); return gr; });
   g.fillRect(0, 0, viewW, VIEW_H);
   g.fillStyle = "#fff";
-  for (let i = 0; i < 70; i++) { g.globalAlpha = (.3 + .6 * Math.abs(Math.sin(frame / (30 + i % 13) + i))) * (scene === "alps" ? .5 : 1); g.fillRect(((hash(i * 3) * 3000) % viewW + viewW) % viewW, hash(i * 7) * 220, 2, 2); }
+  const starA = { alps: .5, polder: .15, duinen: 0 }[scene] ?? 1;
+  if (starA) for (let i = 0; i < 70; i++) { g.globalAlpha = (.3 + .6 * Math.abs(Math.sin(frame / (30 + i % 13) + i))) * starA; g.fillRect(((hash(i * 3) * 3000) % viewW + viewW) % viewW, hash(i * 7) * 220, 2, 2); }
   g.globalAlpha = 1;
-  if (scene !== "alps") drawAurora(scene === "fjord" ? 1 : .8);
+  if (scene === "pole" || scene === "fjord") drawAurora(scene === "fjord" ? 1 : .8);
 }
 
 /** De rijen van een laag waar iets op staat (de rest is doorzichtig), met 2 lege rijen marge zodat de randen precies hetzelfde blijven. */
@@ -603,7 +688,7 @@ function grad(key, make) {
 }
 function drawBackground(theme, camX) {
   const scene = arguments.length > 2 ? arguments[2] : L && L.d.scene;
-  if (scene === "pole" || scene === "alps" || scene === "fjord") {
+  if (SCENES.has(scene)) {
     const Ls = getSceneLayers(scene);
     drawSceneSky(scene);
     drawLayer(Ls.far, camX * .15);
@@ -729,7 +814,118 @@ function drawDeco(kind, x, theme) {
   const by = groundTop(x) * TS, px = x * TS;
   g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const H = hash(x * 5.3);
-  if (kind === "candycane") {
+  if (kind === "windmill") {
+    // a Dutch windmill: a dark octagonal body, a thatched cap, a stage around it and sails that turn in the wind
+    shadowAt(px + 30, by, 44);
+    g.fillStyle = "#3e4a3a"; g.beginPath(); g.moveTo(px + 6, by); g.lineTo(px + 16, by - 120); g.lineTo(px + 44, by - 120); g.lineTo(px + 54, by); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#4e5c48"; g.beginPath(); g.moveTo(px + 30, by); g.lineTo(px + 30, by - 120); g.lineTo(px + 44, by - 120); g.lineTo(px + 54, by); g.closePath(); g.fill();
+    g.fillStyle = "#6e4426"; g.fillRect(px - 4, by - 58, 68, 5); g.strokeRect(px - 4, by - 58, 68, 5);
+    for (let xx = px; xx <= px + 60; xx += 10) g.fillRect(xx, by - 53, 2, 14);
+    g.fillStyle = "#f1ece0"; g.fillRect(px + 24, by - 24, 12, 24); g.strokeRect(px + 24, by - 24, 12, 24); g.fillStyle = "#ffd88a"; g.fillRect(px + 26, by - 92, 8, 10);
+    g.fillStyle = "#8a6a3a"; g.beginPath(); g.moveTo(px + 12, by - 118); g.quadraticCurveTo(px + 30, by - 146, px + 48, by - 118); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(px + 14, by - 122); g.quadraticCurveTo(px + 30, by - 144, px + 46, by - 122); g.quadraticCurveTo(px + 30, by - 136, px + 14, by - 122); g.fill();
+    const hx = px + 30, hy = by - 118, a0 = frame * .012 + H * 6;
+    for (let k = 0; k < 4; k++) {
+      const a = a0 + k * Math.PI / 2, ca = Math.cos(a), sa = Math.sin(a);
+      g.strokeStyle = "#4a3020"; g.lineWidth = 3; g.beginPath(); g.moveTo(hx, hy); g.lineTo(hx + ca * 64, hy + sa * 64); g.stroke();
+      g.save(); g.translate(hx, hy); g.rotate(a);
+      g.fillStyle = "rgba(244,240,228,.85)"; g.fillRect(10, 1, 52, 11); g.strokeStyle = "#4a3020"; g.lineWidth = 1; for (let i = 14; i < 62; i += 6) { g.beginPath(); g.moveTo(i, 1); g.lineTo(i, 12); g.stroke(); }
+      g.restore();
+    }
+    g.strokeStyle = OUT; g.lineWidth = 2; g.fillStyle = "#3a2a1a"; g.beginPath(); g.arc(hx, hy, 4, 0, 7); g.fill();
+  } else if (kind === "gablehouse") {
+    // a narrow canal house with a stepped, neck or bell gable, white window frames and a hoist beam
+    const v = Math.floor(H * 3), cols = ["#7a3a2a", "#3e4a5a", "#8a5a3a", "#5a3a3a"], w = 52, h = 140;
+    shadowAt(px + w / 2, by, 34);
+    g.fillStyle = cols[Math.floor(H * 4)]; g.beginPath(); g.moveTo(px, by); g.lineTo(px, by - h);
+    if (v === 0) [[0, 12], [8, 12], [8, 24], [16, 24], [16, 36], [36, 36], [36, 24], [44, 24], [44, 12], [52, 12], [52, 0]].forEach(([dx, dy]) => g.lineTo(px + dx, by - h - dy));
+    else if (v === 1) { g.lineTo(px + 12, by - h); g.quadraticCurveTo(px + 12, by - h - 20, px + 16, by - h - 30); g.lineTo(px + 36, by - h - 30); g.quadraticCurveTo(px + 40, by - h - 20, px + 40, by - h); g.lineTo(px + w, by - h); }
+    else { g.quadraticCurveTo(px + 4, by - h - 26, px + w / 2, by - h - 34); g.quadraticCurveTo(px + w - 4, by - h - 26, px + w, by - h); }
+    g.lineTo(px + w, by); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#f4f1ea"; g.fillRect(px + w / 2 - 2, by - h - 26, 4, 10);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) { const wx = px + 8 + c * 22, wy = by - h + 10 + r * 30; g.fillStyle = "#f4f1ea"; g.fillRect(wx - 2, wy - 2, 18, 22); g.fillStyle = (hash(x * 3 + r * 7 + c) > .45) ? "#ffd88a" : "#2a3550"; g.fillRect(wx, wy, 14, 18); }
+    g.fillStyle = "#2a3a2a"; g.fillRect(px + 18, by - 26, 16, 26); g.strokeRect(px + 18, by - 26, 16, 26);
+    g.fillStyle = "#f4f8ff"; g.fillRect(px - 2, by - h - 2, w + 4, 3);
+  } else if (kind === "cow") {
+    // a black-and-white Dutch cow in a winter blanket
+    shadowAt(px + 22, by, 24);
+    g.fillStyle = "#f6f4ee"; [[6], [12], [30], [36]].forEach(([dx]) => { g.fillRect(px + dx, by - 16, 4, 16); });
+    g.beginPath(); rp(px, by - 36, 46, 22, 9); g.fill(); g.stroke();
+    g.fillStyle = "#1d1d26"; [[8, -32, 7, 5], [24, -30, 9, 6], [36, -24, 5, 4]].forEach(([dx, dy, rx, ry]) => { g.beginPath(); g.ellipse(px + dx, by + dy, rx, ry, .3, 0, 7); g.fill(); });
+    g.fillStyle = "#c43a3a"; g.fillRect(px + 12, by - 36, 22, 12); g.fillStyle = "#e8c45a"; g.fillRect(px + 12, by - 30, 22, 2);
+    g.fillStyle = "#f6f4ee"; g.beginPath(); rp(px + 40, by - 42, 16, 15, 5); g.fill(); g.stroke();
+    g.fillStyle = "#f0b8b0"; g.beginPath(); rp(px + 47, by - 33, 10, 7, 3); g.fill();
+    g.fillStyle = "#1d1d26"; g.fillRect(px + 46, by - 38, 2, 2);
+    g.strokeStyle = "#d8cfb8"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 43, by - 42); g.lineTo(px + 40, by - 47); g.moveTo(px + 52, by - 42); g.lineTo(px + 55, by - 47); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+  } else if (kind === "clogs") {
+    // a giant pair of wooden clogs: a classic photo spot
+    shadowAt(px + 30, by, 34);
+    [[0, "#f2c230"], [30, "#f2c230"]].forEach(([dx, c]) => {
+      g.fillStyle = c; g.beginPath(); g.moveTo(px + dx, by - 4); g.quadraticCurveTo(px + dx - 2, by - 26, px + dx + 8, by - 28); g.lineTo(px + dx + 18, by - 28);
+      g.quadraticCurveTo(px + dx + 24, by - 16, px + dx + 30, by - 12); g.quadraticCurveTo(px + dx + 36, by - 8, px + dx + 30, by); g.lineTo(px + dx + 4, by); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = "#3a2a1a"; g.beginPath(); g.ellipse(px + dx + 11, by - 26, 6, 2.5, 0, 0, 7); g.fill();
+      g.fillStyle = "#d8232a"; g.beginPath(); g.arc(px + dx + 20, by - 12, 3, 0, 7); g.fill();
+    });
+  } else if (kind === "tulips") {
+    // tulips in a wooden crate (from the greenhouse: it's winter)
+    shadowAt(px + 22, by, 24);
+    for (let i = 0; i < 7; i++) {
+      const tx = px + 4 + i * 6, ty = by - 30 - (i % 2) * 6;
+      g.strokeStyle = "#3a7a3a"; g.lineWidth = 2; g.beginPath(); g.moveTo(tx, by - 14); g.lineTo(tx, ty); g.stroke();
+      g.fillStyle = ["#e8323a", "#f2c230", "#e85aa0", "#f08a2a"][i % 4]; g.beginPath(); g.moveTo(tx - 4, ty); g.lineTo(tx - 4, ty - 7); g.lineTo(tx - 1.5, ty - 4); g.lineTo(tx, ty - 8); g.lineTo(tx + 1.5, ty - 4); g.lineTo(tx + 4, ty - 7); g.lineTo(tx + 4, ty); g.closePath(); g.fill();
+    }
+    g.strokeStyle = OUT; g.lineWidth = 2; g.fillStyle = "#a87a4a"; g.fillRect(px, by - 16, 46, 16); g.strokeRect(px, by - 16, 46, 16);
+    g.fillStyle = "#8a5a32"; g.fillRect(px, by - 9, 46, 2);
+  } else if (kind === "cheese") {
+    // a stack of Gouda cheese wheels on a wooden barrow
+    shadowAt(px + 28, by, 34);
+    g.fillStyle = "#8a5a32"; g.fillRect(px, by - 10, 58, 6); g.strokeRect(px, by - 10, 58, 6);
+    g.fillStyle = "#3a2a1a"; g.beginPath(); g.arc(px + 10, by - 3, 4, 0, 7); g.arc(px + 48, by - 3, 4, 0, 7); g.fill();
+    [[4, 0], [30, 0], [17, 1]].forEach(([dx, row]) => { const cy = by - 18 - row * 14; g.fillStyle = "#f2b630"; g.beginPath(); g.ellipse(px + dx + 12, cy, 13, 8, 0, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#f8d060"; g.beginPath(); g.ellipse(px + dx + 12, cy - 3, 11, 4, 0, 0, 7); g.fill(); });
+  } else if (kind === "bike") {
+    // a Dutch bike (upright, with a crate on the front)
+    const c = ["#1d1d26", "#2e5a9a", "#c43a3a", "#f4f1ea"][Math.floor(H * 4)];
+    g.strokeStyle = "#2a2f3c"; g.lineWidth = 2.5; [px + 8, px + 44].forEach(cx => { g.beginPath(); g.arc(cx, by - 11, 11, 0, 7); g.stroke(); });
+    g.strokeStyle = c; g.lineWidth = 3; g.beginPath(); g.moveTo(px + 8, by - 11); g.lineTo(px + 22, by - 11); g.lineTo(px + 18, by - 30); g.moveTo(px + 22, by - 11); g.lineTo(px + 38, by - 28); g.lineTo(px + 44, by - 11); g.moveTo(px + 18, by - 26); g.lineTo(px + 38, by - 26); g.stroke();
+    g.strokeStyle = "#2a2f3c"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 38, by - 28); g.lineTo(px + 36, by - 36); g.lineTo(px + 30, by - 38); g.stroke();
+    g.fillStyle = "#3a2a1a"; g.fillRect(px + 13, by - 33, 10, 3);
+    g.strokeStyle = OUT; g.lineWidth = 2; g.fillStyle = "#a87a4a"; g.fillRect(px + 40, by - 40, 14, 10); g.strokeRect(px + 40, by - 40, 14, 10);
+  } else if (kind === "thatch") {
+    // a farmhouse with a thatched roof (Giethoorn), with a little bridge to the door
+    shadowAt(px + 48, by, 56);
+    g.fillStyle = "#8a4a32"; g.fillRect(px, by - 40, 96, 40); g.strokeRect(px, by - 40, 96, 40);
+    g.fillStyle = "#a07a42"; g.beginPath(); g.moveTo(px - 10, by - 36); g.quadraticCurveTo(px + 48, by - 112, px + 106, by - 36); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(px - 10, by - 36); g.quadraticCurveTo(px + 48, by - 112, px + 106, by - 36); g.quadraticCurveTo(px + 48, by - 98, px - 10, by - 36); g.fill();
+    g.fillStyle = "#2a5a3a"; g.fillRect(px + 40, by - 30, 16, 30); g.strokeRect(px + 40, by - 30, 16, 30);
+    [[px + 10, by - 30], [px + 70, by - 30]].forEach(([wx, wy]) => { g.fillStyle = "#f4f1ea"; g.fillRect(wx - 2, wy - 2, 18, 18); g.fillStyle = "#ffd88a"; g.fillRect(wx, wy, 14, 14); });
+  } else if (kind === "willow") {
+    // a pollard willow by the ditch: a short thick trunk with a crown of thin branches
+    shadowAt(px + 16, by, 16);
+    g.fillStyle = "#5a4a3a"; g.beginPath(); g.moveTo(px + 8, by); g.lineTo(px + 10, by - 50); g.lineTo(px + 24, by - 50); g.lineTo(px + 26, by); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = "#6a5a48"; g.lineWidth = 1.5;
+    for (let i = 0; i < 14; i++) { const a = -Math.PI / 2 + (i - 6.5) * .16; g.beginPath(); g.moveTo(px + 17, by - 50); g.quadraticCurveTo(px + 17 + Math.cos(a) * 20, by - 50 + Math.sin(a) * 30, px + 17 + Math.cos(a) * 34, by - 50 + Math.sin(a) * 44); g.stroke(); }
+    g.strokeStyle = OUT; g.lineWidth = 2; g.fillStyle = "#f4f8ff"; g.fillRect(px + 9, by - 52, 16, 3);
+  } else if (kind === "dune") {
+    // a dune with marram grass
+    g.fillStyle = "#e6d4a8"; g.beginPath(); g.moveTo(px - 30, by); g.quadraticCurveTo(px + 24, by - 60, px + 80, by); g.closePath(); g.fill();
+    g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(px - 10, by - 18); g.quadraticCurveTo(px + 24, by - 52, px + 60, by - 18); g.quadraticCurveTo(px + 24, by - 40, px - 10, by - 18); g.fill();
+    g.strokeStyle = "#8a9a4a"; g.lineWidth = 1.5; for (let i = 0; i < 16; i++) { const gx = px - 10 + i * 6, gy = by - 6 - Math.sin(i / 16 * Math.PI) * 44; g.beginPath(); g.moveTo(gx, gy + 6); g.lineTo(gx + 4, gy - 8); g.moveTo(gx, gy + 6); g.lineTo(gx - 3, gy - 6); g.stroke(); }
+    g.strokeStyle = OUT; g.lineWidth = 2;
+  } else if (kind === "lighthouse") {
+    // a red-and-white lighthouse with a turning light
+    const w = 34, h = 190;
+    shadowAt(px + w / 2, by, 30);
+    g.save(); g.beginPath(); g.moveTo(px, by); g.lineTo(px + 6, by - h); g.lineTo(px + w - 6, by - h); g.lineTo(px + w, by); g.closePath(); g.clip();
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#c8323a"; g.fillRect(px - 2, by - (i + 1) * h / 6, w + 4, h / 6); }
+    g.restore();
+    g.beginPath(); g.moveTo(px, by); g.lineTo(px + 6, by - h); g.lineTo(px + w - 6, by - h); g.lineTo(px + w, by); g.closePath(); g.stroke();
+    g.fillStyle = "#2a2f3c"; g.fillRect(px + 2, by - h - 6, w - 4, 6); g.fillStyle = "#ffe8a0"; g.fillRect(px + 8, by - h - 26, w - 16, 20); g.strokeRect(px + 8, by - h - 26, w - 16, 20);
+    g.fillStyle = "#c8323a"; g.beginPath(); g.moveTo(px + 4, by - h - 26); g.lineTo(px + w / 2, by - h - 40); g.lineTo(px + w - 4, by - h - 26); g.closePath(); g.fill(); g.stroke();
+    const a = frame * .03, beam = g.createLinearGradient(px + w / 2, 0, px + w / 2 + Math.cos(a) * 200, 0);
+    beam.addColorStop(0, "rgba(255,240,170,.55)"); beam.addColorStop(1, "rgba(255,240,170,0)");
+    g.fillStyle = beam; g.beginPath(); g.moveTo(px + w / 2, by - h - 16); g.lineTo(px + w / 2 + Math.cos(a) * 200, by - h - 16 - 24); g.lineTo(px + w / 2 + Math.cos(a) * 200, by - h - 16 + 24); g.closePath(); g.fill();
+  } else if (kind === "candycane") {
     // a candy-cane pole, red and white
     g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(px + 16, by); g.lineTo(px + 16, by - 64); g.arc(px + 26, by - 64, 10, Math.PI, 0); g.stroke();
     g.lineWidth = 6; g.strokeStyle = "#f8f4ec"; g.stroke();
@@ -829,7 +1025,7 @@ function drawDeco(kind, x, theme) {
     g.save(); g.translate(px + 92, by - 6); g.scale(.22, .22); drawSaab("900", -72, 0, { tree: false, color: "#d8232a" }); g.restore();
   } else if (kind === "stall") {
     // kerstmarktkraam
-    const names = T(["Mulled wine", "Waffles", "Chips", "Baubles", "Chocolate", "Pretzels"], ["Glühwein", "Wafels", "Frieten", "Kerstballen", "Chocolade", "Krakelingen"]), name = names[Math.floor(H * names.length)];
+    const names = L.d.stalls || T(["Mulled wine", "Waffles", "Chips", "Baubles", "Chocolate", "Pretzels"], ["Glühwein", "Wafels", "Frieten", "Kerstballen", "Chocolade", "Krakelingen"]), name = names[Math.floor(H * names.length)];
     shadowAt(px + 48, by, 50);
     g.fillStyle = "#7a4a26"; g.fillRect(px, by - 70, 96, 70); g.strokeRect(px, by - 70, 96, 70);
     g.fillStyle = "#6b3f20"; for (let x = px + 8; x < px + 96; x += 12) g.fillRect(x, by - 70, 2, 70);
@@ -1193,7 +1389,8 @@ const FLAGS = {
   ardennes: [3, (i, r) => ["#1d1d1d", "#fdda24", "#ef3340"][fl(i / 4)]],
   tirol: [3, (i, r) => r === 1 ? "#ffffff" : "#c8102e"],
   norway: [7, (i, r) => { const v = i === 4 || r === 3, w = i >= 3 && i <= 5 || r >= 2 && r <= 4; return v ? "#00205b" : w ? "#ffffff" : "#ba0c2f"; }],
-  pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]]
+  pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]],
+  netherlands: [3, (i, r) => ["#ae1c28", "#ffffff", "#21468b"][r]]
 };
 function drawCheck(c) {
   g.strokeStyle = OUT; g.lineWidth = 1.5;
@@ -1304,6 +1501,19 @@ function drawMover(m) {
     g.fillStyle = "#ffffff"; g.fillRect(x - 3, y, w + 6, 4);
     g.fillStyle = "rgba(90,140,200,.35)"; g.fillRect(x + 6, y + 7, w - 20, 2);
   }
+}
+/** Wind streaks (the Netherlands): they fly the way the wind blows, faster in a gust. */
+let gusts = [];
+function drawWind() {
+  const w = windNow();
+  while (gusts.length < 22) gusts.push({ x: Math.random() * viewW, y: 40 + Math.random() * (VIEW_H - 120), l: 20 + Math.random() * 40 });
+  g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1.5;
+  for (const s of gusts) {
+    if (state === "play" && !dialog) s.x += w * 22 + Math.sign(w || 1) * 1.5;
+    if (s.x > viewW + 60) s.x = -60; if (s.x < -60) s.x = viewW + 60;
+    g.globalAlpha = Math.min(1, Math.abs(w) * 2.2); g.beginPath(); g.moveTo(s.x, s.y); g.lineTo(s.x - Math.sign(w || 1) * s.l, s.y + 1); g.stroke();
+  }
+  g.globalAlpha = 1;
 }
 /** Darkness with a circle of light around you (the troll forest, the northern lights night). Finding things makes it bigger. */
 function drawDark(cx) {
@@ -1418,6 +1628,7 @@ function render() {
   g.globalAlpha = 1;
   g.restore();
   if (L.d.dark) drawDark(cx);
+  if (L.d.wind) drawWind();
   drawAmbient(theme);
   if (theme === "sneeuw" || theme === "stad") drawFlakes();
   vignette();

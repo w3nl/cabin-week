@@ -8,7 +8,7 @@ test('the map shows the regions; choosing one switches the days, and the choice 
   await expect(page.locator('#levels .t').first()).toHaveText('Arrival in Pinebrook');
   await page.locator('#regionBtn').click();
   await expect(page.locator('#mapWrap')).toBeVisible();
-  await expect(page.locator('#mapBox .pin')).toHaveCount(4);
+  await expect(page.locator('#mapBox .pin')).toHaveCount(5);
   await expect(page.locator('#mapBox .pin.here')).toHaveAttribute('data-region', 'ardennes');
   await expect(page.locator('#mapSoon')).toContainText('Iceland');
   await page.locator('#mapBox .pin[data-region="tirol"]').click();
@@ -69,13 +69,14 @@ test('the map works with the keyboard and the remote: arrows, Enter, and Escape 
 test('the new regions have their own scenery, enemies and checkpoint flags', async ({ page }) => {
   await seed(page, { unlocked: 8 });
   const info = await page.evaluate(() => REGIONS.map(r => ({ id: r.id, n: r.levels.length, scenes: [...new Set(r.levels.map(l => l.scene || l.theme))], enemies: [...new Set(r.levels.filter(l => l.enemies !== false).map(l => l.enemy))] })));
-  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8]);
+  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8]);
   expect(info.find(r => r.id === 'pole').scenes).toContain('pole');
   expect(info.find(r => r.id === 'tirol').enemies).toContain('geit');
   expect(info.find(r => r.id === 'norway').enemies).toContain('troll');
   expect(info.find(r => r.id === 'pole').enemies).toContain('pinguin');
   const codes = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map(l => l.code && l.code.answer)));
-  expect(new Set(codes).size).toBe(32);
+  expect(new Set(codes).size).toBe(40);
+  expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'meeuw', 'zwijn']));
 });
 
 test('Dutch: the map and the region names are translated', async ({ page }) => {
@@ -93,7 +94,7 @@ for (const [w, h, what] of [[960, 540, 'tv'], [740, 360, 'phone turned'], [412, 
     await seed(page, { lang: 'nl' });
     await page.locator('#regionBtn').click();
     expect(await page.evaluate(() => document.getElementById('mapWrap').scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    for (const id of ['ardennes', 'pole', 'tirol', 'norway']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
+    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
     await expect(page.locator('#mapClose')).toBeInViewport({ ratio: .99 });
   });
 }
@@ -104,11 +105,12 @@ test('every region plays differently: hills, movers, ice, water and darkness whe
     hills: r.levels.filter(l => l.hills && new Set(l.ground.map(g => g[2])).size > 1).length,
     movers: r.levels.filter(l => l.ents.some(e => e[0] === 'mover')).length,
     ice: r.levels.filter(l => l.ice).length, dark: r.levels.filter(l => l.dark).length,
-    water: r.levels.filter(l => l.water).length, interior: r.levels.filter(l => l.interior).length }])));
+    water: r.levels.filter(l => l.water).length, interior: r.levels.filter(l => l.interior).length, wind: r.levels.filter(l => l.wind).length }])));
   // the Ardennes stay as they were: flat ground, nothing that moves, no ice or darkness
-  expect(f.ardennes).toEqual({ hills: 0, movers: 0, ice: 0, dark: 0, water: 0, interior: 0 });
+  expect(f.ardennes).toEqual({ hills: 0, movers: 0, ice: 0, dark: 0, water: 0, interior: 0, wind: 0 });
   expect(f.pole.ice).toBeGreaterThanOrEqual(5); expect(f.pole.movers).toBeGreaterThanOrEqual(2); expect(f.pole.dark).toBe(1); expect(f.pole.interior).toBe(2);
   expect(f.tirol.hills).toBeGreaterThanOrEqual(4); expect(f.tirol.movers).toBeGreaterThanOrEqual(2); expect(f.tirol.interior).toBe(2);
+  expect(f.netherlands.wind).toBeGreaterThanOrEqual(3); expect(f.netherlands.ice).toBe(1); expect(f.netherlands.movers).toBe(2); expect(f.netherlands.dark).toBe(1);
   expect(f.norway.movers).toBeGreaterThanOrEqual(2); expect(f.norway.dark).toBe(1); expect(f.norway.water).toBeGreaterThanOrEqual(6);
 });
 
@@ -139,4 +141,12 @@ test('in the dark troll forest you see more once you have the torch', async ({ p
   await startDay(page, 5);
   const r = await page.evaluate(() => { const dk = L.d.dark, rad = () => dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0); const a = rad(); L.hasQuest = true; return [a, rad()]; });
   expect(r[1]).toBeGreaterThan(r[0] + 100);
+});
+
+test('the Netherlands: the wind pushes you, sometimes against you and sometimes from behind', async ({ page }) => {
+  await seed(page, { region: 'netherlands', unlocked: 8 });
+  await startDay(page, 1);
+  const w = await page.evaluate(() => { const out = []; for (let t = 0; t < 900; t += 30) { L.time = t; out.push(windNow()); } return { min: Math.min(...out), max: Math.max(...out) }; });
+  expect(w.min).toBeLessThan(-.3);
+  expect(w.max).toBeGreaterThan(.1);
 });
