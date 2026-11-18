@@ -3,7 +3,7 @@
 /* ---------- Poppetje ---------- */
 function drawPerson(c, cx, by, s, face, phase, air, hat, opts = {}) {
   const t = opts.t || 0, moving = !!opts.moving, kid = !!c.kid, sz = c.size || 1;
-  const skin = "#f4caa6", skinD = "#d9a07c", shoe = c.shoes || "#3a2a22";
+  const skin = c.skin || "#f4caa6", skinD = c.skin ? shade(c.skin, -.14) : "#d9a07c", shoe = c.shoes || "#3a2a22";
   // Indoors Paul wears his green Christmas jumper with a Saab 900 on it.
   const sweater = opts.indoor && c.sweater;
   const coat = sweater ? c.sweater : c.coatCol, coatD = shade(coat, -.3), coatL = shade(coat, .25);

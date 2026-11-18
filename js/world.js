@@ -1260,7 +1260,7 @@ function render() {
   g.setTransform(scale, 0, 0, scale, 0, 0);
   g.imageSmoothingEnabled = true;
 
-  if (!L || state === "title" || state === "map") {
+  if (!L || state === "title" || state === "map" || state === "hero") {
     drawBackground("sneeuw", frame * .6, REGION.scene);
     drawFlakes(); vignette();
     return;
@@ -1322,7 +1322,7 @@ function render() {
   for (const e of L.enemies) drawEnemy(e, frame * 16);
 
   if (!(P.inv > 0 && fl(P.inv / 4) % 2)) {
-    const ch = CHARS[save.char];
+    const ch = heroChar();
     // On the birthday level the birthday boy wears a party hat.
     const pHat = L.d.birthday === ch.name ? "party" : hat;
     if (P.slide) {

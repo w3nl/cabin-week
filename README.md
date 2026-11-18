@@ -2,7 +2,7 @@
 
 A platform game in the browser about winter trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol or Norway) and play its week: eight days, **one level a day**.
 
-You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, help the others with a task, and crack a code lock with clues written on signs along the way. Finish a day to unlock the next one.
+Play as one of the nine, or **make your own hero** (name, height, skin, hair, coat, glasses, hat and scarf). You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, help the others with a task, and crack a code lock with clues written on signs along the way. Finish a day to unlock the next one.
 
 **In English and Dutch** (choose at the bottom of the title screen, or add `?lang=nl` to the link).
 
