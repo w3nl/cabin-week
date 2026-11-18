@@ -232,6 +232,7 @@ Everything in "Lessons learned" in [docs/blueprint.md](docs/blueprint.md) applie
 - New texts in English and Dutch.
 - `AGENTS.md` updated (solutions, storage, pitfalls).
 - Screenshots checked of everything you changed, on computer and phone size.
+- **Release notes** in the PR description, in en-GB and nl-NL (the section in the PR template): a few sentences for players, max. 500 characters per language, in the `<en-GB>…</en-GB><nl-NL>…</nl-NL>` format that Google Play Console takes as is. When several PRs go into one release, combine their notes.
 
 ## Workflow
 
