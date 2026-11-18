@@ -1652,8 +1652,17 @@ function drawMover(m) {
   const x = m.x, y = m.y, w = m.w, st = L.d.movers;
   g.strokeStyle = OUT; g.lineWidth = 2; g.lineJoin = "round";
   if (st === "gondola") {
-    g.strokeStyle = "#2a2f3c"; g.lineWidth = 2; g.beginPath(); g.moveTo(m.x0 - TS, y - 70); g.lineTo(m.x1 + w + TS, y - 70); g.stroke();
-    g.fillStyle = "#2a2f3c"; g.fillRect(x + w / 2 - 2, y - 70, 4, 20); g.beginPath(); g.arc(x + w / 2, y - 70, 5, 0, 7); g.fill();
+    // The cable runs from the station at the bottom to the one at the top (or level, if the ground is level).
+    const k = (m.y1 - m.y0) / (m.x1 - m.x0), cy = sx => m.y0 - 70 + (sx - m.x0 - w / 2) * k;
+    const sa = m.x0 - TS / 2, sb = m.x1 + w + TS / 2;
+    g.strokeStyle = "#2a2f3c"; g.lineWidth = 2; g.beginPath(); g.moveTo(sa, cy(sa)); g.lineTo(sb, cy(sb)); g.stroke();
+    for (const [sx, gy] of [[sa, m.y0], [sb, m.y1]]) {
+      g.fillStyle = "#5a6070"; g.fillRect(sx - 4, cy(sx) - 4, 8, gy - cy(sx) + 4); g.strokeStyle = OUT; g.strokeRect(sx - 4, cy(sx) - 4, 8, gy - cy(sx) + 4);
+      g.fillStyle = "#2a2f3c"; g.beginPath(); g.arc(sx, cy(sx), 7, 0, 7); g.fill();
+      g.fillStyle = "#c9ced8"; g.beginPath(); g.arc(sx, cy(sx), 3, 0, 7); g.fill();
+    }
+    const hy = cy(x + w / 2);
+    g.fillStyle = "#2a2f3c"; g.fillRect(x + w / 2 - 2, hy, 4, y - 50 - hy); g.beginPath(); g.arc(x + w / 2, hy, 5, 0, 7); g.fill();
     g.strokeStyle = OUT; g.lineWidth = 2;
     g.fillStyle = "#d8423a"; g.beginPath(); rp(x + 2, y - 50, w - 4, 50, 6); g.fill(); g.stroke();
     g.fillStyle = "#ffe7a8"; g.fillRect(x + 8, y - 42, w - 16, 16); g.strokeRect(x + 8, y - 42, w - 16, 16);

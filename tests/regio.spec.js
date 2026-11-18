@@ -1,6 +1,6 @@
 // Regions: the map of Europe, choosing a region, and separate progress per region.
 const { test, expect } = require('@playwright/test');
-const { KEY, seed, startDay, playDay } = require('./helpers');
+const { KEY, seed, startDay, playDay, skip } = require('./helpers');
 
 test('the map shows the regions; choosing one switches the days, and the choice is remembered', async ({ page }) => {
   await seed(page);
@@ -178,4 +178,22 @@ test('a summer region says "summer days" on the title screen', async ({ page }) 
   await expect(page.locator('#cdWord')).toHaveText('summer days to play');
   await seed(page);
   await expect(page.locator('#cdWord')).toHaveText('winter days to play');
+});
+
+test('Tirol: the cable car goes up the mountain on a slanted cable, and takes you along', async ({ page }) => {
+  await seed(page, { unlocked: 8, region: 'tirol' });
+  await startDay(page, 2);
+  await skip(page);
+  const m0 = await page.evaluate(() => { const m = L.movers[0]; return { y0: m.y0, y1: m.y1 }; });
+  expect(m0.y1).toBeLessThan(m0.y0); // the first gondola goes up
+  // Stand in the gondola while it waits at the bottom station, and ride along to the top.
+  await page.evaluate(() => {
+    window.hurt = () => {}; L.enemies.length = 0;
+    const m = L.movers[0]; m.x = m.x0; m.y = m.y0; m.dir = 1; m.wait = 30;
+    P.x = m.x + m.w / 2 - P.w / 2; P.y = m.y - P.h; P.vx = P.vy = 0;
+  });
+  await page.waitForFunction(() => L.movers[0].x === L.movers[0].x1, null, { timeout: 15000 });
+  const end = await page.evaluate(() => ({ feet: P.y + P.h, top: L.movers[0].y1, on: P.mover === L.movers[0] }));
+  expect(end.on).toBe(true);
+  expect(Math.abs(end.feet - end.top)).toBeLessThan(2);
 });

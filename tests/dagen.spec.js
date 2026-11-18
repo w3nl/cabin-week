@@ -19,7 +19,11 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dal
       const solid = (x, y, open) => { if (x < 0 || x >= L.w) return true; if (y < 0 || y >= ROWS) return false; const c = L.grid[y][x]; return c === '#' || c === 'S' || (!open && (c === 'G' || c === 'H')); };
       // A mover (ice floe, gondola, boat) carries you across a gap: you can stand anywhere along its track.
       const ride = new Set();
-      for (const m of L.movers) for (let px = m.x0; px <= m.x1 + m.w - TS; px += TS / 2) ride.add(Math.floor(px / TS) + ',' + (m.y / TS - 1));
+      // A gondola can ride up or down a slanted cable: count every row it passes on the way.
+      for (const m of L.movers) for (let px = m.x0; px <= m.x1; px += TS / 4) {
+        const my = m.y0 + (m.y1 - m.y0) * (px - m.x0) / (m.x1 - m.x0);
+        for (let c = Math.floor(px / TS); c <= Math.floor((px + m.w - 1) / TS); c++) for (const r of [Math.floor(my / TS), Math.ceil(my / TS)]) ride.add(c + ',' + (r - 1));
+      }
       // Where you can swim (Dalmatia), the water carries you too: count it a row lower than the ground, to be safe.
       if (L.d.swim) for (let x = 0; x < L.w; x++) if (L.grid[ROWS - 1][x] !== '#') ride.add(x + ',12');
       const stand = (x, y, open) => y >= 1 && y < ROWS - 1 && !solid(x, y, open) && !solid(x, y - 1, open) && (solid(x, y + 1, open) || L.grid[y + 1][x] === '=' || ride.has(x + ',' + y)) && L.grid[y][x] !== '^';
