@@ -129,7 +129,31 @@ function blockTex(theme, R) {
   if (theme === "bos") { g.fillStyle = "#5c9a3e"; g.fillRect(2, 2, 12, 3); g.fillRect(4, 5, 4, 2); g.fillRect(20, 2, 8, 2); g.fillStyle = "#86c45c"; g.fillRect(4, 2, 6, 1); }
   else if (theme !== "kust") { g.fillStyle = "#f4f8ff"; g.fillRect(2, 2, 28, 3); }
 }
-function spikeTex(theme, R) {
+function spikeTex(theme, R, kind) {
+  if (kind === "cones") {
+    // pine cones on the floor of the mountain hut
+    [[7, 26, 0], [19, 25, 1], [28, 27, 0]].forEach(([x, y, f]) => {
+      g.fillStyle = OUT; g.beginPath(); g.ellipse(x, y, 6, 4.5, f ? .4 : -.3, 0, 7); g.fill();
+      g.fillStyle = "#7a4a26"; g.beginPath(); g.ellipse(x, y, 5, 3.5, f ? .4 : -.3, 0, 7); g.fill();
+      g.fillStyle = "#a8703e"; for (let i = -3; i <= 3; i += 2) for (let j = -1; j <= 1; j += 2) g.fillRect(x + i, y + j, 1.5, 1.5);
+    });
+    return;
+  }
+  if (kind === "blocks") {
+    // wooden toy blocks and marbles in Santa's workshop
+    [[2, 22, "#d8423a", "A"], [16, 24, "#2f7fe0", "B"]].forEach(([x, y, c]) => { g.fillStyle = OUT; g.fillRect(x - 1, y - 1, 11, 11); g.fillStyle = c; g.fillRect(x, y, 9, 9); g.fillStyle = "rgba(255,255,255,.45)"; g.fillRect(x + 2, y + 2, 5, 1.5); g.fillRect(x + 2, y + 2, 1.5, 5); });
+    [[12, 28, "#59c28a"], [29, 28, "#ffd25e"], [26, 22, "#ff7aa8"]].forEach(([x, y, c]) => { g.fillStyle = OUT; g.beginPath(); g.arc(x, y, 3.6, 0, 7); g.fill(); g.fillStyle = c; g.beginPath(); g.arc(x, y, 2.8, 0, 7); g.fill(); g.fillStyle = "#fff"; g.fillRect(x - 1.5, y - 1.5, 1.2, 1.2); });
+    return;
+  }
+  if (kind === "pins") {
+    // drawing pins that fell off the notice board in the post office
+    [[5, 27, "#d8423a"], [15, 25, "#2f7fe0"], [24, 28, "#ffd25e"], [29, 24, "#59c28a"]].forEach(([x, y, c]) => {
+      g.fillStyle = "#c9ced8"; g.fillRect(x - .6, y - 8, 1.4, 6);
+      g.fillStyle = OUT; g.beginPath(); g.ellipse(x, y - 1, 4.5, 2.6, 0, 0, 7); g.fill();
+      g.fillStyle = c; g.beginPath(); g.ellipse(x, y - 1.4, 3.6, 1.9, 0, 0, 7); g.fill();
+    });
+    return;
+  }
   if (theme === "bos") {
     g.fillStyle = "#24461b";
     for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(i * 8, 32); g.lineTo(i * 8 + 4, 10 + (i % 2) * 4); g.lineTo(i * 8 + 8, 32); g.fill(); }
@@ -155,18 +179,19 @@ function spikeTex(theme, R) {
     }
   }
 }
-function getTex(theme) {
-  if (TEXCACHE[theme]) return TEXCACHE[theme];
+function getTex(theme, spikeKind) {
+  const key = spikeKind ? theme + ":" + spikeKind : theme;
+  if (TEXCACHE[key]) return TEXCACHE[key];
   const R = rng(theme.length * 977 + 13), T = { fill: [], top: [] };
   for (let v = 0; v < 4; v++) { T.fill.push(texTile(() => fillTex(theme, R))); T.top.push(texTile(() => { fillTex(theme, R); topTex(theme, R); })); }
-  T.plat = texTile(() => platTex(theme)); T.block = texTile(() => blockTex(theme, R)); T.spike = texTile(() => spikeTex(theme, R));
+  T.plat = texTile(() => platTex(theme)); T.block = texTile(() => blockTex(theme, R)); T.spike = texTile(() => spikeTex(theme, R, spikeKind));
   // Alle tegels ook in één atlas (met een rand van 1 px ertussen): zo tekent de grafische chip honderden tegels per
   // beeld uit één plaatje, in plaats van steeds te wisselen. Pixel voor pixel hetzelfde resultaat.
   const all = [...T.fill, ...T.top, T.plat, T.block, T.spike];
   T.atlas = mk(all.length * 34, 34); T.at = new Map();
   const actx = T.atlas.getContext("2d");
   all.forEach((c, i) => { actx.drawImage(c, i * 34 + 1, 1); T.at.set(c, i * 34 + 1); });
-  return TEXCACHE[theme] = T;
+  return TEXCACHE[key] = T;
 }
 
 /* ---------- Achtergrondlagen (naadloos herhalend) ---------- */
@@ -1014,6 +1039,37 @@ function drawDeco(kind, x, theme) {
     for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) { const wx = px + 8 + c * 22, wy = by - h + 10 + r * 30; g.fillStyle = "#f4f1ea"; g.fillRect(wx - 2, wy - 2, 18, 22); g.fillStyle = (hash(x * 3 + r * 7 + c) > .45) ? "#ffd88a" : "#2a3550"; g.fillRect(wx, wy, 14, 18); }
     g.fillStyle = "#2a3a2a"; g.fillRect(px + 18, by - 26, 16, 26); g.strokeRect(px + 18, by - 26, 16, 26);
     g.fillStyle = "#f4f8ff"; g.fillRect(px - 2, by - h - 2, w + 4, 3);
+  } else if (kind === "polarbear") {
+    // a polar bear strolling over the ice (scenery: it minds its own business)
+    const st = Math.sin(frame / 14 + px) * 1.5;
+    shadowAt(px + 30, by, 34);
+    g.fillStyle = "#e8eef2"; [[8, st], [18, -st], [40, st], [50, -st]].forEach(([dx, d]) => { g.beginPath(); rp(px + dx, by - 18 + d * .3, 9, 18 - d * .3, 3); g.fill(); g.stroke(); });
+    g.beginPath(); g.ellipse(px + 30, by - 28, 30, 16, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#d4dde4"; g.beginPath(); g.ellipse(px + 26, by - 20, 24, 6, 0, 0, 7); g.fill();
+    g.fillStyle = "#f4f8fb"; g.beginPath(); g.ellipse(px + 62, by - 30, 12, 9, .2, 0, 7); g.fill(); g.stroke();
+    g.beginPath(); g.arc(px + 58, by - 39, 3.5, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(px + 73, by - 28, 2.2, 0, 7); g.fill(); g.fillRect(px + 64, by - 34, 2, 2);
+  } else if (kind === "walrus") {
+    // a walrus resting on the ice, with long tusks and a moustache
+    shadowAt(px + 26, by, 30);
+    g.fillStyle = "#8a5a44"; g.beginPath(); g.moveTo(px, by); g.quadraticCurveTo(px + 2, by - 30, px + 30, by - 34); g.quadraticCurveTo(px + 52, by - 34, px + 54, by); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#a8745a"; g.beginPath(); g.ellipse(px + 18, by - 24, 10, 4, -.3, 0, 7); g.fill();
+    g.fillStyle = "#6a4232"; g.beginPath(); g.ellipse(px + 4, by - 3, 9, 4, .3, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#c89a7a"; g.beginPath(); g.ellipse(px + 46, by - 22, 7, 5, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#fff8e8"; g.beginPath(); g.moveTo(px + 42, by - 18); g.lineTo(px + 43, by - 4); g.lineTo(px + 45, by - 18); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(px + 48, by - 18); g.lineTo(px + 49, by - 4); g.lineTo(px + 51, by - 18); g.fill(); g.stroke();
+    g.fillStyle = "#1d1d26"; g.fillRect(px + 40, by - 32, 2, 2); g.fillRect(px + 49, by - 32, 2, 2);
+  } else if (kind === "muskox") {
+    // a musk ox: a shaggy brown blanket with horns
+    shadowAt(px + 26, by, 28);
+    g.fillStyle = "#3a2a1e"; [[10], [18], [34], [42]].forEach(([dx]) => g.fillRect(px + dx, by - 12, 5, 12));
+    g.fillStyle = "#5a4030"; g.beginPath(); g.moveTo(px + 2, by - 8); g.quadraticCurveTo(px, by - 38, px + 26, by - 40); g.quadraticCurveTo(px + 50, by - 40, px + 50, by - 8);
+    for (let i = 0; i <= 8; i++) g.lineTo(px + 50 - i * 6, by - 8 + (i % 2) * 4); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#7a5a40"; g.beginPath(); g.ellipse(px + 20, by - 34, 14, 4, 0, 0, 7); g.fill();
+    g.fillStyle = "#4a3426"; g.beginPath(); rp(px + 44, by - 30, 14, 16, 5); g.fill(); g.stroke();
+    g.strokeStyle = "#e8dcc4"; g.lineWidth = 3; g.beginPath(); g.moveTo(px + 46, by - 30); g.quadraticCurveTo(px + 38, by - 26, px + 44, by - 18); g.moveTo(px + 56, by - 30); g.quadraticCurveTo(px + 62, by - 26, px + 58, by - 18); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#1d1d26"; g.fillRect(px + 48, by - 24, 2, 2); g.fillRect(px + 53, by - 24, 2, 2);
   } else if (kind === "cow") {
     // a black-and-white Dutch cow in a winter blanket
     shadowAt(px + 22, by, 24);
@@ -1307,7 +1363,8 @@ function drawDeco(kind, x, theme) {
     const cols = ["#ff5a7a", "#ffd25e", "#59c28a", "#5aa8ff"];
     g.strokeStyle = "#7a5a3a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(px - 70, 52); g.quadraticCurveTo(px + 30, 78, px + 130, 52); g.stroke();
     for (let i = 0; i < 11; i++) { const t = i / 10, xx = px - 70 + t * 200, yy = 52 + Math.sin(t * Math.PI) * 13; g.fillStyle = cols[i % 4]; g.beginPath(); g.moveTo(xx - 7, yy); g.lineTo(xx + 7, yy); g.lineTo(xx, yy + 16); g.closePath(); g.fill(); g.strokeStyle = OUT; g.lineWidth = 1; g.stroke(); }
-    sign2(px - 10, 92, 90, 24, "#fff4e6", "PAUL 40", "#c43a3a");
+    // Only on Paul's birthday does the garland say his age; elsewhere it's just a Christmas garland.
+    sign2(px - 10, 92, 90, 24, "#fff4e6", L.d.birthday ? "PAUL 40" : "HO HO HO", "#c43a3a");
     [[-40, 130, "#ff5a7a"], [100, 124, "#5aa8ff"]].forEach(([dx, y, c2]) => { g.strokeStyle = "#888"; g.lineWidth = 1; g.beginPath(); g.moveTo(px + dx, y + 14); g.lineTo(px + dx + 2, y + 50); g.stroke(); g.fillStyle = c2; g.beginPath(); g.ellipse(px + dx, y + Math.sin(frame / 30 + dx) * 3, 10, 13, 0, 0, 7); g.fill(); g.strokeStyle = OUT; g.stroke(); g.fillStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.ellipse(px + dx - 3, y - 4, 2.5, 4, -.4, 0, 7); g.fill(); });
   } else if (kind === "fire") {
     [[0, 0], [10, 2], [22, 0], [32, 1]].forEach(([dx, dy]) => { g.fillStyle = "#7a7a72"; g.beginPath(); g.ellipse(px - 2 + dx, by - 3 + dy, 6, 4, 0, 0, 7); g.fill(); g.stroke(); });
@@ -1593,6 +1650,112 @@ function drawLantern(l) {
   g.fillStyle = "#f4f8ff"; g.beginPath(); rp(lx - 12, ly - 16, 24, 4, 2); g.fill();
 }
 
+/* ---------- The gate halfway: levers, lamps, the bell and the animal; clues for the lock ---------- */
+function numPlate(cx, cy, n, col = "#fff4e6") {
+  g.fillStyle = OUT; g.beginPath(); g.arc(cx, cy, 8.5, 0, 7); g.fill();
+  g.fillStyle = col; g.beginPath(); g.arc(cx, cy, 7, 0, 7); g.fill();
+  g.fillStyle = "#2a1404"; g.font = "700 11px Fredoka, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(n, cx, cy + .5);
+}
+function drawSwitch(s) {
+  const cx = s.x + 16, by = s.y + TS, kind = L.d.task.kind, look = L.d.task.look;
+  g.strokeStyle = OUT; g.lineWidth = 1.5;
+  if (kind === "levers") {
+    // a lever on a little iron box: down and red when off, up and green when on
+    const a = s.on ? -.5 : .5;
+    g.save(); g.translate(cx, by - 14); g.rotate(a);
+    g.fillStyle = "#5a3a20"; g.fillRect(-2.5, -26, 5, 26); g.strokeRect(-2.5, -26, 5, 26);
+    g.fillStyle = s.on ? "#59c28a" : "#e8423a"; g.beginPath(); g.arc(0, -27, 5, 0, 7); g.fill(); g.stroke();
+    g.restore();
+    g.fillStyle = "#5a6070"; g.beginPath(); rp(cx - 13, by - 16, 26, 16, 3); g.fill(); g.stroke();
+    g.fillStyle = s.on ? "#8dffb5" : "#3a3f4a"; g.fillRect(cx - 8, by - 10, 4, 4); g.fillStyle = s.on ? "#3a3f4a" : "#ff8a8a"; g.fillRect(cx + 4, by - 10, 4, 4);
+    return;
+  }
+  // a lamp to light: a lantern on a post, or a torch
+  const ly = by - 50;
+  if (s.on) { g.fillStyle = grad("lampglow", () => { const gl = g.createRadialGradient(0, 0, 2, 0, 0, 70); gl.addColorStop(0, "rgba(255,210,120,.5)"); gl.addColorStop(1, "rgba(255,210,120,0)"); return gl; });
+    const m0 = g.getTransform(); g.translate(cx, ly); g.fillRect(-70, -70, 140, 140); g.setTransform(m0); }
+  if (look === "torch") {
+    g.fillStyle = "#6b4528"; g.fillRect(cx - 3, ly, 6, by - ly); g.strokeRect(cx - 3, ly, 6, by - ly);
+    g.fillStyle = "#3a2a1a"; g.fillRect(cx - 5, ly - 4, 10, 7); g.strokeRect(cx - 5, ly - 4, 10, 7);
+    if (s.on) [["#ff5a2a", 16], ["#ff9b45", 12], ["#ffd25e", 7]].forEach(([c, h], i) => { const hh = h + Math.sin(frame / 4 + i) * 3; g.fillStyle = c; g.beginPath(); g.moveTo(cx - 5 + i, ly - 4); g.quadraticCurveTo(cx, ly - 4 - hh * 2, cx + 5 - i, ly - 4); g.fill(); });
+    return;
+  }
+  g.fillStyle = "#2b2b30"; g.fillRect(cx - 2.5, ly + 10, 5, by - ly - 10); g.fillRect(cx - 8, by - 4, 16, 4);
+  g.beginPath(); g.moveTo(cx - 10, ly - 10); g.lineTo(cx + 10, ly - 10); g.lineTo(cx, ly - 19); g.closePath(); g.fill();
+  g.fillStyle = s.on ? "#ffe8b0" : "#56607a"; g.fillRect(cx - 7, ly - 10, 14, 20); g.strokeRect(cx - 7, ly - 10, 14, 20);
+  if (s.on) { g.fillStyle = "#ff9b45"; g.beginPath(); g.ellipse(cx, ly + 1 + Math.sin(frame / 12) * .6, 2.6, 5, 0, 0, 7); g.fill(); }
+}
+function drawBell(b) {
+  const cx = b.x + 16, by = b.y + TS, top = by - 64;
+  g.strokeStyle = OUT; g.lineWidth = 1.5;
+  g.fillStyle = "#6b4528"; g.fillRect(cx - 18, top, 5, by - top); g.strokeRect(cx - 18, top, 5, by - top); g.fillRect(cx + 13, top, 5, by - top); g.strokeRect(cx + 13, top, 5, by - top);
+  g.fillRect(cx - 22, top - 6, 44, 7); g.strokeRect(cx - 22, top - 6, 44, 7);
+  const a = Math.sin(b.swing / 3) * b.swing / 120;
+  g.save(); g.translate(cx, top + 1); g.rotate(a);
+  g.fillStyle = "#e8b44a"; g.beginPath(); g.moveTo(-5, 4); g.quadraticCurveTo(-6, 18, -12, 24); g.lineTo(12, 24); g.quadraticCurveTo(6, 18, 5, 4); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = "#fff3c4"; g.fillRect(-2, 8, 2, 10);
+  g.fillStyle = "#8a6a2a"; g.beginPath(); g.arc(0, 26, 3, 0, 7); g.fill();
+  g.restore();
+  if (L.timer > 0) { g.fillStyle = "#ffd25e"; g.font = "700 14px Fredoka, sans-serif"; g.textAlign = "center"; g.fillText(Math.ceil(L.timer / 60), cx, top - 16); }
+}
+function drawAnimal(a) {
+  const found = a.follow || a.home, cx = a.x + 16, by = a.y + TS, moving = a.follow && Math.abs(P.vx) > .3, bob = moving ? Math.abs(Math.sin(frame / 5)) * 3 : 0;
+  shadowAt(cx, by, found ? 15 : 12);
+  g.fillStyle = "#000"; // emoji take the alpha of the fill colour: the shadow's see-through colour made the animal look like a ghost
+  const m0 = g.getTransform(); g.translate(cx, by - (found ? 16 : 13) - bob); g.scale(-a.face, 1);
+  // once found it is bigger, with a white outline, so you always see it walking with you
+  if (found) { g.shadowColor = "#ffffff"; g.shadowBlur = 5 * scale; emoji(L.d.task.animal, 0, 0, 34); emoji(L.d.task.animal, 0, 0, 34); g.shadowBlur = 0; g.shadowColor = "transparent"; }
+  else { g.globalAlpha = .6; emoji(L.d.task.animal, 0, 0, 28); g.globalAlpha = 1; } // still hiding: a bit see-through, so it takes some looking
+  g.setTransform(m0);
+  if (a.follow && (frame % 120) < 50) {
+    const yy = by - 48 - ((frame % 120) / 50) * 8;
+    g.globalAlpha = 1 - (frame % 120) / 50; emoji("💛", cx, yy, 14); g.globalAlpha = 1;
+  }
+  if (!a.follow && !a.home) {
+    const yy = by - 46 + Math.sin(frame / 10) * 2;
+    g.fillStyle = OUT; g.beginPath(); g.arc(cx, yy, 9.5, 0, 7); g.fill(); g.fillStyle = "#ffd25e"; g.beginPath(); g.arc(cx, yy, 8, 0, 7); g.fill();
+    g.fillStyle = "#3a200c"; g.font = "700 13px Fredoka, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("?", cx, yy + 1);
+  }
+}
+function drawClue(c) {
+  const cx = c.x + 16, by = c.y + TS;
+  g.strokeStyle = OUT; g.lineWidth = 1.5;
+  if (c.kind === "melody") {
+    // a bell on a post, in the colour of its note
+    const col = NOTES[+c.v - 1][3], a = c.ring ? Math.sin(c.ring / 2.5) * c.ring / 100 : 0;
+    g.fillStyle = "#6b4528"; g.fillRect(cx - 2.5, by - 52, 5, 52); g.strokeRect(cx - 2.5, by - 52, 5, 52); g.fillRect(cx - 2.5, by - 54, 16, 5); g.strokeRect(cx - 2.5, by - 54, 16, 5);
+    g.save(); g.translate(cx + 10, by - 49); g.rotate(a);
+    g.fillStyle = col; g.beginPath(); g.moveTo(-3, 0); g.quadraticCurveTo(-4, 10, -9, 15); g.lineTo(9, 15); g.quadraticCurveTo(4, 10, 3, 0); g.closePath(); g.fill(); g.stroke();
+    g.restore();
+    if (c.ring) { g.strokeStyle = col; g.lineWidth = 2; for (let i = 1; i <= 2; i++) { g.beginPath(); g.arc(cx + 10, by - 40, 10 + i * 6 + (50 - c.ring) / 5, -.9, .9); g.stroke(); } }
+    numPlate(cx, by - 20, c.i + 1);
+  } else if (c.kind === "colours") {
+    // a lamp post with a coloured globe
+    const col = COLOURS[c.v][0];
+    g.fillStyle = "#2b2b30"; g.fillRect(cx - 2.5, by - 56, 5, 56); g.fillRect(cx - 8, by - 4, 16, 4);
+    const glow = g.createRadialGradient(cx, by - 62, 3, cx, by - 62, 40); glow.addColorStop(0, col + "aa"); glow.addColorStop(1, col + "00");
+    g.fillStyle = glow; g.fillRect(cx - 40, by - 102, 80, 80);
+    g.fillStyle = col; g.beginPath(); g.arc(cx, by - 62, 9, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.arc(cx - 3, by - 65, 2.5, 0, 7); g.fill();
+    numPlate(cx, by - 24, c.i + 1);
+  } else if (c.kind === "arrows") {
+    // a signpost with an arrow
+    g.fillStyle = "#6b4528"; g.fillRect(cx - 3, by - 50, 6, 50); g.strokeRect(cx - 3, by - 50, 6, 50);
+    g.fillStyle = "#e8d4a8"; g.beginPath(); rp(cx - 17, by - 62, 34, 26, 4); g.fill(); g.stroke();
+    g.save(); g.translate(cx, by - 49); g.rotate({ "→": 0, "↓": Math.PI / 2, "←": Math.PI, "↑": -Math.PI / 2 }[c.v]);
+    g.fillStyle = "#c43a3a"; g.beginPath(); g.moveTo(-9, -3); g.lineTo(2, -3); g.lineTo(2, -8); g.lineTo(10, 0); g.lineTo(2, 8); g.lineTo(2, 3); g.lineTo(-9, 3); g.closePath(); g.fill();
+    g.restore();
+    numPlate(cx, by - 20, c.i + 1);
+  } else {
+    // a stone with a carved letter (indoors: a wooden letter block)
+    if (L.d.theme === "huis") { g.fillStyle = "#e0b070"; g.beginPath(); rp(cx - 16, by - 32, 32, 32, 4); g.fill(); g.stroke(); g.fillStyle = "#c8955a"; g.fillRect(cx - 12, by - 28, 24, 2); }
+    else { g.fillStyle = "#8a8f98"; g.beginPath(); g.ellipse(cx, by - 16, 18, 17, 0, Math.PI, 0); g.lineTo(cx + 18, by); g.lineTo(cx - 18, by); g.closePath(); g.fill(); g.stroke(); }
+    if (L.d.theme === "sneeuw") { g.fillStyle = "#f4f8ff"; g.beginPath(); g.ellipse(cx, by - 31, 12, 4, 0, 0, 7); g.fill(); }
+    g.fillStyle = "#3a3f4a"; g.font = "700 18px Fredoka, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(c.v, cx, by - 15);
+    numPlate(cx + 17, by - 30, c.i + 1);
+  }
+}
+
 /** Een kaarsenstandaard in de kerk: een paar kaarsjes branden al, en je kunt er een bij aansteken. */
 function drawCandles(l) {
   const cx = l.x + 16, by = l.y + TS;
@@ -1694,8 +1857,10 @@ function drawWind() {
   g.globalAlpha = 1;
 }
 /** Darkness with a circle of light around you (the troll forest, the northern lights night). Finding things makes it bigger. */
+/** How far you can see in the dark: more for every thing you find, the task item and every lamp or torch you light. */
+function darkRadius() { const dk = L.d.dark; return dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0) + L.switches.filter(s => s.on).length * (dk.lamp || 0); }
 function drawDark(cx) {
-  const dk = L.d.dark, r = dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0);
+  const r = darkRadius();
   const sx = P.x + P.w / 2 - cx, sy = P.y + P.h / 2;
   const gr = g.createRadialGradient(sx, sy, r * .45, sx, sy, r);
   gr.addColorStop(0, "rgba(4,6,18,0)"); gr.addColorStop(1, "rgba(4,6,18,.9)");
@@ -1721,7 +1886,7 @@ function render() {
   for (const [k, x] of L.d.deco) drawDeco(k, x, theme);
   if (L.exit) drawExit(theme);
 
-  const T = getTex(theme);
+  const T = getTex(theme, L.d.spikeKind);
   g.imageSmoothingEnabled = false;
   const x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1);
   for (let ty = 0; ty < ROWS; ty++) for (let tx = x0; tx <= x1; tx++) { const c = L.grid[ty][tx]; if (c !== " " && c !== "G" && c !== "H") drawTile(c, tx * TS, ty * TS, theme, tx, ty, T); }
@@ -1737,6 +1902,9 @@ function render() {
   for (const c of L.checks) drawCheck(c);
   if (L.lantern) drawLantern(L.lantern);
   for (const s of L.signs) drawSign(s);
+  for (const c of L.clues) drawClue(c);
+  for (const s of L.switches) drawSwitch(s);
+  if (L.bell) drawBell(L.bell);
 
   for (const it of L.items) if (!it.taken) {
     const cx2 = it.x + 16, cy2 = it.y + 16 + Math.sin(frame / 18 + it.x) * 3;
@@ -1771,6 +1939,7 @@ function render() {
     }
   }
   for (const e of L.enemies) drawEnemy(e, frame * 16);
+  if (L.animal && !L.animal.follow) drawAnimal(L.animal);
 
   if (!(P.inv > 0 && fl(P.inv / 4) % 2)) {
     const ch = heroChar();
@@ -1791,9 +1960,12 @@ function render() {
       if (P.swim) { g.fillStyle = "rgba(42,170,190,.8)"; g.fillRect(P.x - 10, SWIM_Y, P.w + 20, P.h); g.fillStyle = "#e8fbff"; g.fillRect(P.x - 10, SWIM_Y - 1 + Math.sin(frame / 8) * 1, P.w + 20, 2.5); }
     }
   }
+  // a found animal walks with you, drawn in front so you always see it
+  if (L.animal && L.animal.follow) drawAnimal(L.animal);
 
   if (!dialog) {
-    const near = nearest(L.npcs) || nearest(L.signs) || (L.lantern && Math.abs(L.lantern.x + 16 - (P.x + P.w / 2)) < 44 ? L.lantern : null)
+    const near = nearest(L.npcs) || nearest(L.switches.filter(s => !s.on)) || (L.bell && !L.questDone && nearest([L.bell])) || (L.animal && !L.animal.follow && !L.animal.home && nearest([L.animal], 48))
+      || nearest(L.signs) || nearest(L.clues) || (L.lantern && Math.abs(L.lantern.x + 16 - (P.x + P.w / 2)) < 44 ? L.lantern : null)
       || (L.pad && !L.codeOpen && Math.abs(L.pad.x + 16 - (P.x + P.w / 2)) < 50 ? L.pad : null);
     if (near) {
       const label = GP.on ? "□" : isTouch ? "💬" : "E", bx = P.x + P.w / 2, byy = P.y - 22 + Math.sin(frame / 8) * 1.5;

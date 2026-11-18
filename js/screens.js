@@ -10,13 +10,22 @@ function updateHud() {
   $("hKeys").hidden = !L.need; $("hQuest").hidden = !d.gate; $("hCode").hidden = !d.code; $("hCoins").hidden = !L.coinTotal;
   $("hKeys").textContent = `${d.keyHud} ${L.keys}/${L.need}`;
   $("hKeys").classList.toggle("done", L.keys >= L.need);
-  $("hQuest").textContent = `${d.questHud} ${L.questDone ? T("done", "klaar") : L.hasQuest ? T("bring back", "breng terug") : T("find", "zoeken")}`;
+  $("hQuest").textContent = questLabel();
   $("hQuest").classList.toggle("done", L.questDone);
   $("hCode").textContent = L.codeOpen ? "🔓 code" : "🔒 code";
   $("hCode").classList.toggle("done", L.codeOpen);
   $("hCoins").textContent = `${d.coinHud || d.coin} ${L.coins}/${L.coinTotal}`;
   $("hHearts").textContent = "❤️".repeat(Math.max(0, P.hearts)) + "🤍".repeat(Math.max(0, 3 - P.hearts));
   $("hNights").textContent = nightsLabel(L.idx);
+}
+/** The task halfway in the top bar: what to do, or how far you are. */
+function questLabel() {
+  const d = L.d, t = d.task, done = T("done", "klaar");
+  if (!t) return `${d.questHud} ${L.questDone ? done : L.hasQuest ? T("bring back", "breng terug") : T("find", "zoeken")}`;
+  if (L.questDone) return `${t.hud} ${done}`;
+  if (t.kind === "timer") return `${t.hud} ${L.timer > 0 ? Math.ceil(L.timer / 60) + "s" : T("ring", "luiden")}`;
+  if (t.kind === "follow") return `${t.hud} ${L.animal && L.animal.follow ? T("follows you", "loopt mee") : T("find", "zoeken")}`;
+  return `${t.hud} ${L.switches.filter(s => s.on).length}/${L.switches.length}`;
 }
 function setScreen(s) {
   state = s;
@@ -78,29 +87,57 @@ function completeLevel() {
 function toTitle() { hideDialog(); dialog = null; setScreen("title"); buildTitle(); menuAutoFocus(); }
 
 /* ---------- Code lock ---------- */
+// One lock for every kind: digits, notes (a melody), colours, arrows or letters. The answer is a string of key values.
 function openPad() {
-  padState = { val: "" };
-  const c = L.d.code;
+  const c = L.d.code, kind = c.kind || "symbols", keys = c.keys || lockKeys(c), n = [...c.answer].length;
+  padState = { val: [], kind, keys, n };
   $("padTitle").textContent = c.title; $("padRiddle").textContent = c.riddle;
   $("padFb").textContent = L.codeTries >= 3 ? hintFor() : "";
+  const dg = $("digits"); dg.innerHTML = ""; dg.className = "digits" + (kind === "clock" ? " clock" : "") + (n > 4 ? " long" : "");
+  for (let i = 0; i < n; i++) dg.appendChild(document.createElement("span"));
+  const kb = $("keys"); kb.innerHTML = ""; kb.className = "keys k-" + kind;
+  const add = (k, label, cls, col) => {
+    const b = document.createElement("button"); b.type = "button"; b.innerHTML = label; if (cls) b.className = cls;
+    if (col) b.style.setProperty("--key", col);
+    if (k.length === 1 && kind !== "symbols" && kind !== "count" && kind !== "clock") b.setAttribute("aria-label", keyName(k));
+    b.onclick = () => padPress(k); kb.appendChild(b);
+  };
+  if (kind === "symbols" || kind === "count" || kind === "clock") ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "OK"].forEach(k => add(k, k, k === "OK" ? "ok" : ""));
+  else { keys.forEach(k => add(k.v, keyLabel(k), "tok", k.col)); add("⌫", "⌫"); add("OK", "OK", "ok"); }
   drawDigits(); setScreen("pad");
 }
-function hintFor() { const a = L.d.code.answer; return T(`Tip: the code starts with ${a.slice(0, L.codeTries >= 5 ? 3 : 2)}...`, `Tip: de code begint met ${a.slice(0, L.codeTries >= 5 ? 3 : 2)}...`); }
+function keyOf(v) { return padState.keys.find(k => k.v === v) || { v, name: v }; }
+function keyName(v) { return keyOf(v).name; }
+/** What a key or a filled-in slot shows: a coloured dot, a coloured bell with its note, an arrow or a letter. */
+function keyLabel(k) {
+  if (padState.kind === "colours") return `<i class="dot" style="background:${k.col}"></i>`;
+  if (padState.kind === "melody") return `<i class="dot" style="background:${k.col}"></i><small>${k.name}</small>`;
+  return k.v;
+}
+function hintFor() {
+  const a = [...L.d.code.answer].slice(0, L.codeTries >= 5 ? 3 : 2), digits = !padState || ["symbols", "count", "clock"].includes(padState.kind);
+  const s = digits ? a.join("") : a.map(keyName).join(", ");
+  return T(`Tip: the code starts with ${s}...`, `Tip: de code begint met ${s}...`);
+}
 function drawDigits(bad) {
   const sp = $("digits").children;
-  for (let i = 0; i < 4; i++) sp[i].textContent = padState.val[i] || "";
+  for (let i = 0; i < sp.length; i++) { const v = padState.val[i]; sp[i].innerHTML = v == null ? "" : padState.kind === "symbols" || padState.kind === "count" || padState.kind === "clock" ? v : keyLabel(keyOf(v)); }
   $("digits").classList.toggle("bad", !!bad);
 }
 function padPress(k) {
-  if (k === "⌫") padState.val = padState.val.slice(0, -1);
+  if (k === "⌫") padState.val.pop();
   else if (k === "OK") return padCheck();
-  else if (padState.val.length < 4) { padState.val += k; tone(500 + +k * 40, .05, "square", .03); }
+  else if (padState.val.length < padState.n) {
+    padState.val.push(k);
+    const key = keyOf(k);
+    if (key.f) tone(key.f, .3, "sine", .07); else tone(500 + ("0123456789".indexOf(k) + 1) * 40, .05, "square", .03);
+  }
   drawDigits();
-  if (padState.val.length === 4) setTimeout(padCheck, 150);
+  if (padState.val.length === padState.n) setTimeout(padCheck, 150);
 }
 function padCheck() {
-  if (padState.val.length < 4) { $("padFb").textContent = T("The code has 4 digits.", "De code heeft 4 cijfers."); return; }
-  if (padState.val === L.d.code.answer) {
+  if (padState.val.length < padState.n) { $("padFb").textContent = T(`The code has ${padState.n} parts.`, `De code heeft ${padState.n} delen.`); return; }
+  if (padState.val.join("") === L.d.code.answer) {
     L.codeOpen = true; SFX.open(); $("padFb").textContent = T("Click! Open!", "Klik! Open!");
     setTimeout(() => { setScreen("play"); pop(L.d.code.x * TS + 16, 8 * TS, T("Code cracked!", "Code gekraakt!"), "#8dffb5"); updateHud(); }, 600);
   } else {
@@ -108,19 +145,16 @@ function padCheck() {
     const wrong = T(["Bleep. Wrong. The lock is laughing at you.", "No. Try again, and read the signs.", "Still wrong. Ask someone who's paying attention."],
       ["Bliep. Fout. Het slot lacht je uit.", "Nee. Probeer het nog eens, en lees de bordjes.", "Nog steeds fout. Vraag het aan iemand die oplet."]);
     $("padFb").textContent = L.codeTries >= 3 ? hintFor() : wrong[(L.codeTries - 1) % 3];
-    setTimeout(() => { padState.val = ""; drawDigits(); }, 500);
+    setTimeout(() => { padState.val = []; drawDigits(); }, 500);
   }
 }
 function padKey(e) {
-  if (e.key >= "0" && e.key <= "9") padPress(e.key);
+  const typed = e.key.length === 1 ? e.key.toUpperCase() : "";
+  if (["symbols", "count", "clock"].includes(padState.kind) ? e.key >= "0" && e.key <= "9" : padState.keys.some(k => k.v === typed)) padPress(typed);
   else if (e.key === "Backspace") padPress("⌫");
   else if (e.key === "Enter") padPress("OK");
   else if (e.key === "Escape") setScreen("play");
 }
-["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "OK"].forEach(k => {
-  const b = document.createElement("button"); b.type = "button"; b.textContent = k; if (k === "OK") b.className = "ok";
-  b.onclick = () => padPress(k); $("keys").appendChild(b);
-});
 $("padClose").onclick = () => setScreen("play");
 
 /* ---------- Confetti (on the canvas) ---------- */

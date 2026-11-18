@@ -149,6 +149,16 @@ kbd { font-family: var(--body); font-weight: 800; font-size: 12px; background: r
 .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .keys button { padding: 12px 0; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); font-family: var(--display); font-size: 22px; font-weight: 600; }
 .keys button.ok { background: var(--pine); color: #062414; }
+.keys .dot { display: inline-block; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #0b1520; vertical-align: middle; box-shadow: inset 0 -4px 0 rgba(0,0,0,.18); }
+.keys button small, .digits small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.keys.k-colours, .keys.k-melody, .keys.k-word { grid-template-columns: repeat(4, 1fr); }
+.keys.k-arrows { grid-template-columns: repeat(4, 1fr); }
+.keys.k-arrows button, .keys.k-word button { font-size: 26px; }
+.digits .dot { display: inline-block; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #0b1520; }
+.digits span { line-height: 1; text-align: center; }
+.digits.long span { width: 44px; }
+.digits.clock span:nth-child(2) { margin-right: 14px; position: relative; }
+.digits.clock span:nth-child(2)::after { content: ":"; position: absolute; right: -14px; color: var(--muted); }
 .pad .fb { min-height: 1.5em; margin-top: 10px; text-align: center; font-weight: 700; color: var(--gold); line-height: 1.4; }
 
 @media (max-width: 860px) { .levels { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

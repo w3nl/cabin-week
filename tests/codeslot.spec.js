@@ -12,7 +12,9 @@ test('een foute code geeft een grapje, na drie keer een tip, de goede code opent
   await expect(page.locator('#padFb')).toContainText('Wrong');
   await expect(page.locator('#digits span').first()).toHaveText('', { timeout: 3000 });
   await page.keyboard.type('1111');
-  await page.waitForTimeout(700);
+  // wait until the lock has emptied itself again (on a busy machine that can take a moment)
+  await expect.poll(() => page.evaluate(() => L.codeTries)).toBe(2);
+  await expect(page.locator('#digits span').first()).toHaveText('', { timeout: 3000 });
   await page.keyboard.type('2222');
   await expect(page.locator('#padFb')).toContainText('Tip: the code starts with 49');
   await page.waitForTimeout(700);
@@ -32,4 +34,20 @@ test('elke dag met een codeslot heeft bordjes met de cijfers of een raadsel', as
     return { answer: d.code.answer, digits: d.code.answer.length, clues: syms ? syms[1].split('  ').filter(s => signs.some(t => t.includes(s + ' = '))).length : 4 };
   }).filter(Boolean));
   for (const c of r) { expect(c.digits).toBe(4); expect(c.clues).toBe(4); }
+});
+
+test('every lock in every region can be solved from what is in the level', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  const bad = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map((d, i) => {
+    if (!d.code || !d.seed) return null; // the hand-built Ardennes days have riddles (checked above)
+    const c = d.code, kind = c.kind || 'symbols', ans = [...c.answer], where = `${r.id} ${i + 1} (${kind})`;
+    const keys = c.keys || lockKeys(c);
+    if (!ans.every(v => keys.some(k => k.v === v))) return `${where}: a part of the answer has no key`;
+    if (kind === 'symbols') return d.ents.filter(e => e[0] === 'sign' && / = \d/.test(e[3][0])).length >= 4 ? null : `${where}: signs`;
+    if (kind === 'count') { const deco = d.deco.map(x => x[0]); return c.count.every(([k], j) => deco.filter(x => x === k).length === +ans[j]) ? null : `${where}: wrong numbers of things`; }
+    if (kind === 'clock') return ans.length === 4 && d.ents.some(e => e[0] === 'sign') ? null : `${where}: no clock clues`;
+    const clues = d.ents.filter(e => e[0] === 'clue').sort((a, b) => a[3].i - b[3].i).map(e => e[3].v);
+    return clues.join('') === c.answer ? null : `${where}: clues ${clues.join('')} for ${c.answer}`;
+  })).filter(Boolean));
+  expect(bad).toEqual([]);
 });
