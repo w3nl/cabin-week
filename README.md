@@ -2,7 +2,7 @@
 
 A platform game in the browser about winter trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway, the Netherlands, or Dalmatia in summer) and play its week: eight days, **one level a day**.
 
-Play as one of the nine, or **make your own hero** (name, height, skin, hair, coat, glasses, hat and scarf). You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, help the others with a task, and crack a code lock with clues written on signs along the way. Finish a day to unlock the next one.
+Play as one of the nine, or **make your own hero** (name, height, skin, hair, coat, glasses, hat and scarf). You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, get through a gate halfway (bring something, pull levers, light lamps, race the bell or walk a lost animal home) and open a lock at the end: a code, a tune, colours, arrows, a word or a clock, with clues along the way. Every trip mixes them differently. Finish a day to unlock the next one.
 
 **In English and Dutch** (choose at the bottom of the title screen, or add `?lang=nl` to the link).
 
@@ -35,7 +35,7 @@ npm start          # http://127.0.0.1:4180
 
 **With a controller** (PlayStation, Stadia, Xbox; USB or Bluetooth, on computer, tablet and phone): walk with the left stick or the D-pad, run with R1/L1 (or R2/L2), jump with ✕/A, talk with □/X or ○/B, Start for the menu. In menus, choose with the stick or the D-pad and press ✕/A; ○/B goes back. Press a button first after connecting, so the browser sees the controller.
 
-Jump on wild boars, robot vacuums, snowmen, lost penguins, mountain goats, little trolls, cross geese, seagulls and crabs, or belly-slide into them (you slide furthest in the snow). Watch out for brambles, Lego bricks and icicles. Chocolate gives you a heart back.
+Jump on wild boars, robot vacuums, snowmen, a lost penguin, arctic foxes, lemmings, mountain goats, little trolls, cross geese, seagulls and crabs, or belly-slide into them (you slide furthest in the snow). Watch out for brambles, Lego bricks and icicles. Chocolate gives you a heart back.
 
 ## The trips
 

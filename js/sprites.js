@@ -302,6 +302,65 @@ function drawEnemy(e, t) {
     g.strokeStyle = "#a8281e"; g.beginPath(); g.moveTo(-3, -13); g.lineTo(-3, -18); g.moveTo(3, -13); g.lineTo(3, -18); g.stroke(); g.strokeStyle = OUT;
     blob("#fff", () => g.arc(-3, -19, 2, 0, 7)); blob("#fff", () => g.arc(3, -19, 2, 0, 7));
     g.fillStyle = "#1d1d26"; g.fillRect(-3, -19.5, 1.2, 1.2); g.fillRect(3, -19.5, 1.2, 1.2);
+  } else if (e.kind === "poolvos") {
+    // an arctic fox: white, with a big bushy tail, after your sweets
+    const st = Math.sin(e.x * .4) * 2.5;
+    blob("#f4f8fb", () => { g.moveTo(-10, -12); g.quadraticCurveTo(-26, -20, -22, -8); g.quadraticCurveTo(-18, -4, -10, -9); g.closePath(); });
+    [[-7, st], [-2, -st], [5, st], [9, -st]].forEach(([x, d]) => blob("#dfe7ee", () => g.rect(x - 1.8, -8, 3.6, 8 + d * .3)));
+    blob("#f4f8fb", () => g.ellipse(0, -12, 12, 6.5, 0, 0, 7));
+    blob("#f4f8fb", () => g.ellipse(12, -16, 6.5, 5.5, 0, 0, 7));
+    blob("#f4f8fb", () => { g.moveTo(17, -15); g.lineTo(23, -13); g.lineTo(17, -11); g.closePath(); });
+    blob("#f4f8fb", () => { g.moveTo(8, -20); g.lineTo(9, -26); g.lineTo(12, -21); g.closePath(); });
+    blob("#f4f8fb", () => { g.moveTo(13, -21); g.lineTo(15, -26); g.lineTo(16, -20); g.closePath(); });
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(23, -13, 1.4, 0, 7); g.fill(); g.beginPath(); g.arc(14, -17.5, 1.3, 0, 7); g.fill();
+  } else if (e.kind === "lemming") {
+    // a lemming: a small round rodent in a hurry
+    const st = Math.sin(e.x * .7) * 1.5, b = Math.abs(Math.sin(e.x * .35)) * 1.5;
+    g.translate(0, -b);
+    [[-4, st], [4, -st]].forEach(([x, d]) => blob("#3a2a1e", () => g.rect(x - 1.5, -4, 3, 4 + d * .3)));
+    blob("#c8884a", () => g.ellipse(0, -8, 10, 7, 0, 0, 7));
+    g.fillStyle = "#2a1e16"; g.beginPath(); g.ellipse(-3, -12, 6, 3, 0, 0, 7); g.fill();
+    g.fillStyle = "#e8c8a0"; g.beginPath(); g.ellipse(4, -5, 5, 3, 0, 0, 7); g.fill();
+    blob("#c8884a", () => g.arc(5, -14, 2.5, 0, 7));
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(7, -10, 1.3, 0, 7); g.fill(); g.fillStyle = "#e88a8a"; g.beginPath(); g.arc(10.5, -8, 1.2, 0, 7); g.fill();
+  } else if (e.kind === "marmot") {
+    // a marmot from the Alps that slipped into the hut: chubby, brown, with big front teeth
+    const st = Math.sin(e.x * .4) * 2;
+    blob("#6a4a2e", () => g.ellipse(-14, -7, 6, 3.5, -.5, 0, 7));
+    [[-8, st], [-3, -st], [5, st], [9, -st]].forEach(([x, d]) => blob("#4a321e", () => g.rect(x - 2, -6, 4, 6 + d * .3)));
+    blob("#9a6a3e", () => g.ellipse(-1, -12, 13, 9, 0, 0, 7));
+    g.fillStyle = "#b8895a"; g.beginPath(); g.ellipse(2, -9, 8, 5, 0, 0, 7); g.fill();
+    blob("#9a6a3e", () => g.ellipse(11, -15, 7, 6.5, 0, 0, 7));
+    blob("#7a5230", () => g.arc(8, -21, 2.5, 0, 7));
+    blob("#e8d4b8", () => g.ellipse(15.5, -13, 3.5, 3, 0, 0, 7));
+    g.fillStyle = "#2a1c12"; g.beginPath(); g.arc(17.5, -14.5, 1.3, 0, 7); g.fill();
+    g.fillStyle = "#fff6e0"; g.fillRect(15, -10.5, 2.2, 3); g.strokeRect(15, -10.5, 2.2, 3);
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(12.5, -17, 1.4, 0, 7); g.fill();
+  } else if (e.kind === "speelgoed") {
+    // a wind-up tin toy robot that escaped from the workshop: it marches, and the key on its back turns
+    const st = Math.sin(e.x * .45) * 2.5;
+    blob("#5a6070", () => g.rect(-6, -6 + Math.max(0, st) * .4, 4, 6));
+    blob("#5a6070", () => g.rect(2, -6 + Math.max(0, -st) * .4, 4, 6));
+    blob("#d8423a", () => rp(-8, -19, 16, 13, 2));
+    g.fillStyle = "#ffd25e"; g.fillRect(-5, -16, 3, 3); g.fillRect(-1, -16, 3, 3); g.fillRect(3, -16, 3, 3);
+    blob("#c9ced8", () => rp(-6, -29, 13, 10, 2));
+    g.fillStyle = "#1d1d26"; g.fillRect(-2, -26, 2, 3); g.fillRect(3, -26, 2, 3);
+    g.fillStyle = "#3a3f4a"; g.fillRect(-1, -24.5 + 2, 6, 1.4);
+    g.strokeStyle = "#5a6070"; g.lineWidth = 1.4; g.beginPath(); g.moveTo(0, -29); g.lineTo(0, -33); g.stroke(); g.strokeStyle = OUT;
+    blob("#ff5a5a", () => g.arc(0, -34, 2, 0, 7));
+    const k = Math.sin(t / 120);
+    g.fillStyle = "#c9a34a"; g.fillRect(-12, -14, 4, 2); g.beginPath(); g.ellipse(-13, -13, 2, 4 * Math.abs(k) + .8, 0, 0, 7); g.fill(); g.stroke();
+  } else if (e.kind === "pakje") {
+    // a parcel on little legs that ran away from the sorting belt
+    const st = Math.sin(e.x * .5) * 2;
+    g.strokeStyle = "#3a2a1a"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(-5, -5); g.lineTo(-6 + st, 0); g.moveTo(5, -5); g.lineTo(6 - st, 0); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 1.6;
+    blob("#c8955a", () => rp(-12, -24, 24, 19, 2));
+    g.fillStyle = "#a8743e"; g.fillRect(-12, -24, 24, 4);
+    g.fillStyle = "#d8423a"; g.fillRect(-2, -24, 4, 19); g.fillRect(-12, -16, 24, 3);
+    g.fillStyle = "#fff4e6"; g.fillRect(4, -13, 7, 5); g.fillStyle = "#5a6070"; g.fillRect(5, -12, 5, 1); g.fillRect(5, -10, 3, 1);
+    blob("#fff", () => g.arc(-6, -19, 2.3, 0, 7)); blob("#fff", () => g.arc(7, -19, 2.3, 0, 7));
+    g.fillStyle = "#1d1d26"; g.fillRect(-5.5, -19.5, 1.3, 1.3); g.fillRect(7.5, -19.5, 1.3, 1.3);
   } else if (e.kind === "troll") {
     // a small, grumpy forest troll with a big nose, a mossy tuft and a tail
     const st = Math.sin(e.x * .3) * 2.5;

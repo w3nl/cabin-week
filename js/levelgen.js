@@ -9,21 +9,24 @@ function genLevel(o) {
   //   movers: "floe" | "gondola" | "boat" – wide gaps (too wide to jump) with something that carries you across.
   //     A gondola rides on a slanted cable: up the mountain (2 or 3 rows), or down where the ground is already high.
   //   ice, dark, water, interior – used by the game and the drawing code, not by the generator.
+  // The gate halfway (see AGENTS.md, "Gates and locks"): quest (bring something), or task: { kind: "levers" | "lights" |
+  //   "timer" | "follow", ... }, or neither (no gate). The lock at the end: code.kind "symbols" (default), "count",
+  //   "melody", "colours", "arrows", "word" or "clock".
   const R = rng(o.seed), w = o.w;
-  const gateX = o.quest ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
+  const gated = !!(o.quest || o.task), gateX = gated ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
   const ground = [], plats = [], blocks = [], spikes = [], ents = [], slots = [], bad = new Set(), used = new Set();
   const coin = (x, y) => { if (o.coins !== false) ents.push(["coin", x, y]); };
   let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers;
   const [hLow, hHigh] = o.hills || [12, 12];
   const limit = (o.code ? codeX : w - 8) - 10;
   while (x < limit) {
-    if (o.quest && x > gateX - 9 && x < gateX + 5) { x = gateX + 5; continue; }
+    if (gated && x > gateX - 9 && x < gateX + 5) { x = gateX + 5; continue; }
     let type;
     if (!towerDone && x > w * .3) type = "tower";
     else if (!ferryDone && x > w * .12) type = "ferry";
     else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .3 && o.movers ? "ferry" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
     const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11 }[type];
-    if (x + width > limit || (o.quest && x <= gateX - 9 && x + width > gateX - 9)) { x += 3; continue; }
+    if (x + width > limit || (gated && x <= gateX - 9 && x + width > gateX - 9)) { x += 3; continue; }
     // Hills: before a piece the ground may go up (at most 2 rows, so you can always jump it) or down.
     if (o.hills && type !== "ferry") {
       let ny = gy + [-2, -1, 0, 1, 2][Math.floor(R() * 5)];
@@ -70,17 +73,30 @@ function genLevel(o) {
   const topAt = Array(w).fill(ROWS_GEN);
   for (const [a, b, t] of ground) for (let c = a; c <= b; c++) topAt[c] = Math.min(topAt[c], t);
   const yAt = c => (topAt[c] < ROWS_GEN ? topAt[c] : 12) - 1;
-  const free = (t) => { t = Math.round(t); for (let dd = 0; dd < 30; dd++) for (const c of [t + dd, t - dd]) if (c > 2 && c < w - 2 && !bad.has(c) && !used.has(c) && topAt[c] < ROWS_GEN) { used.add(c); return c; } return t; };
+  const free = (t, lo = 3, hi = w - 3) => { t = Math.round(t); for (let dd = 0; dd < 30; dd++) for (const c of [t + dd, t - dd]) if (c >= lo && c <= hi && !bad.has(c) && !used.has(c) && topAt[c] < ROWS_GEN) { used.add(c); return c; } return t; };
   [gateX, gateX - 1, gateX + 1, codeX, codeX - 1, codeX + 1, w - 6].forEach(c => used.add(c));
+  // Levers, lamps, the bell, the animal and clues get some room, so nobody stands right next to them.
+  const room = c => { for (let d = -2; d <= 2; d++) used.add(c + d); return c; };
 
   if (o.intro) { const c = free(5); ents.push(["sign", c, yAt(c), o.intro]); }
   let gate = null, code = null;
-  if (o.quest) {
+  if (gated) {
     gate = [gateX, 2, yAt(gateX)];
-    used.add(gateX - 3); ents.push(["npc", gateX - 3, yAt(gateX - 3), { quest: o.quest }]);
+    used.add(gateX - 3); ents.push(["npc", gateX - 3, yAt(gateX - 3), o.quest ? { quest: o.quest } : { task: o.task }]);
     ents.push(["check", gateX + 2, yAt(gateX + 2)]);
-    const pre = slots.filter(s => s[0] < gateX - 6).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
-    const q = pre[0]; slots.splice(slots.indexOf(q), 1); ents.push(["quest", q[0], q[1]]);
+    const k = o.task && o.task.kind;
+    if (o.quest) {
+      const pre = slots.filter(s => s[0] < gateX - 6).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+      const q = pre[0]; slots.splice(slots.indexOf(q), 1); ents.push(["quest", q[0], q[1]]);
+    } else if (k === "levers" || k === "lights") {
+      // three levers or lamps spread over the way to the gate
+      [.3, .6, .9].forEach((f, i) => { const c = free(8 + (gateX - 14) * f, 6, gateX - 5); ents.push(["switch", room(c), yAt(c), { i }]); });
+    } else if (k === "timer") {
+      // a bell well before the gate: ring it, and the gate stays open for a few seconds
+      const c = free(gateX - 20, 6, gateX - 6); ents.push(["bell", room(c), yAt(c)]);
+    } else if (k === "follow") {
+      const c = free(gateX * .35, 6, gateX - 8); ents.push(["animal", room(c), yAt(c)]);
+    }
   }
   const keysNeeded = o.keysNeeded ?? 3;
   if (keysNeeded) {
@@ -93,27 +109,64 @@ function genLevel(o) {
   (o.npcs || []).forEach((lines, i) => { const c = free(w * [.2, .46, .8][i]); ents.push(["npc", c, yAt(c), { lines }]); });
   (o.signs || []).forEach(([f, lines]) => { const c = free(w * f); ents.push(["sign", c, yAt(c), lines]); });
   if (o.code) {
-    const syms = o.code.syms, digits = o.code.answer.split("");
-    code = { x: codeX, y1: 2, y2: yAt(codeX), pad: codeX - 2, answer: o.code.answer, title: o.code.title,
-      riddle: T(`Four symbols: ${syms.join("  ")}. Signs along the way tell you which digit goes with which symbol.`,
-        `Vier symbolen: ${syms.join("  ")}. Onderweg staan bordjes die vertellen welk cijfer bij welk symbool hoort.`) };
+    const kind = o.code.kind || "symbols", ans = [...o.code.answer];
+    code = { x: codeX, y1: 2, y2: yAt(codeX), pad: codeX - 2, answer: o.code.answer, title: o.code.title, kind, keys: lockKeys(o.code), riddle: o.code.riddle, count: o.code.count };
     used.add(codeX - 2);
-    [.14, .37, .56, .74].forEach((f, i) => { const k = [2, 0, 3, 1][i], c = free(w * f); ents.push(["sign", c, yAt(c), [T(`Someone scratched something on this sign: ${syms[k]} = ${digits[k]}`, `Op dit bordje is iets gekrast: ${syms[k]} = ${digits[k]}`), o.code.flavor[k]]]); });
+    if (kind === "symbols") {
+      const syms = o.code.syms;
+      code.riddle = T(`Four symbols: ${syms.join("  ")}. Signs along the way tell you which digit goes with which symbol.`,
+        `Vier symbolen: ${syms.join("  ")}. Onderweg staan bordjes die vertellen welk cijfer bij welk symbool hoort.`);
+      [.14, .37, .56, .74].forEach((f, i) => { const k = [2, 0, 3, 1][i], c = free(w * f); ents.push(["sign", c, yAt(c), [T(`Someone scratched something on this sign: ${syms[k]} = ${ans[k]}`, `Op dit bordje is iets gekrast: ${syms[k]} = ${ans[k]}`), o.code.flavor[k]]]); });
+    } else if (kind === "melody" || kind === "colours" || kind === "arrows" || kind === "word") {
+      // numbered clues along the way: bells, coloured lamps, signposts with an arrow, or carved letters
+      const n = ans.length, end = (codeX - 4) / w;
+      ans.forEach((v, i) => { const c = free(w * (.12 + i * (end - .16) / (n - 1))); ents.push(["clue", room(c), yAt(c), { kind, i, n, v, look: o.code.look }]); });
+    } else if (kind === "clock") {
+      (o.code.signs || []).forEach(([f, lines]) => { const c = free(w * f); ents.push(["sign", c, yAt(c), lines]); });
+    }
   }
   let lanternX = null;
   if (o.lantern) { const lx = free(w * .7); lanternX = lx; ents.push(["lantern", lx, yAt(lx)]); for (let dd = -3; dd <= 3; dd++) used.add(lx + dd); }
   ents.push(["exit", w - 6, yAt(w - 6)]);
   if (o.enemyExtra) o.enemyExtra.forEach(f => { const c = free(w * f); ents.push(["enemy", c, yAt(c)]); });
 
+  // A counting lock: things to count are placed in exact numbers, and never as random decoration.
+  const counted = o.code && o.code.kind === "count" ? o.code.count.map(c => c[0]) : [];
+  const kinds = o.decoKinds.filter(k => !counted.includes(k));
   const deco = [];
   for (let dx = 3; dx < w - 8; dx += 5 + Math.floor(R() * 7)) {
     if (bad.has(dx) || topAt[dx] >= ROWS_GEN || Math.abs(dx - gateX) < 4 || Math.abs(dx - codeX) < 5) continue;
     if (o.lantern && o.lanternDeco === "church" && lanternX != null && dx > lanternX - 7 && dx < lanternX + 6) continue;
-    deco.push([o.decoKinds[Math.floor(R() * o.decoKinds.length)], dx]);
+    deco.push([kinds.length ? kinds[Math.floor(R() * kinds.length)] : "pine", dx]);
+  }
+  if (counted.length) {
+    const ns = [...o.code.answer].map(Number), list = [];
+    counted.forEach((k, i) => { for (let j = 0; j < ns[i]; j++) list.push(k); });
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    const cols = [];
+    for (let c = 6; c < codeX - 4; c++) if (!bad.has(c) && topAt[c] < ROWS_GEN && Math.abs(c - gateX) >= 4) cols.push(c);
+    const picks = list.map((_, i) => cols[Math.floor((i + .5) * cols.length / list.length)]);
+    for (let i = deco.length - 1; i >= 0; i--) if (picks.some(c => Math.abs(c - deco[i][1]) < 4)) deco.splice(i, 1);
+    list.forEach((k, i) => deco.push([k, picks[i]]));
+    code.riddle = o.code.riddle || T(`How many did you see along the way? ${o.code.count.map(c => c[1]).join(", ")}: one digit each, in that order.`,
+      `Hoeveel zag je onderweg? ${o.code.count.map(c => c[1]).join(", ")}: elk één cijfer, in die volgorde.`);
   }
   if (o.lantern) { const l = ents.find(e => e[0] === "lantern"); deco.push(o.lanternDeco === "church" ? ["church", l[1] - 3] : ["bench", l[1] + 1]); }
-  (o.decoExtra || []).forEach(([k, f]) => deco.push([k, Math.round(w * f)]));
+  (o.decoExtra || []).filter(([k]) => !counted.includes(k)).forEach(([k, f]) => deco.push([k, Math.round(w * f)]));
   return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded });
+}
+/** The keys on the lock for each kind of lock: digits, notes, colours, arrows or letters. */
+const NOTES = [["1", "do", 523, "#e8423a"], ["2", "re", 587, "#f2a03a"], ["3", "mi", 659, "#f5d23a"], ["4", "sol", 784, "#4cb860"], ["5", "la", 880, "#4a8ae8"]];
+const COLOURS = { R: ["#e8423a", T("red", "rood")], O: ["#f2903a", T("orange", "oranje")], Y: ["#f5d23a", T("yellow", "geel")], G: ["#4cb860", T("green", "groen")],
+  B: ["#3a7ae8", T("blue", "blauw")], P: ["#9a5ad8", T("purple", "paars")], W: ["#f4f4f0", T("white", "wit")], K: ["#ff7aa8", T("pink", "roze")] };
+const ARROWS = { "↑": T("up", "omhoog"), "→": T("right", "rechts"), "↓": T("down", "omlaag"), "←": T("left", "links") };
+function lockKeys(c) {
+  const k = c.kind || "symbols";
+  if (k === "melody") return NOTES.map(([v, name, f, col]) => ({ v, name, f, col }));
+  if (k === "colours") return [...(c.palette || "RYGBWP")].map(v => ({ v, name: COLOURS[v][1], col: COLOURS[v][0] }));
+  if (k === "arrows") return Object.entries(ARROWS).map(([v, name]) => ({ v, name }));
+  if (k === "word") return [...new Set([...c.answer, ...(c.extra || "")])].sort().map(v => ({ v, name: v }));
+  return [..."1234567890"].map(v => ({ v, name: v }));
 }
 /** The number of rows (canvas.js has ROWS, but that file loads after this one). */
 const ROWS_GEN = 15;

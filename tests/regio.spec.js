@@ -76,7 +76,7 @@ test('the new regions have their own scenery, enemies and checkpoint flags', asy
   expect(info.find(r => r.id === 'pole').scenes).toContain('pole');
   expect(info.find(r => r.id === 'tirol').enemies).toContain('geit');
   expect(info.find(r => r.id === 'norway').enemies).toContain('troll');
-  expect(info.find(r => r.id === 'pole').enemies).toContain('pinguin');
+  expect(info.find(r => r.id === 'pole').enemies).toEqual(expect.arrayContaining(['poolvos', 'lemming']));
   const codes = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map(l => l.code && l.code.answer)));
   expect(new Set(codes).size).toBe(48);
   expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'meeuw', 'zwijn']));
@@ -139,11 +139,76 @@ test('on ice you keep sliding when you let go', async ({ page }) => {
   expect(pole).toBeGreaterThan(ardennes * 2);
 });
 
-test('in the dark troll forest you see more once you have the torch', async ({ page }) => {
+test('in the dark troll forest you see more for every torch you light', async ({ page }) => {
   await seed(page, { region: 'norway', unlocked: 8 });
   await startDay(page, 5);
-  const r = await page.evaluate(() => { const dk = L.d.dark, rad = () => dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0); const a = rad(); L.hasQuest = true; return [a, rad()]; });
+  const r = await page.evaluate(() => { const a = darkRadius(); L.switches.forEach(s => s.on = true); return [a, darkRadius()]; });
   expect(r[1]).toBeGreaterThan(r[0] + 100);
+});
+
+test('every region mixes its gates and locks, and keeps its own animals', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  const info = await page.evaluate(() => REGIONS.map(r => ({ id: r.id,
+    gates: r.levels.map(l => l.task ? l.task.kind : l.quest ? 'quest' : 'none'),
+    locks: r.levels.map(l => l.code ? l.code.kind || 'symbols' : 'none'),
+    enemies: r.levels.filter(l => l.enemies !== false).map(l => l.enemy),
+    garland: r.levels.some(l => (l.deco || []).some(d => d[0] === 'garland') && !l.birthday) })));
+  for (const r of info) {
+    if (r.id === 'ardennes') { expect(new Set(r.locks)).toEqual(new Set(['symbols'])); continue; }
+    const count = (list, k) => list.filter(x => x === k).length;
+    // at least six kinds of lock and four kinds of gate, nothing more than twice, at most two "bring something"
+    expect(new Set(r.locks).size).toBeGreaterThanOrEqual(6);
+    for (const k of new Set(r.locks)) expect(count(r.locks, k)).toBeLessThanOrEqual(2);
+    expect(new Set(r.gates).size).toBeGreaterThanOrEqual(4);
+    expect(count(r.gates, 'quest')).toBeLessThanOrEqual(2);
+    // the robot vacuum and Lego belong to the Ardennes cabin
+    expect(r.enemies).not.toContain('robot');
+  }
+  // penguins live at the South Pole: only one lost penguin, on the first day
+  const pole = info.find(r => r.id === 'pole');
+  expect(pole.enemies.filter(e => e === 'pinguin')).toHaveLength(1);
+  expect(pole.enemies[0]).toBe('pinguin');
+});
+
+test('the bell opens the gate for a few seconds; too slow and it closes again', async ({ page }) => {
+  await seed(page, { region: 'tirol', unlocked: 8 });
+  await startDay(page, 1);
+  await skip(page);
+  const b = await page.evaluate(() => { window.hurt = () => {}; return L.bell; });
+  await page.evaluate(b => { P.x = b.x + 5; P.y = b.y + 32 - P.h; }, b);
+  await page.keyboard.press('e');
+  await expect.poll(() => page.evaluate(() => L.gateOpen)).toBe(true);
+  await expect(page.locator('#hQuest')).toContainText('s');
+  await expect.poll(() => page.evaluate(() => L.gateOpen), { timeout: 12000 }).toBe(false);
+  expect(await page.evaluate(() => L.questDone)).toBe(false);
+});
+
+test('a lost animal follows you back to the gate', async ({ page }) => {
+  await seed(page, { region: 'pole', unlocked: 8 });
+  await startDay(page, 1);
+  await skip(page);
+  const a = await page.evaluate(() => { window.hurt = () => {}; return { x: L.animal.x, y: L.animal.y }; });
+  await page.evaluate(a => { P.x = a.x + 5; P.y = a.y + 32 - P.h; }, a);
+  await page.keyboard.press('e');
+  await expect(page.locator('#hQuest')).toContainText('follows you');
+  // walk right for a while: the calf comes along
+  await page.keyboard.down('ArrowRight'); await page.waitForTimeout(1500); await page.keyboard.up('ArrowRight');
+  const d = await page.evaluate(() => Math.abs(L.animal.x - P.x));
+  expect(d).toBeLessThan(170); // about half a second behind you
+});
+
+test('a melody lock: play the notes with the keys 1 to 5', async ({ page }) => {
+  await seed(page, { region: 'dalmatia', unlocked: 8 });
+  await startDay(page, 5);
+  await skip(page);
+  const pad = await page.evaluate(() => { window.hurt = () => {}; return L.pad; });
+  await page.evaluate(p => { P.x = p.x + 5; P.y = p.y + 32 - P.h; }, pad);
+  await page.keyboard.press('e');
+  await expect(page.locator('#padWrap')).toBeVisible();
+  await expect(page.locator('#keys button.tok')).toHaveCount(5);
+  await page.keyboard.type('3521');
+  await expect(page.locator('#padWrap')).toBeHidden();
+  expect(await page.evaluate(() => L.codeOpen)).toBe(true);
 });
 
 test('the Netherlands: the wind pushes you, sometimes against you and sometimes from behind', async ({ page }) => {

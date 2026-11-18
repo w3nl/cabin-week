@@ -36,9 +36,10 @@ Every trip plays differently:
 • Dalmatia in summer: swim in the warm sea, the Krka waterfalls, the walls of Dubrovnik and island hopping by boat
 
 • Play as one of the nine, or make your own hero: height, hair, coat, glasses, hat and scarf
-• Code locks, with hints if you get stuck
+• Locks of every kind: codes, tunes, colours, arrows, words and clocks, with hints if you get stuck
+• Pull levers, light lamps, race the bell and walk lost animals home
 • Chips, chocolate, ice creams and Christmas biscuits to collect
-• Jump on wild boars, robot vacuums, snowmen, lost penguins, mountain goats, little trolls, cross geese, greedy seagulls and crabs, or belly-slide into them
+• Jump on wild boars, robot vacuums, snowmen, a lost penguin, arctic foxes, lemmings, mountain goats, little trolls, cross geese, greedy seagulls and crabs, or belly-slide into them
 • One app for your phone, tablet and Google TV
 • Play with the touch screen, a controller (PlayStation, Stadia, Xbox) or the TV remote
 • In English and Dutch
@@ -77,9 +78,10 @@ Elke reis speelt anders:
 • Dalmatië in de zomer: zwemmen in de warme zee, de watervallen van Krka, de muren van Dubrovnik en eilandhoppen per boot
 
 • Speel als een van de negen, of maak je eigen held: lengte, haar, jas, bril, muts en sjaal
-• Codesloten, met tips als je vastzit
+• Allerlei sloten: codes, melodietjes, kleuren, pijlen, woorden en klokken, met tips als je vastzit
+• Trek hendels over, steek lampen aan, ren tegen de bel en breng verdwaalde dieren thuis
 • Frietjes, chocolade, ijsjes en kerstkoekjes om te verzamelen
-• Spring op wilde zwijnen, robotstofzuigers, sneeuwpoppen, verdwaalde pinguïns, berggeiten, kleine trollen, boze ganzen, gulzige meeuwen en krabben, of glij er op je buik tegenaan
+• Spring op wilde zwijnen, robotstofzuigers, sneeuwpoppen, een verdwaalde pinguïn, poolvossen, lemmingen, berggeiten, kleine trollen, boze ganzen, gulzige meeuwen en krabben, of glij er op je buik tegenaan
 • Eén app voor je telefoon, tablet en Google TV
 • Speel met het touchscreen, een controller (PlayStation, Stadia, Xbox) of de afstandsbediening
 • In het Engels en Nederlands

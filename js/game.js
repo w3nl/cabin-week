@@ -23,6 +23,7 @@ function buildLevel(idx) {
   const others = CHARS.filter((_, i) => i !== save.char);
   let npcN = 0;
   const lv = { idx, d, w, grid, items: [], enemies: [], movers: [], npcs: [], signs: [], checks: [], exit: null, lantern: null,
+    switches: [], clues: [], bell: null, animal: null, timer: 0,
     keys: 0, coins: 0, coinTotal: 0, hasQuest: false, questDone: !d.gate, gateOpen: !d.gate, codeOpen: !d.code,
     gateFade: d.gate ? 1 : 0, codeFade: d.code ? 1 : 0, need: d.keysNeeded ?? 3, respawn: null, time: 0, codeTries: 0 };
   for (const [type, x, y, extra] of d.ents) {
@@ -30,12 +31,18 @@ function buildLevel(idx) {
     if (type === "coin" || type === "key" || type === "heart" || type === "quest") {
       lv.items.push({ type, x: px, y: py, w: TS, h: TS, taken: false });
       if (type === "coin") lv.coinTotal++;
-    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3 }[d.enemy] || -1, dead: 0 });
+    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3, marmot: -1.2, speelgoed: -.9, pakje: -1.1, poolvos: -1.5, lemming: -1.7 }[d.enemy] || -1, dead: 0 });
     else if (type === "npc") lv.npcs.push({ x: px + 5, y: py, who: others[(idx * 3 + npcN++) % others.length], ...extra, talked: false });
     else if (type === "sign") lv.signs.push({ x: px, y: py, lines: extra });
     else if (type === "check") lv.checks.push({ x: px, y: py, on: false });
     else if (type === "exit") lv.exit = { x: px, y: py - TS, w: TS, h: TS * 2 };
     else if (type === "lantern") lv.lantern = { x: px, y: py, lit: false };
+    // The gate halfway: levers or lamps to switch on, a bell that opens the gate for a moment, or an animal that follows you.
+    else if (type === "switch") lv.switches.push({ x: px, y: py, i: extra.i, on: false });
+    else if (type === "bell") lv.bell = { x: px, y: py, swing: 0 };
+    else if (type === "animal") lv.animal = { x: px, y: py, sx: px, sy: py, face: 1, follow: false, home: false, trail: [] };
+    // Clues for the lock: numbered bells, coloured lamps, signposts with an arrow, or carved letters.
+    else if (type === "clue") lv.clues.push({ x: px, y: py, ...extra, heard: false, ring: 0 });
     // Something that carries you across a wide gap: an ice floe, a gondola or a boat. It goes back and forth, and waits a bit at each end.
     // A gondola can go up or down the mountain (rise: rows, negative is up): then it rides on a slanted cable.
     else if (type === "mover") lv.movers.push({ x: px, y: py, w: extra.n * TS, x0: px, x1: px + extra.range * TS, y0: py, y1: py + (extra.rise || 0) * TS,
@@ -162,13 +169,23 @@ function interact() {
   if (npc) {
     const nm = npc.who.name;
     npc.talked = true;
+    if (npc.task) return taskTalk(npc);
     if (!npc.quest) return say(nm, npc.lines);
     if (L.questDone) return say(nm, npc.quest.after);
     if (!L.hasQuest) return say(nm, npc.quest.need);
     return say(nm, npc.quest.done, () => { L.questDone = true; L.gateOpen = true; SFX.open(); pop(L.d.gate[0] * TS + 16, 8 * TS, T("Open!", "Open!"), "#8dffb5"); updateHud(); });
   }
+  const sw = nearest(L.switches);
+  if (sw && !sw.on) return switchOn(sw);
+  if (L.bell && nearest([L.bell])) return ringBell();
+  if (L.animal && !L.animal.follow && nearest([L.animal], 48)) {
+    L.animal.follow = true; L.animal.trail = []; tone(880, .08, "triangle", .05); tone(1100, .1, "triangle", .04);
+    pop(L.animal.x + 16, L.animal.y - 10, T(`The ${L.d.task.name} follows you!`, `${cap(L.d.task.name)} loopt met je mee!`), "#9fe8ff"); updateHud(); return;
+  }
   const sign = nearest(L.signs);
   if (sign) return say(T("Sign", "Bordje"), sign.lines);
+  const clue = nearest(L.clues);
+  if (clue) return clueTalk(clue);
   if (L.lantern && Math.abs(L.lantern.x + 16 - (P.x + P.w / 2)) < 44) {
     L.lantern.lit = true;
     return say(T("In the church", "In de kerk"), T(["Inside it's quiet and warm. Outside you can softly hear the Christmas market.", "You light a candle. 🕯️"],
@@ -177,6 +194,47 @@ function interact() {
   if (L.pad && !L.codeOpen && Math.abs(L.pad.x + 16 - (P.x + P.w / 2)) < 50) return openPad();
 }
 
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+function gateNpc() { return L.npcs.find(n => n.task || n.quest); }
+function openGate(lines) {
+  L.questDone = true; L.gateOpen = true; L.timer = 0; SFX.open();
+  pop(L.d.gate[0] * TS + 16, 8 * TS, T("Open!", "Open!"), "#8dffb5"); updateHud();
+  if (lines) say(gateNpc().who.name, lines);
+}
+/** Talking to the person at the gate when the task is not "bring something". */
+function taskTalk(npc) {
+  const t = L.d.task, nm = npc.who.name;
+  if (L.questDone) return say(nm, t.after);
+  if (t.kind === "follow" && L.animal && L.animal.follow && Math.abs(L.animal.x - npc.x) < 5 * TS) {
+    L.animal.home = true; L.animal.follow = false;
+    return say(nm, t.done, () => openGate());
+  }
+  return say(nm, t.need);
+}
+/** Pull a lever or light a lamp; when all are on, the gate opens. */
+function switchOn(sw) {
+  sw.on = true; SFX.key(); burst(sw.x + 16, sw.y, L.d.task.kind === "lights" ? "#ffd25e" : "#c9ced8", 12);
+  const n = L.switches.filter(s => s.on).length;
+  pop(sw.x + 16, sw.y - 20, `${L.d.task.hud} ${n}/${L.switches.length}`, "#fff3a0"); updateHud();
+  if (n === L.switches.length) openGate(L.d.task.done);
+}
+/** The bell: the gate opens for a few seconds. Run! */
+function ringBell() {
+  if (L.questDone) return;
+  L.bell.swing = 60; L.gateOpen = true; L.timer = Math.round((L.d.task.secs || 5) * 60);
+  tone(988, .35, "sine", .06); tone(1318, .5, "sine", .04);
+  pop(L.bell.x + 16, L.bell.y - 30, T("Run!", "Rennen!"), "#ffd25e"); updateHud();
+}
+/** A clue for the lock: what it says, and for a bell its note. */
+function clueTalk(c) {
+  c.heard = true;
+  const nr = T(`${c.i + 1} of ${c.n}`, `${c.i + 1} van ${c.n}`);
+  if (c.kind === "melody") { const nt = NOTES[+c.v - 1]; ringClue(c); return say(T("Bell", "Belletje"), [T(`Bell ${nr} plays a note: ${nt[1]}.`, `Belletje ${nr} speelt een toon: ${nt[1]}.`)]); }
+  if (c.kind === "colours") return say(T("Lamp", "Lamp"), [T(`Lamp ${nr} shines ${COLOURS[c.v][1]}.`, `Lamp ${nr} brandt ${COLOURS[c.v][1]}.`)]);
+  if (c.kind === "arrows") return say(T("Signpost", "Wegwijzer"), [T(`Signpost ${nr} points ${ARROWS[c.v]}.`, `Wegwijzer ${nr} wijst ${ARROWS[c.v]}.`)]);
+  return say(T("Letter", "Letter"), [T(`Letter ${nr}: ${c.v}`, `Letter ${nr}: ${c.v}`)]);
+}
+function ringClue(c) { const nt = NOTES[+c.v - 1]; c.ring = 50; tone(nt[2], .45, "sine", .07); tone(nt[2] * 2, .3, "sine", .02); }
 /** The wind right now: slow gusts, mostly against you (it's the Netherlands), sometimes from behind. */
 function windNow() { return L.d.wind * (Math.sin(L.time / 140) * .9 - .25 + Math.sin(L.time / 37) * .25); }
 function step() {
@@ -342,15 +400,33 @@ function step() {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
         e.dead = 1; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!") }[e.kind], "#fff");
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
         e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!") }[e.kind], "#fff");
-      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!") }[e.kind]);
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!") }[e.kind], "#fff");
+      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!") }[e.kind]);
     }
   }
   L.enemies = L.enemies.filter(e => e.dead < 30);
 
+  // The bell's gate closes again when time is up, unless you are through (or standing in the gateway).
+  if (L.timer > 0) {
+    const gx = L.d.gate[0] * TS;
+    if (P.x > gx + TS) { L.questDone = true; L.timer = 0; SFX.open(); pop(gx + 16, 8 * TS, T("Made it!", "Gehaald!"), "#8dffb5"); }
+    else if (--L.timer <= 0) { if (P.x + P.w > gx && P.x < gx + TS) L.timer = 1; else { L.gateOpen = false; L.gateFade = 1; SFX.bad(); } }
+    if (L.timer % 60 === 0) { tone(L.timer ? 700 : 300, .05, "square", .03); updateHud(); }
+  }
+  // A melody bell rings when you walk past it for the first time.
+  for (const c of L.clues) { if (c.ring > 0) c.ring--; if (c.kind === "melody" && !c.heard && Math.abs(c.x + 16 - (P.x + P.w / 2)) < 20) { c.heard = true; ringClue(c); } }
+  if (L.bell && L.bell.swing > 0) L.bell.swing--;
+  // The animal follows your footsteps, half a second behind you. After a big jump (a respawn) it comes along at once.
+  if (L.animal && L.animal.follow) {
+    const a = L.animal, tr = a.trail, last = tr[tr.length - 1];
+    if (last && Math.abs(last.x - P.x) + Math.abs(last.y - (P.y + P.h)) > 60) tr.length = 0;
+    tr.push({ x: P.x, y: P.y + P.h, face: P.face });
+    if (tr.length > 30) tr.shift();
+    const s = tr[0]; a.x = s.x - s.face * 6; a.y = s.y - TS; a.face = s.face;
+  } else if (L.animal && L.animal.home) { const n = gateNpc(); L.animal.x += (n.x - 26 - L.animal.x) * .1; L.animal.y = n.y; L.animal.face = 1; }
   // gate fades
   if (L.gateOpen) L.gateFade = Math.max(0, L.gateFade - .04);
   if (L.codeOpen) L.codeFade = Math.max(0, L.codeFade - .04);

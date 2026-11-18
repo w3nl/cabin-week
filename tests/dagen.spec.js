@@ -43,7 +43,10 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dal
       const can = (set, x, y) => set.some(([sx, sy]) => Math.abs(sx - x) <= 1 && sy >= y && sy - y <= 3);
       const closed = reach(false), all = reach(true), out = [];
       L.items.filter(i => i.type === 'key' || i.type === 'quest').forEach(i => { if (!can(i.type === 'quest' ? closed : all, i.x / TS, i.y / TS)) out.push(`${i.type} op ${i.x / TS},${i.y / TS}`); });
-      if (L.npcs.some(n => n.quest) && !can(closed, L.npcs.find(n => n.quest).x / TS, L.npcs.find(n => n.quest).y / TS)) out.push('opdrachtgever');
+      if (L.npcs.some(n => n.quest || n.task) && !can(closed, L.npcs.find(n => n.quest || n.task).x / TS, L.npcs.find(n => n.quest || n.task).y / TS)) out.push('opdrachtgever');
+      // Levers, lamps, the bell and the animal are all before the gate; the clues for the lock can be anywhere.
+      [...L.switches, ...(L.bell ? [L.bell] : []), ...(L.animal ? [L.animal] : [])].forEach(o => { if (!can(closed, o.x / TS, o.y / TS)) out.push(`hek-ding op ${o.x / TS},${o.y / TS}`); });
+      L.clues.forEach(o => { if (!can(all, o.x / TS, o.y / TS)) out.push(`aanwijzing op ${o.x / TS},${o.y / TS}`); });
       if (!can(all, L.exit.x / TS, L.exit.y / TS + 1)) out.push('uitgang');
       return out;
     });

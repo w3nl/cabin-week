@@ -37,7 +37,7 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 | `js/i18n.js` | `LANG`, `T(en, nl)`, `setLang()`, and the Dutch texts of `index.html` (`data-nl`, `data-nl-label`, `data-nl-title`, `data-nl-content`). Loaded first |
 | `js/data.js` | `rng()`, `VILLAGE`, the week (`WEEK`, `DAY_NAMES`, `dayLabel()`, `nightsLabel()`), `CHARS` (the nine), `JOKES` |
 | `js/levels.js` | `LEVELS`: the three hand-built levels (days 1, 4 and 5) |
-| `js/levelgen.js` | `genLevel(o)` and the five generated Ardennes days (`DAY22`, `DAY23`, `DAY26`, `DAY27`, `DAY28`: the names come from the original calendar), put in place in `LEVELS` with `splice`/`push` |
+| `js/levelgen.js` | `genLevel(o)` and the five generated Ardennes days (`DAY22`, `DAY23`, `DAY26`, `DAY27`, `DAY28`: the names come from the original calendar), put in place in `LEVELS` with `splice`/`push`. Also the gates and locks of the other regions (`task`, `code.kind`), `lockKeys()`, `NOTES`, `COLOURS` and `ARROWS` |
 | `js/region-pole.js`, `js/region-tirol.js`, `js/region-norway.js`, `js/region-netherlands.js`, `js/region-dalmatia.js` | `POLE_LEVELS`, `TIROL_LEVELS`, `NORWAY_LEVELS`, `NL_LEVELS`, `DALMATIA_LEVELS`: eight generated levels per region |
 | `js/regions.js` | `REGIONS` (id, name, icon, map position `lon`/`lat`, `scene`, `place`, `blurb`, `levels`, `week`, `finale`), `SOON` (grey dots on the map), `REGION` (the active one), `prog()` (progress of a region), `regionDone()`, `setRegion(id, store)`. Loaded after `core.js` |
 | `js/core.js` | `save`/`persist()` (saving), `tone()` and `SFX` (sound with Web Audio) |
@@ -87,8 +87,12 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
   - `stalls`: the names on the market stalls of a level (otherwise mulled wine, waffles, and so on).
   - `interior: "wood" | "workshop"`: indoor levels with pine panelling (Tirol) or red-and-white stripes (Santa's workshop and post office).
   The Ardennes use none of these (a test checks that), so they stay exactly as they were.
+- **Gates and locks** (the other regions; the Ardennes keep "bring something" and symbol codes). Every day has a gate halfway and a lock at the end, and each region mixes them, so no two days feel the same (`tests/regio.spec.js` checks: at least 6 kinds of lock and 4 kinds of gate per region, nothing more than twice, at most two "bring something"):
+  - **The gate** (`quest` as before, or `task: { kind, hud, name, need, done, after }`, or neither for no gate): `levers` (3 levers before the gate, `L.switches`), `lights` (3 lamps, or torches with `look: "torch"`; in a dark level each lit lamp makes the light bigger, `dark.lamp`), `timer` (ring the bell `L.bell` well before the gate; the gate stays open `secs` seconds, then closes again unless you are through or standing in it), `follow` (a lost animal `L.animal`, drawn as the emoji `animal`, follows your footsteps half a second behind; talk to its owner at the gate while it is near). The generator gives these things room (`room()`), so nobody stands right next to them.
+  - **The lock** (`code.kind`): `symbols` (signs `symbol = digit`, as before), `count` (`code.count: [[decoKind, name]]`: the generator places exactly that many of each, and never as random decoration), `melody` (numbered bells along the way play a note when you pass or talk to them; the keys are 5 coloured notes do re mi sol la, or 1–5 on the keyboard), `colours` (numbered lamps; `code.palette`, default `RYGBWP`), `arrows` (numbered signposts), `word` (numbered letters on stones, wooden blocks indoors; the keys are the letters of the word plus `code.extra`; the word may differ per language), `clock` (four digits shown as HH:MM; `code.signs` give the time). One pad for all of them (`openPad()` builds the slots and keys from `code.keys`, made by `lockKeys()` in `levelgen.js`); clues are `clue` entities (`L.clues`, `drawClue()`).
+- **Regional animals:** enemies and scenery belong to the region. Robot vacuums, Lego bricks and the "PAUL 40" garland are only in the Ardennes cabin (`birthday`). Indoors elsewhere: a toy robot and toy blocks in Santa's workshop, runaway parcels and drawing pins in the post office, a marmot and pine cones in the Tirolean hut (`spikeKind`: `blocks`, `pins`, `cones`). At the North Pole there is only one lost penguin (day 1); otherwise arctic foxes and lemmings, with polar bears, walruses and a musk ox as scenery.
 - **Scenery:** `theme` decides the tiles, the snow and the sliding (`bos`, `huis`, `sneeuw`, `stad`); `scene` (optional) replaces only the background: `pole` (ice floes, Santa's village, northern lights), `alps` (sharp peaks, chalets, a cable car) `fjord` (fjord, red cabins, northern lights), `polder` (flat land, windmills on the dike, reeds), `grachten` (canal houses with stepped, neck and bell gables, the canal, bridges with lights) or `duinen` (the sea with a lighthouse, dunes with marram grass, pines), in `getSceneLayers()`, `drawSceneSky()` and `drawAurora()`. The title screen shows the scene of the active region. Checkpoint flags are white until you pass them, then the flag of the region (`FLAGS`: Belgium, a red-white-green North Pole flag, Austria, Norway, the Netherlands, Croatia).
-- **Levels** are objects in `LEVELS` with: `day` (`dayLabel(i)`), `name`, `theme` (`bos`, `huis`, `sneeuw`, `stad`), `w`, `sub`, what you look for (`keyType`, `keyHud`, `keyName`), the task (`questType`, `questHud`, `questName`), `coin`/`coinName`, `enemy` (`zwijn`, `robot`, `sneeuwpop`, `pinguin` (a lost penguin at the North Pole), `geit` (an Alpine goat), `troll` (a small Norwegian troll), `gans` (a cross Dutch goose), `meeuw` (a seagull after your chips), `krab` (a crab on the rocks)), `spikeMsg`, `ground`, `plats`, `blocks`, `spikes`, `gate`, `code`, `ents`, `deco`, `exitStyle` (`house`, `door`, `tree`, `arch`, `car`), `doneMsg`, and optionally `scene`, `quiet`, `birthday`, `keysNeeded`, `fixedInterior`, `labels`, `coinHud`, and for the generator `lantern`, `lanternDeco` (`church`) and `decoExtra`. Theme and enemy names are internal (Dutch) keys; do not translate them.
+- **Levels** are objects in `LEVELS` with: `day` (`dayLabel(i)`), `name`, `theme` (`bos`, `huis`, `sneeuw`, `stad`), `w`, `sub`, what you look for (`keyType`, `keyHud`, `keyName`), the task (`questType`, `questHud`, `questName`), `coin`/`coinName`, `enemy` (`zwijn`, `robot`, `sneeuwpop`, `pinguin` (a lost penguin at the North Pole), `geit` (an Alpine goat), `troll` (a small Norwegian troll), `gans` (a cross Dutch goose), `meeuw` (a seagull after your chips), `krab` (a crab on the rocks), `poolvos` (an arctic fox), `lemming`, `marmot`, `speelgoed` (a wind-up toy robot), `pakje` (a runaway parcel)), `spikeMsg`, `ground`, `plats`, `blocks`, `spikes`, `gate`, `code`, `ents`, `deco`, `exitStyle` (`house`, `door`, `tree`, `arch`, `car`), `doneMsg`, and optionally `scene`, `quiet`, `birthday`, `keysNeeded`, `fixedInterior`, `labels`, `coinHud`, and for the generator `lantern`, `lanternDeco` (`church`) and `decoExtra`. Theme and enemy names are internal (Dutch) keys; do not translate them.
 - **The level generator** (`genLevel(o)`) builds a level from pieces (`pit`, `plat2`, `steps`, `tower`, `run`) with a fixed `seed`, so a day always looks the same. It puts the gate at 60% of the width, a tower before the gate for the task item, spreads the 3 things, puts the code door 14 tiles before the end, and four signs with `symbol = digit`. Change a `seed` and the whole level changes; run the tests.
 - **Height** of a character is `40 × size` px; jumping is the same for everyone. Your own hero is a kid (`.76`, bigger head), a teen (`.88`) or an adult (`1`).
 - **Your own hero:** the tenth tile on the title screen. Not made yet: "+ Your hero" opens the creator. Made: the tile chooses it, and pressing it again (when chosen) opens the creator to change it. Every option is a button (chips and colour swatches), so the creator works with a remote and a controller; the name field is optional (max. 12 characters, empty becomes "Me"/"Ik"), and keys typed there go to the field only (Enter saves, Escape goes back). `drawPerson()` takes an optional `skin` colour (the nine keep the default). The creator fits on 960×540, 740×360 and an upright phone (`tests/held.spec.js`).
@@ -117,74 +121,74 @@ Cabin Week is a public version of a game that was made for one family. **Keep it
 | 7 · Sun | The Last Evening (`huis`, seed 2727) | raclette cheeses 🧀 | Uno cards 🃏 | **7924** | 🌙 nights 7, 👨‍👩‍👧 people 9, 🛏️ people per bedroom 2, 🧖 sauna 4 |
 | 8 · Mon | Going Home (`bos`, seed 2828) | lost socks 🧦 | suitcase 🧳 with the presents | **2128** | 🚗=2 🧳=1 🎄=2 🏠=8 |
 
-**North Pole** (Santa's village, scene `pole`, enemy `pinguin`; the workshop and post office are indoors with `robot`):
+**North Pole** (Santa's village, scene `pole`; one lost penguin on day 1, otherwise arctic foxes `poolvos` and lemmings `lemming`; polar bears, walruses and a musk ox in the scenery; indoors a wind-up toy robot `speelgoed` in the workshop and runaway parcels `pakje` in the post office):
 
-| Day | Level | 3 things | Task | Code | Symbols |
-|---|---|---|---|---|---|
-| 1 | Landing at the North Pole (seed 3101) | backpacks 🎒 | cup of tea 🍵 | **5180** | ❄️=5 🦌=1 🎅=8 ⭐=0 |
-| 2 | The Reindeer Stables (3202) | reindeer bells 🔔 | broom 🧹 | **7263** | 🦌=7 🔔=2 🛷=6 🥕=3 |
-| 3 | Santa's Workshop (3303, `huis`) | teddy bears 🧸 | screwdriver 🪛 | **1847** | 🧸=1 🚂=8 🎁=4 🎨=7 |
-| 4 | Building an Igloo (3404) | ice blocks 🧊 | fishing rod 🎣 | **3926** | 🧊=3 🐟=9 🐧=2 🌙=6 |
-| 5 | The Post Office (3505, `huis`) | letters ✉️ | magnifying glass 🔍 | **6402** | ✉️=6 📦=4 🔍=0 🎄=2 |
-| 6 | Northern Lights Night (3606) | lanterns 🏮 | camera 📷 | **8135** | 🌌=8 🏮=1 📷=3 🦉=5 |
-| 7 | Christmas Eve (3707) | presents 🎁 | route map 🗺️ | **2479** | 🎁=2 🛷=4 🦌=7 🎅=9 |
-| 8 | Going Home (3808) | scarves 🧣 | plane tickets 🎫 | **9051** | ✈️=9 🧣=0 🎫=5 🏠=1 |
+| Day | Level | 3 things | Gate | Lock | Answer | Clues |
+|---|---|---|---|---|---|---|
+| 1 | Landing at the North Pole (seed 3101) | backpacks 🎒 | no gate | symbols | **5180** | ❄️=5 🦌=1 🎅=8 ⭐=0 |
+| 2 | The Reindeer Stables (3202) | reindeer bells 🔔 | bring back 🦌 reindeer calf | melody | **1355** | do mi la la |
+| 3 | Santa's Workshop (3303, `huis`) | teddy bears 🧸 | bring screwdriver 🪛 | word | **ELVES** (NL **ELFEN**) | numbered letters |
+| 4 | Building an Igloo (3404) | ice blocks 🧊 | 3 levers 🔧 | count | **342** | igloos 3, piles of presents 4, candy canes 2 |
+| 5 | The Post Office (3505, `huis`) | letters ✉️ | bell 🔔 6 s | colours | **RGBY** | red, green, blue, yellow |
+| 6 | Northern Lights Night (3606) | lanterns 🏮 | light 3 lamps 🏮 | arrows | **↑→→↓** | numbered signposts |
+| 7 | Christmas Eve (3707) | presents 🎁 | bring route map 🗺️ | clock | **2345** | signs with the time |
+| 8 | Going Home (3808) | scarves 🧣 | no gate | count | **253** | reindeer 2, sleighs 5, piles of presents 3 |
 
-**Tirol** (Lindenalm, scene `alps`, enemy `geit`):
+**Tirol** (Lindenalm, scene `alps`, enemy `geit`; indoors a marmot `marmot` and pine cones on the floor):
 
-| Day | Level | 3 things | Task | Code | Symbols |
-|---|---|---|---|---|---|
-| 1 | Arrival in Lindenalm (4101) | chalet keys 🔑 | cup of tea 🍵 | **4718** | 🏔️=4 🔑=7 🐐=1 ⛪=8 |
-| 2 | Ski School (4202) | pairs of skis 🎿 | ski goggles 🥽 | **8264** | 🎿=8 🥽=2 ⛷️=6 🚡=4 |
-| 3 | The Cable Car (4303) | lift passes 🎫 | scarf 🧣 | **3591** | 🚡=3 🎫=5 ☀️=9 🧣=1 |
-| 4 | Christmas Market in Innsbruck (4404, `stad`, snowmen) | candles 🕯️ | trumpet 🎺 | **1306** | 🎺=1 🕯️=3 🎄=0 🏰=6 |
-| 5 | The Toboggan Run (4505) | sledges 🛷 | helmet ⛑️ | **6047** | 🛷=6 ⛑️=0 🌲=4 ❄️=7 |
-| 6 | The Mountain Hut (4606, `huis`) | eggs 🥚 | frying pan 🍳 | **2785** | 🥚=2 🍳=7 🧈=8 🍎=5 |
-| 7 | Fondue Night (4707, `huis`) | fondue forks 🍴 | bread 🥖 | **5932** | 🧀=5 🍴=9 🥖=3 🔥=2 |
-| 8 | Going Home (4808) | ski boots 🥾 | suitcase 🧳 | **7140** | 🚗=7 🥾=1 🏔️=4 🏠=0 |
+| Day | Level | 3 things | Gate | Lock | Answer | Clues |
+|---|---|---|---|---|---|---|
+| 1 | Arrival in Lindenalm (4101) | chalet keys 🔑 | bring back 🐐 goat kid | symbols | **4718** | 🏔️=4 🔑=7 🐐=1 ⛪=8 |
+| 2 | Ski School (4202) | pairs of skis 🎿 | bell 🔔 7 s | arrows | **→↓→↓** | numbered signposts |
+| 3 | The Cable Car (4303) | lift passes 🎫 | no gate | count | **324** | chalets 3, pairs of skis 2, chamois 4 |
+| 4 | Christmas Market in Innsbruck (4404, `stad`, snowmen) | candles 🕯️ | bring trumpet 🎺 | melody | **5315** | la mi do la |
+| 5 | The Toboggan Run (4505) | sledges 🛷 | bell 🔔 7 s | arrows | **↓←↓→** | numbered signposts |
+| 6 | The Mountain Hut (4606, `huis`) | eggs 🥚 | light 3 lamps 🪔 | clock | **1930** | signs with the time |
+| 7 | Fondue Night (4707, `huis`) | fondue forks 🍴 | bring bread 🥖 | word | **FONDUE** | numbered letters |
+| 8 | Going Home (4808) | ski boots 🥾 | 3 levers 🔧 | colours | **RWRG** | red, white, red, green |
 
 **Norway** (Fjordvik, scene `fjord`, enemy `troll`):
 
-| Day | Level | 3 things | Task | Code | Symbols |
-|---|---|---|---|---|---|
-| 1 | Arrival at the Fjord (5101) | cabin keys 🔑 | cup of tea 🍵 | **6273** | 🌊=6 ⛰️=2 🏠=7 ⭐=3 |
-| 2 | Kicksled to the Shop (5202) | blocks of brown cheese 🧀 | kicksled 🛷 | **3049** | 🛷=3 🧀=0 🥛=4 🍞=9 |
-| 3 | Husky Safari (5303) | bags of dog biscuits 🦴 | compass 🧭 | **8516** | 🐕=8 🦴=5 🧭=1 ❄️=6 |
-| 4 | The Stave Church (5404, `stad`, no enemies, pits or spikes) | paper stars ⭐ | candle 🕯️ | **4620** | ⛪=4 ⭐=6 🕯️=2 🔔=0 |
-| 5 | The Fishing Village (5505) | fish 🐟 | anchor ⚓ | **1384** | 🐟=1 ⚓=3 ⛵=8 🦀=4 |
-| 6 | The Troll Forest (5606) | bells 🔔 | torch 🔦 | **7905** | 🌲=7 🔔=9 🔦=0 🌙=5 |
-| 7 | Northern Lights (5707) | cups of hot chocolate ☕ | telescope 🔭 | **2658** | 🌌=2 🔭=6 ☕=5 🦊=8 |
-| 8 | Going Home (5808) | woolly socks 🧦 | backpack 🎒 | **9312** | 🚗=9 🧦=3 🌌=1 🏠=2 |
+| Day | Level | 3 things | Gate | Lock | Answer | Clues |
+|---|---|---|---|---|---|---|
+| 1 | Arrival at the Fjord (5101) | cabin keys 🔑 | 3 levers 🔧 | symbols | **6273** | 🌊=6 ⛰️=2 🏠=7 ⭐=3 |
+| 2 | Kicksled to the Shop (5202) | blocks of brown cheese 🧀 | bring kicksled 🛷 | count | **432** | red cabins 4, kicksleds 3, elks 2 |
+| 3 | Husky Safari (5303) | bags of dog biscuits 🦴 | bring back 🐶 husky pup | arrows | **→↑←→** | numbered signposts |
+| 4 | The Stave Church (5404, `stad`, no enemies, pits or spikes) | paper stars ⭐ | light 3 lamps 🕯️ | melody | **5432** | la sol mi re |
+| 5 | The Fishing Village (5505) | fish 🐟 | 3 levers 🔧 | colours | **RYBR** | red, yellow, blue, red |
+| 6 | The Troll Forest (5606) | bells 🔔 | light 3 lamps 🔥 | word | **TROLL** | numbered letters |
+| 7 | Northern Lights (5707) | cups of hot chocolate ☕ | no gate | clock | **2200** | signs with the time |
+| 8 | Going Home (5808) | woolly socks 🧦 | bring backpack 🎒 | word | **HOME** (NL **THUIS**) | numbered letters |
 
 **Dalmatia** in summer (Camp Lavanda, theme `kust`: limestone, dry grass and sea urchins as spikes; scenes `adriatic`, `oldtown` and `falls`; enemy `krab`, also `meeuw` and `geit`):
 
-| Day | Level | 3 things | Task | Code | Symbols | Gameplay |
-|---|---|---|---|---|---|---|
-| 1 | Arrival at Camp Lavanda (7101) | mobile-home keys 🔑 | iced tea 🍵 | **2463** | ☀️=2 🌊=4 🏕️=6 🦀=3 | swimming |
-| 2 | The Krka Waterfalls (7202) | butterfly photos 🦋 | boat ticket 🎫 | **7815** | 💧=7 🦋=8 🌿=1 🐟=5 | hills, swimming, boat |
-| 3 | The Walls of Dubrovnik (7303) | kittens 🐈 | tower key 🗝️ | **5148** | 🏰=5 🐈=1 ⛵=4 🌅=8 | high city walls (hills to row 9), seagulls |
-| 4 | Island Hopping (7404) | snorkels 🤿 | skipper's map 🗺️ | **9376** | 🏝️=9 🤿=3 🐬=7 ⛵=6 | swimming, boat |
-| 5 | The Plitvice Lakes (7505) | lake photos 📸 | hiking boot 🥾 | **3702** | 💧=3 🥾=7 🐻=0 🌲=2 | hills, boat, NO swimming |
-| 6 | Zadar and the Sea Organ (7606) | music notes 🎵 | sunglasses 🕶️ | **6851** | 🎵=6 🌅=8 🏛️=5 🕶️=1 | swimming, seagulls |
-| 7 | Šibenik and the Rocky Beach (7707) | flip-flops 🩴 | sunscreen 🧴 | **1594** | 🩴=1 🧴=5 ⛪=9 🍉=4 | rocky hills, swimming, crabs |
-| 8 | Going Home (7808) | caps 🧢 | suitcase 🧳 | **8427** | 🚗=8 🧢=4 🏕️=2 🏠=7 | swimming |
+| Day | Level | 3 things | Gate | Lock | Answer | Clues | Gameplay |
+|---|---|---|---|---|---|---|---|
+| 1 | Arrival at Camp Lavanda (7101) | mobile-home keys 🔑 | bring back 🐢 tortoise | symbols | **2463** | ☀️=2 🌊=4 🏕️=6 🦀=3 | swimming |
+| 2 | The Krka Waterfalls (7202) | butterfly photos 🦋 | bell 🔔 7 s | count | **352** | waterfalls 3, cypress trees 5, olive trees 2 | hills, swimming, boat |
+| 3 | The Walls of Dubrovnik (7303) | kittens 🐈 | no gate | word | **WALLS** (NL **MUREN**) | numbered letters | high city walls (hills to row 9), seagulls |
+| 4 | Island Hopping (7404) | snorkels 🤿 | bring skipper's map 🗺️ | arrows | **←↑→↑** | numbered signposts | swimming, boat |
+| 5 | The Plitvice Lakes (7505) | lake photos 📸 | 3 levers 🔧 | colours | **BGWB** | blue, green, white, blue | hills, boat, NO swimming |
+| 6 | Zadar and the Sea Organ (7606) | music notes 🎵 | light 3 lamps ☀️ | melody | **3521** | mi la re do | swimming, seagulls |
+| 7 | Šibenik and the Rocky Beach (7707) | flip-flops 🩴 | bring sunscreen 🧴 | clock | **1950** | signs with the time | rocky hills, swimming, crabs |
+| 8 | Going Home (7808) | caps 🧢 | no gate | melody | **1531** | do la mi do | swimming |
 
 **Netherlands** (Tulpendam, scenes `polder`, `grachten` and `duinen`, enemy `gans`; `zwijn` on the Veluwe, `meeuw` on the island):
 
-| Day | Level | 3 things | Task | Code | Symbols | Gameplay |
-|---|---|---|---|---|---|---|
-| 1 | Arrival at the Zaanse Schans (6101) | house keys 🔑 | cup of tea 🍵 | **3164** | 🌬️=3 🧀=1 🌷=6 🚲=4 | wind, canals |
-| 2 | The Windmills of Kinderdijk (6202) | tulip bulbs 🌷 | cog ⚙️ | **5827** | ⚙️=5 🌊=8 🐄=2 🌷=7 | dikes (hills), strong wind |
-| 3 | Amsterdam by Canal Boat (6303, `stad`) | bike bells 🔔 | canal-boat ticket 🎫 | **1935** | 🚲=1 🌉=9 🏠=3 🦢=5 | canal boats carry you |
-| 4 | Gouda by Candlelight (6404, `stad`, no enemies) | cheeses 🧀 | big candle 🕯️ | **7492** | 🧀=7 🕯️=4 ⛪=9 🧇=2 | dark, light grows with the candle |
-| 5 | Skating in Giethoorn (6505) | pairs of skates ⛸️ | gloves 🧤 | **2071** | ⛸️=2 ☕=0 🦆=7 ❄️=1 | ice, holes in the ice |
-| 6 | The Hoge Veluwe (6606) | white bikes 🚲 | museum ticket 🖼️ | **8346** | 🚲=8 🦌=3 🌻=4 🌲=6 | drifting-sand hills, wild boar |
-| 7 | A Wadden Island (6707) | shells 🐚 | herring 🐟 | **4589** | 🐚=4 🦭=5 🌊=8 ⛴️=9 | strongest wind, ferry, seagulls, dunes |
-| 8 | Going Home (6808) | pairs of clogs 👞 | Gouda cheese 🧀 | **6713** | 🚗=6 👞=7 🧀=1 🏠=3 | dikes, wind |
+| Day | Level | 3 things | Gate | Lock | Answer | Clues | Gameplay |
+|---|---|---|---|---|---|---|---|
+| 1 | Arrival at the Zaanse Schans (6101) | house keys 🔑 | bring back 🐑 lamb | symbols | **3164** | 🌬️=3 🧀=1 🌷=6 🚲=4 | wind, canals |
+| 2 | The Windmills of Kinderdijk (6202) | tulip bulbs 🌷 | 3 levers 🔧 | count | **453** | windmills 4, cows 5, tulip beds 3 | dikes (hills), strong wind |
+| 3 | Amsterdam by Canal Boat (6303, `stad`) | bike bells 🔔 | bell 🔔 6 s | colours | **GBRG** | green, blue, red, green | canal boats carry you |
+| 4 | Gouda by Candlelight (6404, `stad`, no enemies) | cheeses 🧀 | bring big candle 🕯️ | word | **GOUDA** | numbered letters | dark, light grows with the candle |
+| 5 | Skating in Giethoorn (6505) | pairs of skates ⛸️ | no gate | clock | **1415** | signs with the time | ice, holes in the ice |
+| 6 | The Hoge Veluwe (6606) | white bikes 🚲 | bring museum ticket 🖼️ | arrows | **→→↑←** | numbered signposts | drifting-sand hills, wild boar |
+| 7 | A Wadden Island (6707) | shells 🐚 | light 3 lamps 🏮 | melody | **1324** | do mi re sol | strongest wind, ferry, seagulls, dunes |
+| 8 | Going Home (6808) | pairs of clogs 👞 | 3 levers 🔧 | colours | **RWB** | red, white, blue | dikes, wind |
 
-Levels with movers, hills or darkness have the same codes; only the way through is different.
+The Ardennes keep their original codes and gates. In the other regions the gate halfway and the lock at the end differ per day (see "Gates and locks").
 
-After three wrong codes the lock gives a hint with the first two digits, after five the first three.
+After three wrong codes the lock gives a hint with the first two parts (digits, notes, colours, arrows or letters), after five the first three.
 
 ## Facts about the cabin (used in jokes and riddles)
 
