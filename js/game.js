@@ -419,13 +419,15 @@ function step() {
   // A melody bell rings when you walk past it for the first time.
   for (const c of L.clues) { if (c.ring > 0) c.ring--; if (c.kind === "melody" && !c.heard && Math.abs(c.x + 16 - (P.x + P.w / 2)) < 20) { c.heard = true; ringClue(c); } }
   if (L.bell && L.bell.swing > 0) L.bell.swing--;
-  // The animal follows your footsteps, half a second behind you. After a big jump (a respawn) it comes along at once.
+  // The animal follows your footsteps, a little behind you, never on top of you (then you couldn't see it).
+  // After a big jump (a respawn) it comes along at once.
   if (L.animal && L.animal.follow) {
     const a = L.animal, tr = a.trail, last = tr[tr.length - 1];
-    if (last && Math.abs(last.x - P.x) + Math.abs(last.y - (P.y + P.h)) > 60) tr.length = 0;
+    if (last && Math.abs(last.x - P.x) + Math.abs(last.y - (P.y + P.h)) > 60) { tr.length = 0; a.x = P.x - P.face * 34; a.y = P.y + P.h - TS; }
     tr.push({ x: P.x, y: P.y + P.h, face: P.face });
-    if (tr.length > 30) tr.shift();
-    const s = tr[0]; a.x = s.x - s.face * 6; a.y = s.y - TS; a.face = s.face;
+    if (tr.length > 40) tr.shift();
+    // the newest footstep that is far enough behind you; if you stand still, it stays where it is
+    for (let i = tr.length - 1; i >= 0; i--) if (Math.abs(tr[i].x - P.x) >= 30) { const s = tr[i]; a.face = Math.sign(P.x - s.x) || s.face; a.x += (s.x - a.x) * .35; a.y = s.y - TS; break; }
   } else if (L.animal && L.animal.home) { const n = gateNpc(); L.animal.x += (n.x - 26 - L.animal.x) * .1; L.animal.y = n.y; L.animal.face = 1; }
   // gate fades
   if (L.gateOpen) L.gateFade = Math.max(0, L.gateFade - .04);

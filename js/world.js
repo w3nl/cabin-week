@@ -1699,9 +1699,18 @@ function drawBell(b) {
   if (L.timer > 0) { g.fillStyle = "#ffd25e"; g.font = "700 14px Fredoka, sans-serif"; g.textAlign = "center"; g.fillText(Math.ceil(L.timer / 60), cx, top - 16); }
 }
 function drawAnimal(a) {
-  const cx = a.x + 16, by = a.y + TS, moving = a.follow && Math.abs(P.vx) > .3, bob = moving ? Math.abs(Math.sin(frame / 5)) * 3 : 0;
-  shadowAt(cx, by, 12);
-  const m0 = g.getTransform(); g.translate(cx, by - 13 - bob); g.scale(-a.face, 1); emoji(L.d.task.animal, 0, 0, 28); g.setTransform(m0);
+  const found = a.follow || a.home, cx = a.x + 16, by = a.y + TS, moving = a.follow && Math.abs(P.vx) > .3, bob = moving ? Math.abs(Math.sin(frame / 5)) * 3 : 0;
+  shadowAt(cx, by, found ? 15 : 12);
+  g.fillStyle = "#000"; // emoji take the alpha of the fill colour: the shadow's see-through colour made the animal look like a ghost
+  const m0 = g.getTransform(); g.translate(cx, by - (found ? 16 : 13) - bob); g.scale(-a.face, 1);
+  // once found it is bigger, with a white outline, so you always see it walking with you
+  if (found) { g.shadowColor = "#ffffff"; g.shadowBlur = 5 * scale; emoji(L.d.task.animal, 0, 0, 34); emoji(L.d.task.animal, 0, 0, 34); g.shadowBlur = 0; g.shadowColor = "transparent"; }
+  else { g.globalAlpha = .6; emoji(L.d.task.animal, 0, 0, 28); g.globalAlpha = 1; } // still hiding: a bit see-through, so it takes some looking
+  g.setTransform(m0);
+  if (a.follow && (frame % 120) < 50) {
+    const yy = by - 48 - ((frame % 120) / 50) * 8;
+    g.globalAlpha = 1 - (frame % 120) / 50; emoji("💛", cx, yy, 14); g.globalAlpha = 1;
+  }
   if (!a.follow && !a.home) {
     const yy = by - 46 + Math.sin(frame / 10) * 2;
     g.fillStyle = OUT; g.beginPath(); g.arc(cx, yy, 9.5, 0, 7); g.fill(); g.fillStyle = "#ffd25e"; g.beginPath(); g.arc(cx, yy, 8, 0, 7); g.fill();
@@ -1930,7 +1939,7 @@ function render() {
     }
   }
   for (const e of L.enemies) drawEnemy(e, frame * 16);
-  if (L.animal) drawAnimal(L.animal);
+  if (L.animal && !L.animal.follow) drawAnimal(L.animal);
 
   if (!(P.inv > 0 && fl(P.inv / 4) % 2)) {
     const ch = heroChar();
@@ -1951,6 +1960,8 @@ function render() {
       if (P.swim) { g.fillStyle = "rgba(42,170,190,.8)"; g.fillRect(P.x - 10, SWIM_Y, P.w + 20, P.h); g.fillStyle = "#e8fbff"; g.fillRect(P.x - 10, SWIM_Y - 1 + Math.sin(frame / 8) * 1, P.w + 20, 2.5); }
     }
   }
+  // a found animal walks with you, drawn in front so you always see it
+  if (L.animal && L.animal.follow) drawAnimal(L.animal);
 
   if (!dialog) {
     const near = nearest(L.npcs) || nearest(L.switches.filter(s => !s.on)) || (L.bell && !L.questDone && nearest([L.bell])) || (L.animal && !L.animal.follow && !L.animal.home && nearest([L.animal], 48))
