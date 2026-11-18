@@ -2,7 +2,7 @@
 // - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding
 // - social-preview.png (1280×640): de social preview van de repository op GitHub (Settings → General → Social preview)
 // - tv-banner.png (1280×720): de banner voor Android TV (uit android-tv/banner.svg)
-// - screenshot-*.png (1920×1080): voor telefoon, tablet en tv
+// - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, six regions and your own hero
 const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -12,10 +12,19 @@ const root = path.join(__dirname, '..'), out = path.join(root, 'docs', 'play-sto
 const port = 4187, base = `http://127.0.0.1:${port}/`;
 const KEY = 'cabin-week';
 
-async function open(browser, { width, height, scale = 1, char = 0, lang = 'en' }) {
+// Your own hero in the screenshots (a made-up kid with red curls).
+const HERO = { name: 'Robin', size: 'kid', skin: '#c68a5c', hair: 'curly', hairCol: '#b5512a', coat: 'puffer', coatCol: '#e8a33a',
+  pants: '#2f4870', glasses: 'round', beanie: '#2e5a9a', scarf: '#59c28a' };
+
+async function open(browser, { width, height, scale = 1, char = 0, lang = 'en', region = 'ardennes' }) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: scale });
   await page.goto(base + '?lang=' + lang);
-  await page.evaluate(([KEY, char]) => localStorage.setItem(KEY, JSON.stringify({ unlocked: 8, char, best: {} })), [KEY, char]);
+  await page.evaluate(([KEY, char, region, HERO]) => {
+    // Every region unlocked, a few days played here and there, so the map shows progress.
+    const regions = { pole: { unlocked: 8, best: { 0: 3, 1: 3 } }, tirol: { unlocked: 8, best: { 0: 3 } }, norway: { unlocked: 8, best: { 0: 3, 1: 3, 2: 3 } },
+      netherlands: { unlocked: 8, best: {} }, dalmatia: { unlocked: 8, best: { 0: 3 } } };
+    localStorage.setItem(KEY, JSON.stringify({ unlocked: 8, char, best: { 0: 3, 1: 3, 2: 3, 3: 3 }, region, regions, hero: HERO }));
+  }, [KEY, char, region, HERO]);
   await page.reload();
   await page.waitForFunction(() => document.documentElement.classList.contains('ready'));
   await page.evaluate(() => document.fonts.ready);
@@ -39,19 +48,52 @@ async function play(page, i, walk) {
   await new Promise(r => setTimeout(r, 800));
   const browser = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
   try {
-    // Schermafbeeldingen: 1280×720 op anderhalve scherpte = 1920×1080
+    // Screenshots: 1280×720 at 1.5× = 1920×1080. [file, region, day (null = a menu), character, walk ms, extra]
     const shots = [
-      ['screenshot-1-titel.png', null, 0, 0],
-      ['screenshot-2-aankomst.png', 0, 3, 1500],
-      ['screenshot-3-verjaardag.png', 3, 0, 1200],
-      ['screenshot-4-kerst.png', 4, 8, 1800],
-      ['screenshot-5-glijden.png', 5, 6, 900, true],
+      ['screenshot-1-title.png', 'norway', null, 'me', 0],
+      ['screenshot-2-map.png', 'ardennes', null, 0, 0, 'map'],
+      ['screenshot-3-dalmatia.png', 'dalmatia', 0, 3, 0, 'swim'],
+      ['screenshot-4-tirol.png', 'tirol', 2, 6, 0, 'mover'],
+      ['screenshot-5-netherlands.png', 'netherlands', 1, 2, 1600],
+      ['screenshot-6-north-pole.png', 'pole', 0, 5, 0, 'mover'],
+      ['screenshot-7-christmas.png', 'ardennes', 4, 8, 900, 'slide'],
+      ['screenshot-8-hero.png', 'ardennes', null, 'me', 0, 'hero'],
     ];
-    for (const [name, day, char, walk, slide] of shots) {
-      const page = await open(browser, { width: 1280, height: 720, scale: 1.5, char });
+    for (const [name, region, day, char, walk, extra] of shots) {
+      const page = await open(browser, { width: 1280, height: 720, scale: 1.5, char, region });
       if (day !== null) await play(page, day, walk);
-      if (slide) {
-        // Buikglijden door de sneeuw: op een vlak stuk zonder blokken, bordjes of mensen in de buurt.
+      if (extra === 'map') {
+        await page.locator('#regionBtn').click();
+        await page.waitForSelector('#mapWrap:not([hidden])');
+        await page.locator('#mapBox .pin[data-region="tirol"]').hover();
+        await page.waitForTimeout(300);
+      }
+      if (extra === 'hero') {
+        await page.locator('#ownHero').click(); // already chosen, so this opens the creator
+        await page.waitForSelector('#heroWrap:not([hidden])');
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(900);
+      }
+      if (extra === 'mover') {
+        // Ride the gondola or ice floe across the gap.
+        await page.evaluate(() => {
+          const m = L.movers[0]; L.enemies.length = 0;
+          P.x = m.x + m.w / 2 - P.w / 2; P.y = m.y - P.h; P.vx = 0; P.vy = 0; P.face = 1;
+        });
+        await page.waitForTimeout(1500);
+      }
+      if (extra === 'swim') {
+        // Swimming in the sea: the middle of the first gap with water.
+        await page.evaluate(() => {
+          for (let tx = 6; tx < L.w - 6; tx++) if (L.grid[12][tx] !== '#') {
+            let n = 0; while (L.grid[12][tx + n] !== '#') n++;
+            P.x = tx * 32 + n * 16 - P.w / 2; P.y = SWIM_Y - P.h; P.vx = 0; P.vy = 0; P.face = 1; return;
+          }
+        });
+        await page.waitForTimeout(1400);
+      }
+      if (extra === 'slide') {
+        // Belly-sliding through the snow: on flat ground without blocks, signs or people nearby.
         await page.evaluate(() => {
           const far = x => [...L.npcs, ...L.signs].every(o => Math.abs(o.x - x) > 160);
           for (let tx = 8; tx < L.w - 14; tx++) {
@@ -62,7 +104,7 @@ async function play(page, i, walk) {
         });
         await page.waitForTimeout(260);
       }
-      else await page.evaluate(() => { document.activeElement.blur(); document.querySelectorAll('*').forEach(el => { el.scrollTop = 0; }); });
+      else if (day === null && !extra) await page.evaluate(() => { document.activeElement.blur(); document.querySelectorAll('*').forEach(el => { el.scrollTop = 0; }); });
       await page.screenshot({ path: path.join(out, name) });
       await page.close();
     }
@@ -77,7 +119,7 @@ async function play(page, i, walk) {
         d.style.cssText = `position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding-left:${pad}px;` +
           'background:linear-gradient(90deg,rgba(11,22,49,.88),rgba(11,22,49,.55) 48%,transparent 75%);color:#fff;font-family:Fredoka,sans-serif;z-index:99';
         d.innerHTML = `<div style="font-size:${big}px;font-weight:700;line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.35)">Cabin<br>Week</div>` +
-          `<div style="font-size:${small}px;font-weight:600;margin-top:16px;color:#ffd25e">A level a day in a Christmas week</div>`;
+          `<div style="font-size:${small}px;font-weight:600;margin-top:16px;color:#ffd25e">A level a day, all across Europe</div>`;
         document.body.appendChild(d);
       }, [pad, big, small]);
       await page.waitForTimeout(300);
