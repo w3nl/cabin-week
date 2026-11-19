@@ -18,7 +18,7 @@ const REGIONS = [
     finale: [T("Ho ho home! ✈️🏠", "Ho ho naar huis! ✈️🏠"),
       T("A lost penguin, nine reindeer, a workshop full of elves, an igloo, millions of letters, the northern lights and Santa's sleigh taking off.",
         "Een verdwaalde pinguïn, negen rendieren, een werkplaats vol elfjes, een iglo, miljoenen brieven, het noorderlicht en de slee van de Kerstman die vertrekt.")] },
-  { id: "tirol", name: "Tirol", icon: "⛷️", lon: 11.4, lat: 47.25, scene: "alps",
+  { id: "tirol", name: "Tirol", icon: "⛷️", lon: 11.4, lat: 47.25, labelDy: -.35, scene: "alps",
     place: "Lindenalm", blurb: T("A ski week in a chalet in Lindenalm, high in the Alps.", "Een skiweek in een chalet in Lindenalm, hoog in de Alpen."),
     levels: TIROL_LEVELS,
     week: regionWeek([["🏔️", "Arrival", "Aankomst"], ["🎿", "Ski school", "Skiles"], ["🚡", "Cable car", "Kabelbaan"], ["🎄", "Innsbruck", "Innsbruck"],
@@ -45,7 +45,7 @@ const REGIONS = [
       T("Windmills, dikes and a headwind, Amsterdam by boat, Gouda by candlelight, skating in Giethoorn, the white bikes, herring on the island and a cheese for the neighbours.",
         "Molens, dijken en tegenwind, Amsterdam per boot, Gouda bij kaarslicht, schaatsen in Giethoorn, de witte fietsen, haring op het eiland en een kaas voor de buren.")] }
 ,
-  { id: "dalmatia", name: T("Dalmatia", "Dalmatië"), icon: "☀️", lon: 16.4, lat: 43.5, scene: "adriatic", summer: true,
+  { id: "dalmatia", name: T("Dalmatia", "Dalmatië"), icon: "☀️", lon: 16.6, lat: 43.1, labelDy: .45, scene: "adriatic", summer: true,
     place: T("Camp Lavanda", "Camping Lavanda"), blurb: T("A summer week at Camp Lavanda on the Croatian coast: islands, waterfalls, old towns and a warm sea to swim in.",
       "Een zomerweek op Camping Lavanda aan de Kroatische kust: eilanden, watervallen, oude stadjes en een warme zee om in te zwemmen."),
     levels: DALMATIA_LEVELS,
@@ -81,13 +81,21 @@ const REGIONS = [
       ["🌻", "Lavender", "Lavendel"], ["🍇", "Grape harvest", "Druivenoogst"], ["⛪", "Old village", "Oud dorp"], ["🏠", "Home", "Naar huis"]]),
     finale: [T("Merci, Ardèche! 🌻🚗", "Merci, Ardèche! 🌻🚗"),
       T("Cicadas, a canoe under the Pont d'Arc, Josette the hen, 36,000-year-old horses on a cave wall, lavender, grape juice from our own harvest and a picnic in an old village. And a 2CV on every corner.",
-        "Cicaden, een kano onder de Pont d'Arc, Josette de kip, paarden van 36.000 jaar oud op een grotwand, lavendel, druivensap van onze eigen oogst en een picknick in een oud dorp. En op elke hoek een 2CV.")] }
+        "Cicaden, een kano onder de Pont d'Arc, Josette de kip, paarden van 36.000 jaar oud op een grotwand, lavendel, druivensap van onze eigen oogst en een picknick in een oud dorp. En op elke hoek een 2CV.")] },
+  { id: "veneto", name: "Veneto", icon: "🎭", lon: 12.3, lat: 45.5, scene: "laguna", summer: true,
+    place: "Portoverde", blurb: T("A summer week by the lagoon near Portoverde: Venice and its islands, flamingos, Verona's Arena, the Dolomites and the Lido.",
+      "Een zomerweek aan de lagune bij Portoverde: Venetië en zijn eilanden, flamingo's, de Arena van Verona, de Dolomieten en het Lido."),
+    levels: VENETO_LEVELS,
+    week: regionWeek([["🏕️", "Lagoon", "Lagune"], ["🎭", "Venice", "Venetië"], ["🔮", "Murano & Burano", "Murano & Burano"], ["🦩", "Flamingos", "Flamingo's"],
+      ["🎶", "Verona", "Verona"], ["⛰️", "Dolomites", "Dolomieten"], ["🏖️", "Lido", "Lido"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Grazie, Veneto! 🎭🚗", "Grazie, Veneto! 🎭🚗"),
+      T("Flamingos on one leg, the vaporetto from island to island, glass from Murano, the colours of Burano, opera by candlelight in the Arena, pink mountains and a day at the Lido. And far too much gelato.",
+        "Flamingo's op één poot, de vaporetto van eiland naar eiland, glas uit Murano, de kleuren van Burano, opera bij kaarslicht in de Arena, roze bergen en een dag op het Lido. En veel te veel gelato.")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [
   { name: T("Iceland", "IJsland"), lon: -19, lat: 64.9 },
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
-  { name: "Veneto", lon: 12.3, lat: 45.5 },
   { name: T("Catalonia", "Catalonië"), lon: 1.8, lat: 41.9 },
   { name: T("Greece", "Griekenland"), lon: 22.0, lat: 39.6 }
 ];

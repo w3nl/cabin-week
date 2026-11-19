@@ -362,6 +362,17 @@ function drawEnemy(e, t) {
     blob("#f2c42a", () => g.arc(9, -11, 3, 0, 7));
     g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(10, -12, 1.1, 0, 7); g.fill();
     g.strokeStyle = "#2a2a2e"; g.lineWidth = 1; g.beginPath(); g.moveTo(10, -14); g.lineTo(13, -18); g.stroke(); g.strokeStyle = OUT;
+  } else if (e.kind === "duif") {
+    // a city pigeon: grey, a shiny green-purple neck, and a head that bobs as it walks
+    const ph = e.x * .5, bob = Math.sin(ph * 2) * 2;
+    [[-3, 0], [3, Math.PI]].forEach(([x, o]) => walkLeg(x, -6, 6, 2.5, ph + o, .6, "#d8707e"));
+    blob("#8a8e9a", () => g.ellipse(-2, -12, 11, 7, -.1, 0, 7));
+    blob("#6a6e7a", () => { g.moveTo(-14, -12); g.lineTo(-20, -9); g.lineTo(-12, -8); g.closePath(); });
+    g.fillStyle = "#5a8a7a"; g.beginPath(); g.ellipse(7, -16, 4.5, 4, 0, 0, 7); g.fill(); g.fillStyle = "rgba(150,90,170,.6)"; g.beginPath(); g.ellipse(7, -14, 3.5, 2.5, 0, 0, 7); g.fill();
+    blob("#8a8e9a", () => g.arc(10 + bob, -21, 4.5, 0, 7));
+    g.fillStyle = "#e88a3a"; g.beginPath(); g.arc(11.5 + bob, -22, 1.2, 0, 7); g.fill();
+    g.fillStyle = "#5a5a5a"; g.beginPath(); g.moveTo(14 + bob, -21); g.lineTo(18 + bob, -20); g.lineTo(14 + bob, -19); g.fill();
+    g.fillStyle = "#c8a0a8"; g.fillRect(-6, -12, 7, 1.5); g.fillRect(-6, -9, 7, 1.5);
   } else if (e.kind === "bever") {
     // a beaver from the lake, with a flat tail and big orange teeth
     const ph = e.x * .4;

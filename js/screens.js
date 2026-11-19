@@ -280,6 +280,8 @@ function buildMap() {
     const [x, y] = mapXY(r.lon, r.lat), done = regionDone(r.id), total = r.levels.length;
     const b = document.createElement("button"); b.type = "button"; b.className = "pin" + (r.id === REGION.id ? " here" : "") + (r.labelLeft ? " left" : "");
     b.style.left = (x / MAP_W * 100).toFixed(2) + "%"; b.style.top = (y / MAP_H * 100).toFixed(2) + "%";
+    // labelDy: nudge a label up (−) or down (+), as a share of its height, where places are close together (Tirol, Veneto, Dalmatia)
+    if (r.labelDy) b.style.transform = `translate(${r.labelLeft ? "calc(-100% + 14px)" : "-14px"}, ${(-50 + r.labelDy * 100).toFixed(0)}%)`;
     b.dataset.region = r.id;
     b.innerHTML = `<span class="dot">${r.icon}</span><span class="lbl"><b></b><small></small></span>`;
     b.querySelector("b").textContent = (r.offMap ? "↑ " : "") + r.name;
