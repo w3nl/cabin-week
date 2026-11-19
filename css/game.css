@@ -339,10 +339,18 @@ html.wide #title .chars button.own .plus { width: 42px; height: 50px; font-size:
   .sheet.hero { grid-template-columns: 1fr; }
   #heroCanvas { width: 120px; height: 150px; }
   .hero-row { grid-template-columns: 74px minmax(0, 1fr); }
+  /* upright: the preview on the left, name and buttons beside it, so the rows fit below */
+  .hero-side { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "eye eye" "pic name" "pic cta"; align-items: center; column-gap: 12px; }
+  .hero-side .eyebrow { grid-area: eye; }
+  #heroCanvas { grid-area: pic; width: 100px; height: 125px; }
+  .hero-side .hero-name { grid-area: name; }
+  .hero-side .cta { grid-area: cta; }
+  .hero-rows { gap: 5px; }
 }
 html.wide .sheet.hero { padding: 12px 16px; gap: 14px; }
 html.wide .hero-rows { gap: 5px; }
 @media (max-height: 460px) {
+  #heroWrap { padding: 4px 12px; }
   .sheet.hero { grid-template-columns: 170px minmax(0, 1fr); padding: 8px 12px; gap: 10px; }
   .sheet.hero .eyebrow { font-size: 11px; }
   #heroCanvas { width: 96px; height: 120px; }
@@ -355,5 +363,5 @@ html.wide .hero-rows { gap: 5px; }
   .hero-row .hl { font-size: 11px; }
   .hero-row .hv { gap: 3px; }
   .hero-row .chip { font-size: 11px; padding: 1px 8px; }
-  .hero-row .swatch { width: 21px; height: 21px; font-size: 10px; }
+  .hero-row .swatch { width: 19px; height: 19px; font-size: 10px; }
 }

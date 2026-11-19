@@ -1,5 +1,5 @@
 "use strict";
-// Your own hero: choose a name, height, skin, hair, coat, trousers, glasses, hat and scarf.
+// Your own hero: choose a name, height, skin, hair (and a bun, bow or hairband), coat, trousers/shorts/skirt/dress, glasses, hat and scarf.
 // The hero is saved in save.hero; save.char === "me" means you play with it. Loaded after screens.js.
 const HERO_OPTS = {
   size: [["kid", T("Kid", "Kind")], ["teen", T("Teen", "Tiener")], ["adult", T("Adult", "Volwassen")]],
@@ -9,24 +9,32 @@ const HERO_OPTS = {
   hairCol: ["#f2d184", "#d9a35a", "#a87c4c", "#6b4426", "#2a1d16", "#b5512a", "#b9b4ac"],
   coat: [["puffer", T("Puffer", "Gewatteerd")], ["long", T("Long coat", "Lange jas")], ["jacket", T("Jacket", "Jack")]],
   coatCol: ["#d8423a", "#2f7a4a", "#2e5a9a", "#f1ece3", "#2e3338", "#e8a33a", "#8a4ab0", "#e07aa0"],
-  pants: ["#2f4870", "#2c2f36", "#56603d", "#7a2236", "#6b5a48"],
+  legs: [["trousers", T("Trousers", "Lange broek")], ["shorts", T("Shorts", "Korte broek")], ["skirt", T("Skirt", "Rok")], ["dress", T("Dress", "Jurk")]],
+  pants: ["#2f4870", "#2c2f36", "#56603d", "#7a2236", "#6b5a48", "#e07aa0", "#8a4ab0", "#4aa0c8"],
+  extra: [[null, T("None", "Niets")], ["bun", T("Bun", "Knotje")], ["bow", T("Bow", "Strik")], ["headband", T("Hairband", "Haarband")]],
+  extraCol: ["#b67ad9", "#b3202e", "#e07aa0", "#2e5a9a", "#e8b44a", "#59c28a", "#f1ece3"],
   glasses: [[null, T("None", "Geen")], ["round", T("Round", "Rond")], ["thick", T("Thick", "Breed")]],
   beanie: [null, "#c43a3a", "#2e5a9a", "#5a6068", "#2f7a4a", "#f1ece3"],
   scarf: [null, "#d33a3a", "#2e5a9a", "#e8b44a", "#59c28a", "#e07aa0"]
 };
 const HERO_ROWS = [["size", T("Height", "Lengte")], ["skin", T("Skin", "Huid")], ["hair", T("Hair", "Haar")], ["hairCol", T("Hair colour", "Haarkleur")],
-  ["coat", T("Coat", "Jas")], ["coatCol", T("Coat colour", "Jaskleur")], ["pants", T("Trousers", "Broek")], ["glasses", T("Glasses", "Bril")],
-  ["beanie", T("Hat", "Muts")], ["scarf", T("Scarf", "Sjaal")]];
-const HERO_DEFAULT = { name: "", size: "kid", skin: "#f4caa6", hair: "short", hairCol: "#a87c4c", coat: "puffer", coatCol: "#2e5a9a", pants: "#2c2f36", glasses: null, beanie: "#c43a3a", scarf: null };
+  ["extra", T("In your hair", "In je haar")], ["extraCol", T("Clip colour", "Kleur clipje")],
+  ["coat", T("Coat", "Jas")], ["coatCol", T("Coat colour", "Jaskleur")], ["legs", T("Bottoms", "Broek of rok")], ["pants", T("Colour", "Kleur")],
+  ["glasses", T("Glasses", "Bril")], ["beanie", T("Hat", "Muts")], ["scarf", T("Scarf", "Sjaal")]];
+const HERO_DEFAULT = { name: "", size: "kid", skin: "#f4caa6", hair: "short", hairCol: "#a87c4c", coat: "puffer", coatCol: "#2e5a9a", legs: "trousers", pants: "#2c2f36", extra: null, extraCol: "#b67ad9", glasses: null, beanie: "#c43a3a", scarf: null };
 const optVal = o => Array.isArray(o) ? o[0] : o;
 /** Turn the saved choices into a character for drawPerson(). */
 function makeHero(h) {
   h = Object.assign({}, HERO_DEFAULT, h || {});
   const c = { name: (h.name || "").trim() || T("Me", "Ik"), fam: T("You", "Jij"), size: { kid: .76, teen: .88, adult: 1 }[h.size] || .88, kid: h.size === "kid",
     hair: h.hair, hairCol: h.hairCol, skin: h.skin, coat: h.coat, coatCol: h.coatCol, pants: h.pants, own: true };
+  // Shorts: bare legs. Skirt or dress: dark tights in the cold, bare legs in summer.
+  if (h.legs === "shorts") c.shorts = true;
+  if (h.legs === "skirt" || h.legs === "dress") { c[h.legs] = h.pants; c.pants = "#2e2a30"; c.bareSummer = true; }
+  if (h.extra) c[h.extra] = h.extraCol;
   if (h.glasses) c.glasses = h.glasses;
   if (h.beanie) c.beanie = h.beanie;
-  if (h.scarf) c.scarf = [h.scarf, shade(h.scarf, .35)];
+  if (h.scarf) c.scarf = [h.scarf, shade(h.scarf, .35)]; else c.noScarf = true;
   return c;
 }
 /** The character you play with: one of the nine, or your own hero. */
