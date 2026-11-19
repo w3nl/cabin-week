@@ -63,17 +63,16 @@ const REGIONS = [
       ["🌼", "Midsummer", "Midzomer"], ["🛶", "Canoe", "Kano"], ["🚗", "Car meet", "Autotreffen"], ["🏠", "Home", "Naar huis"]]),
     finale: [T("Hej då, Småland! 🛶🚗", "Hej då, Småland! 🛶🚗"),
       T("A red cottage by the lake, fika with princess cake, moose to bounce on, glass birds, dancing like frogs at midsummer, a canoe that tipped over and a parade of Saabs.",
-        "Een rood huisje aan het meer, fika met prinsessentaart, elanden om op te stuiteren, glazen vogeltjes, als kikkers dansen met midzomer, een kano die omsloeg en een parade van Saabs.")] }
-,
+        "Een rood huisje aan het meer, fika met prinsessentaart, elanden om op te stuiteren, glazen vogeltjes, als kikkers dansen met midzomer, een kano die omsloeg en een parade van Saabs.")] },
   { id: "scotland", name: T("Scotland", "Schotland"), icon: "🏰", lon: -4.3, lat: 57.0, labelLeft: true, scene: "highlands", summer: true,
     place: "Glen Rowan", blurb: T("A summer week in a fictional Highland village: rugged glens, lochs, old castles, ceilidh music and long daylight.",
-    "Een zomerweek in een fictief dorp in de Highlands: ruige dalen, lochs, oude kastelen, ceilidhmuziek en lange dagen."),
+      "Een zomerweek in een fictief dorp in de Highlands: ruige dalen, lochs, oude kastelen, ceilidhmuziek en lange dagen."),
     levels: SCOTLAND_LEVELS,
     week: regionWeek([["🏔️", "Glen Coe", "Glen Coe"], ["🌊", "Loch Ness", "Loch Ness"], ["🏰", "Castle", "Kasteel"], ["🎶", "Ceilidh", "Ceilidh"],
-    ["⛴️", "Isles", "Eilanden"], ["🏘️", "Edinburgh", "Edinburgh"], ["🎻", "Glasgow", "Glasgow"], ["🏠", "Home", "Naar huis"]]),
+      ["⛴️", "Isles", "Eilanden"], ["🏘️", "Edinburgh", "Edinburgh"], ["🎻", "Glasgow", "Glasgow"], ["🏠", "Home", "Naar huis"]]),
     finale: [T("Slàinte, Scotland! 🏰🚗", "Slàinte, Schotland! 🏰🚗"),
-    T("The Highlands, a loch-side boat trip, old castle stones, a ceilidh, island ferries, Edinburgh's lanes and Glasgow's music. The long summer light came all the way home with us.",
-      "De Highlands, een boottocht op de loch, oude kasteelstenen, een ceilidh, veerboten naar de eilanden, de steegjes van Edinburgh en de muziek van Glasgow. Het lange zomerlicht ging met ons mee naar huis.")] }
+      T("The Highlands, a loch-side boat trip, old castle stones, a ceilidh, island ferries, Edinburgh's lanes and Glasgow's music. The long summer light came all the way home with us.",
+        "De Highlands, een boottocht op de loch, oude kasteelstenen, een ceilidh, veerboten naar de eilanden, de steegjes van Edinburgh en de muziek van Glasgow. Het lange zomerlicht ging met ons mee naar huis.")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [

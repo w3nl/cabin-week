@@ -14,7 +14,8 @@ const PAL = {
   sneeuw: { base: "#566b8f", dark: "#40527a", light: "#7189b0", edge: "#25324d" },
   huis: { base: "#d5c7b0", dark: "#b9a98e", light: "#e6dbc8", edge: "#7d6b52" },
   stad: { base: "#7c7882", dark: "#615d68", light: "#9894a0", edge: "#2e2b34" },
-  kust: { base: "#d8c9a8", dark: "#bfae8a", light: "#ebe1c9", edge: "#6e5e44" }
+  kust: { base: "#d8c9a8", dark: "#bfae8a", light: "#ebe1c9", edge: "#6e5e44" },
+  straat: { base: "#857d70", dark: "#6a6358", light: "#a39a8a", edge: "#332e28" }
 };
 function fillTex(theme, R) {
   const p = PAL[theme];
@@ -81,6 +82,12 @@ function topTex(theme, R) {
     for (let x = 0; x < 16; x += 3) { const o = (x / 3) % 2; g.fillStyle = ["#8d8894", "#a19ca8", "#7e7a86"][x % 3]; pxr(x, 1 + o, 2, 2); pxr(x + 1, 3 + o, 2, 2); g.fillStyle = "#b9b4c0"; pxr(x, 1 + o, 1, 1); }
     g.fillStyle = "#f4f8ff"; for (let x = 0; x < 16; x++) pxr(x, 0, 1, 1 + (R() < .4 ? 1 : 0));
     g.fillStyle = "#c3d4ec"; pxr(0, 6, 16, 1);
+  } else if (theme === "straat") {
+    // summer cobbles (Edinburgh, Glasgow): no snow, a little moss between the stones
+    g.fillStyle = "#3a352e"; g.fillRect(0, 0, 32, 12);
+    for (let x = 0; x < 16; x += 3) { const o = (x / 3) % 2; g.fillStyle = ["#948b7c", "#a89f8e", "#857d70"][x % 3]; pxr(x, 0 + o, 2, 2); pxr(x + 1, 2 + o, 2, 2); g.fillStyle = "#c2b9a6"; pxr(x, o, 1, 1); }
+    g.fillStyle = "#5f7a3e"; for (let x = 0; x < 16; x++) if (R() < .18) pxr(x, 4 + (x % 2), 1, 1);
+    g.fillStyle = "#4e473d"; pxr(0, 6, 16, 1);
   } else {
     const cols = ["#c08a55", "#b07a47", "#c99560", "#b88450"];
     let x = 0, i = fl(R() * 4);
@@ -127,7 +134,7 @@ function blockTex(theme, R) {
   g.fillStyle = "#64625a"; g.fillRect(2, 27, 28, 3); g.fillRect(27, 2, 3, 28);
   g.fillStyle = "#55534c"; g.fillRect(10, 10, 2, 6); g.fillRect(12, 16, 4, 2); g.fillRect(20, 18, 2, 4);
   if (theme === "bos") { g.fillStyle = "#5c9a3e"; g.fillRect(2, 2, 12, 3); g.fillRect(4, 5, 4, 2); g.fillRect(20, 2, 8, 2); g.fillStyle = "#86c45c"; g.fillRect(4, 2, 6, 1); }
-  else if (theme !== "kust") { g.fillStyle = "#f4f8ff"; g.fillRect(2, 2, 28, 3); }
+  else if (theme !== "kust" && theme !== "straat") { g.fillStyle = "#f4f8ff"; g.fillRect(2, 2, 28, 3); }
 }
 function spikeTex(theme, R, kind) {
   if (kind === "cones") {
@@ -154,7 +161,17 @@ function spikeTex(theme, R, kind) {
     });
     return;
   }
-  if (theme === "bos") {
+  if (theme === "straat") {
+    // thistles (Scotland): spiky green stems with purple heads
+    [[5, 0], [15, 1], [25, 0]].forEach(([x, f]) => {
+      g.fillStyle = "#2c5a2a"; g.fillRect(x - 1, 14 + f * 3, 2, 18 - f * 3);
+      g.beginPath(); g.moveTo(x - 7, 32); g.lineTo(x, 22); g.lineTo(x + 7, 32); g.fill();
+      g.fillStyle = "#4a8a3a"; g.beginPath(); g.moveTo(x - 4, 30); g.lineTo(x, 24); g.lineTo(x + 4, 30); g.fill();
+      g.fillStyle = "#3a6a32"; g.beginPath(); g.ellipse(x, 16 + f * 3, 3.5, 3, 0, 0, 7); g.fill();
+      g.fillStyle = "#8a4ab8"; g.fillRect(x - 3, 9 + f * 3, 6, 5); g.fillStyle = "#b67ae0"; g.fillRect(x - 2, 8 + f * 3, 1.5, 4); g.fillRect(x + 1, 8 + f * 3, 1.5, 4);
+      g.fillStyle = "#d9d0b0"; g.fillRect(x - 5, 18 + f * 3, 1.5, 1.5); g.fillRect(x + 4, 17 + f * 3, 1.5, 1.5);
+    });
+  } else if (theme === "bos") {
     g.fillStyle = "#24461b";
     for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(i * 8, 32); g.lineTo(i * 8 + 4, 10 + (i % 2) * 4); g.lineTo(i * 8 + 8, 32); g.fill(); }
     g.fillStyle = "#3e7a2c"; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(i * 8 + 2, 32); g.lineTo(i * 8 + 4, 14 + (i % 2) * 4); g.lineTo(i * 8 + 6, 32); g.fill(); }
@@ -878,6 +895,9 @@ function drawGroundDecor(d, th) {
     else if (d.k === 3) { g.fillStyle = OUT; g.fillRect(x + 2, y - 7, 2.5, 7); g.fillStyle = "#f4ead8"; g.fillRect(x + 2.5, y - 7, 1.5, 7); g.fillStyle = OUT; g.beginPath(); g.arc(x + 3.2, y - 7, 5.5, Math.PI, 0); g.fill(); g.fillStyle = "#d8323a"; g.beginPath(); g.arc(x + 3.2, y - 7, 4.5, Math.PI, 0); g.fill(); g.fillStyle = "#fff"; g.fillRect(x + 1, y - 10, 1.5, 1.5); g.fillRect(x + 4.5, y - 9.5, 1.5, 1.5); }
     else if (d.k === 4) { g.fillStyle = "#2a1a10"; g.beginPath(); g.ellipse(x + 5, y - 2, 6.5, 4, 0, Math.PI, 0); g.fill(); g.fillStyle = "#9b958a"; g.beginPath(); g.ellipse(x + 5, y - 2, 5.5, 3, 0, Math.PI, 0); g.fill(); g.fillStyle = "#c8c2b5"; g.fillRect(x + 2, y - 4, 3, 1); }
     else { g.strokeStyle = "#4f9e3c"; g.lineWidth = 1.3; g.beginPath(); g.moveTo(x + 4, y); g.quadraticCurveTo(x - 2, y - 6, x - 3, y - 10); g.moveTo(x + 4, y); g.quadraticCurveTo(x + 10, y - 6, x + 11, y - 10); g.moveTo(x + 4, y); g.lineTo(x + 4, y - 12); g.stroke(); }
+  } else if (th === "straat") {
+    if (d.k < 2) { g.fillStyle = "#5f8a3e"; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(x + i * 3, y); g.lineTo(x + i * 3 + 1, y - 4 - (i % 2) * 2); g.lineTo(x + i * 3 + 2, y); g.fill(); } }
+    else if (d.k === 3) { g.fillStyle = "#5f8a3e"; g.fillRect(x + 3, y - 6, 1.2, 6); g.fillStyle = "#f5d23a"; g.beginPath(); g.arc(x + 3.6, y - 7, 2, 0, 7); g.fill(); }
   } else if (th === "kust") {
     if (d.k < 2) { g.strokeStyle = "#a89a4a"; g.lineWidth = 1.2; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(x + i * 2.5, y); g.lineTo(x + i * 2.5 + 1.5, y - 6 - (i % 2) * 3); g.stroke(); } }
     else if (d.k === 2) { g.fillStyle = "#f4f1ea"; g.beginPath(); g.ellipse(x + 3, y - 1.5, 3, 2, 0, 0, 7); g.ellipse(x + 8, y - 1, 2, 1.5, 0, 0, 7); g.fill(); }
@@ -976,8 +996,8 @@ function drawTile(c, px, py, theme, tx, ty, T) {
     const v = fl(hash(tx * 31 + ty * 17) * 4);
     tile(T, top ? T.top[v] : T.fill[v], px, py);
     const pe = PAL[theme].edge;
-    if (cell(tx - 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : "#f4f8ff"; g.fillRect(px - 3, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px - 3, py + 10, 5, 2); g.fillRect(px - 5, py + 2, 2, 8); } }
-    if (cell(tx + 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px + TS - 2, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : "#f4f8ff"; g.fillRect(px + TS - 2, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px + TS - 2, py + 10, 5, 2); g.fillRect(px + TS + 3, py + 2, 2, 8); } }
+    if (cell(tx - 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : theme === "straat" ? "#a89f8e" : "#f4f8ff"; g.fillRect(px - 3, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px - 3, py + 10, 5, 2); g.fillRect(px - 5, py + 2, 2, 8); } }
+    if (cell(tx + 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px + TS - 2, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : theme === "straat" ? "#a89f8e" : "#f4f8ff"; g.fillRect(px + TS - 2, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px + TS - 2, py + 10, 5, 2); g.fillRect(px + TS + 3, py + 2, 2, 8); } }
   } else if (c === "=") tile(T, T.plat, px, py);
   else if (c === "|") drawLadder(px, py, theme);
   else if (c === "S") tile(T, T.block, px, py);
@@ -1106,6 +1126,16 @@ function drawDeco(kind, x, theme, far) {
     g.fillStyle = "#525952"; g.fillRect(px + 63, by - 82, 9, 29); g.strokeRect(px + 63, by - 82, 9, 29);
     [[px + 12, by - 40], [px + 52, by - 40]].forEach(([wx, wy]) => { g.fillStyle = "#3e4c50"; g.fillRect(wx, wy, 14, 17); g.strokeRect(wx, wy, 14, 17); g.fillStyle = "#e5d19c"; g.fillRect(wx + 2, wy + 2, 10, 13); });
     g.fillStyle = "#4c4940"; g.fillRect(px + 33, by - 29, 18, 29); g.strokeRect(px + 33, by - 29, 18, 29);
+  } else if (kind === "heather") {
+    // a low clump of purple heather on the hillside
+    shadowAt(px + 22, by, 26);
+    [[8, 9, 0], [22, 12, 1], [36, 9, 2], [15, 7, 3], [29, 8, 4]].forEach(([dx, r, i]) => {
+      g.fillStyle = i % 2 ? "#4a6a3a" : "#3e5e32"; g.beginPath(); g.ellipse(px + dx, by - r * .7, r, r * .8, 0, Math.PI, 0); g.fill();
+    });
+    for (let i = 0; i < 26; i++) {
+      const hx = px + 2 + hash(x * 7 + i) * 40, hy = by - 2 - hash(x * 11 + i * 3) * 14;
+      g.fillStyle = ["#9a5aa8", "#b878c4", "#7e4690"][i % 3]; g.fillRect(hx, hy, 2.2, 2.2);
+    }
   } else if (kind === "castle") {
     shadowAt(px + 48, by, 50);
     g.fillStyle = "#77796f"; g.fillRect(px + 8, by - 66, 76, 66); g.strokeRect(px + 8, by - 66, 76, 66);
@@ -1712,7 +1742,7 @@ function drawExit(theme) {
   g.lineJoin = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const style = L.d.exitStyle;
   if (style === "arch") {
-    const sn = theme !== "bos" && theme !== "kust";
+    const sn = theme !== "bos" && theme !== "kust" && theme !== "straat";
     [x - 26, x + 50].forEach(px => { g.fillStyle = "#6b4528"; g.fillRect(px, by - 110, 10, 110); g.strokeRect(px, by - 110, 10, 110); g.fillStyle = "#8a5a32"; g.fillRect(px + 2, by - 108, 3, 106); });
     g.font = "700 14px Fredoka, sans-serif"; const w = Math.max(96, g.measureText(L.d.exitLabel).width + 24);
     g.fillStyle = "#c9955a"; g.beginPath(); rp(x + 14 - w / 2, by - 132, w, 30, 4); g.fill(); g.stroke();
@@ -1825,7 +1855,8 @@ const FLAGS = {
   pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]],
   netherlands: [3, (i, r) => ["#ae1c28", "#ffffff", "#21468b"][r]],
   smaland: [5, (i, r) => r === 2 || i === 3 || i === 4 ? "#fecc02" : "#006aa7"],
-  scotland: [1, () => "#0065bd"],
+  // the saltire: a white diagonal cross on blue
+  scotland: [9, (i, r) => { const d = i * 8 / 11; return Math.abs(r - d) < 1.1 || Math.abs(r - (8 - d)) < 1.1 ? "#ffffff" : "#0065bd"; }],
   dalmatia: [6, (i, r) => i >= 5 && i <= 6 && r >= 1 && r <= 3 ? ((i + r) % 2 ? "#ffffff" : "#d8232a") : ["#d8232a", "#d8232a", "#ffffff", "#ffffff", "#1a3a8a", "#1a3a8a"][r]]
 };
 function drawCheck(c) {
@@ -1836,14 +1867,6 @@ function drawCheck(c) {
   for (let i = 0; i < 12; i++) {
     const wav = Math.sin(frame / 8 - i * .5) * (1 + i * .25);
     for (let r = 0; r < rows; r++) { g.fillStyle = c.on ? col(i, r) : r % 2 ? "#b9c6d6" : "#d6dee8"; g.fillRect(c.x + 17 + i * 2, c.y - 28 + r * h + wav, 2.2, h + .3); }
-  }
-  if (REGION.id === "scotland") {
-    g.fillStyle = c.on ? "#ffffff" : "#d6dee8";
-    for (let i = 0; i < 12; i++) {
-      const wav = Math.sin(frame / 8 - i * .5) * (1 + i * .25), x = c.x + 17 + i * 2;
-      g.fillRect(x, c.y - 28 + i * 1.5 + wav, 2.2, 2.6);
-      g.fillRect(x, c.y - 11 - i * 1.5 + wav, 2.2, 2.6);
-    }
   }
 }
 function drawPad() {
@@ -2098,12 +2121,14 @@ function drawWind() {
   }
   g.globalAlpha = 1;
 }
-/** Scotland's weather turns from sun to wind to rain while the daylight stays long. */
-function drawScotlandWeather() {
-  const phase = Math.floor(frame / 600) % 3;
+/** Changeable weather (Scotland): about ten seconds of sun, then a breeze, then a shower, and round again.
+ *  Only to look at: it does not push you (that is `wind`). Drawn in front of the world, like the wind. */
+function weatherPhase() { return Math.floor(L.time / 600) % 3; }
+function drawWeather() {
+  const phase = weatherPhase();
   if (phase === 0) return;
   g.save();
-  g.globalAlpha = phase === 1 ? .35 : .55;
+  g.globalAlpha = phase === 1 ? .35 : .5;
   if (phase === 1) {
     g.strokeStyle = "#f4f8ff"; g.lineWidth = 1.5;
     for (let i = 0; i < 20; i++) {
@@ -2111,7 +2136,7 @@ function drawScotlandWeather() {
       g.beginPath(); g.moveTo(x, y); g.lineTo(x - 26, y + 2); g.stroke();
     }
   } else {
-    g.fillStyle = "rgba(55,70,82,.18)"; g.fillRect(0, 0, viewW, VIEW_H);
+    g.fillStyle = "rgba(55,70,82,.2)"; g.fillRect(0, 0, viewW, VIEW_H);
     g.strokeStyle = "rgba(225,240,248,.72)"; g.lineWidth = 1;
     for (let i = 0; i < 56; i++) {
       const x = (i * 53 + frame * 1.7) % viewW, y = (i * 71 + frame * 4) % VIEW_H;
@@ -2145,7 +2170,6 @@ function render() {
   }
   const theme = L.d.theme, cx = Math.round(cam);
   drawBackground(theme, cx);
-  if (L.d.weather && L.d.scene === "highlands") drawScotlandWeather();
   g.save(); g.translate(-cx, 0);
 
   for (const [k, x] of L.d.deco) drawDeco(k, x, theme);
@@ -2251,6 +2275,7 @@ function render() {
   g.restore();
   if (L.d.dark) drawDark(cx);
   if (L.d.wind) drawWind();
+  if (L.d.weather) drawWeather();
   drawAmbient(theme);
   if (theme === "sneeuw" || theme === "stad") drawFlakes();
   vignette();
