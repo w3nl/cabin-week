@@ -253,7 +253,7 @@ Everything in "Lessons learned" in [docs/blueprint.md](docs/blueprint.md) applie
 
 ## Workflow
 
-**Never push directly to `main`.** Every change goes through a branch from the latest `origin/main` and a pull request; the owner reviews and merges. The workflow *Play the game* runs all tests on every pull request, and *Publish the game* publishes `main` to GitHub Pages. The review and playtest agents run on demand: the label `agent-review` or `agent-speeltest` on a pull request, or Actions → Run workflow. Ideas can be refined and built by the AI agents via the issue form *Idea*: see [docs/agent-workflow.md](docs/agent-workflow.md).
+**Never push directly to `main`.** Every change goes through a branch from the latest `origin/main` and a pull request; the owner reviews and merges. The workflows only run when they are needed (`paths` and `paths-ignore` in `.github/workflows/`): *Play the game* runs all tests when something in the game or the tests changes (not for docs, Markdown, the Android app or the other workflows only), *Build the Android app* when the app or the game inside it changes, and *Publish the game* publishes `main` to GitHub Pages when something on the site changes (the files in `tools/build-site.js`). Add a new file or folder to the game? Check that these filters still cover it. No branch protection requires these checks, so a skipped workflow does not block a merge; if you make one required, a skipped workflow would keep the PR waiting. The review and playtest agents run on demand: the label `agent-review` or `agent-speeltest` on a pull request, or Actions → Run workflow. Ideas can be refined and built by the AI agents via the issue form *Idea*: see [docs/agent-workflow.md](docs/agent-workflow.md).
 
 ```bash
 npm install
