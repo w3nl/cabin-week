@@ -22,6 +22,7 @@ async function open(browser, { width, height, scale = 1, char = 0, lang = 'en', 
   await page.evaluate(([KEY, char, region, HERO]) => {
     // Every region unlocked, a few days played here and there, so the map shows progress.
     const regions = { pole: { unlocked: 8, best: { 0: 3, 1: 3 } }, tirol: { unlocked: 8, best: { 0: 3 } }, norway: { unlocked: 8, best: { 0: 3, 1: 3, 2: 3 } },
+      scotland: { unlocked: 8, best: { 0: 3, 1: 3 } },
       netherlands: { unlocked: 8, best: {} }, dalmatia: { unlocked: 8, best: { 0: 3 } } };
     localStorage.setItem(KEY, JSON.stringify({ unlocked: 8, char, best: { 0: 3, 1: 3, 2: 3, 3: 3 }, region, regions, hero: HERO }));
   }, [KEY, char, region, HERO]);

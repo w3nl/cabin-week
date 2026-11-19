@@ -23,7 +23,7 @@ Trips through Europe: a level a day, with puzzles, code locks and your own hero.
 **Full description** (max. 4000 characters)
 
 ```text
-Two families, nine people, seven trips. Pick a trip on the map of Europe and play a new level every day of the week: eight days per trip, 56 levels in all.
+Two families, nine people, eight trips. Pick a trip on the map of Europe and play a new level every day of the week: eight days per trip, 64 levels in all.
 
 Walk, jump, slide and swim your way through every day. Find the three lost things, help the others with a task and crack the code lock with the clues on the signs along the way.
 
@@ -35,6 +35,7 @@ Every trip plays differently:
 • The Netherlands: windmills, dikes and a headwind, canal boats in Amsterdam, Gouda by candlelight and skating in Giethoorn
 • Dalmatia in summer: swim in the warm sea, the Krka waterfalls, the walls of Dubrovnik and island hopping by boat
 • Småland in summer: red cottages by the lake, fika, moose to bounce on, midsummer, canoes and a car meet with Saabs, a Volvo and a Scania
+• Scotland in summer: the Highlands, Loch Ness, castles, a ceilidh, island ferries, Edinburgh's Old Town and music in Glasgow, in long daylight and changeable weather
 
 • Play as one of the nine, or make your own hero: height, hair, coat, glasses, hat and scarf
 • Locks of every kind: codes, tunes, colours, arrows, words and clocks, with hints if you get stuck
@@ -66,7 +67,7 @@ Reis door Europa: elke dag een level, met puzzels, codesloten en je eigen held.
 **Volledige beschrijving**
 
 ```text
-Twee gezinnen, negen personen, zeven reizen. Kies een reis op de kaart van Europa en speel elke dag van de week een nieuw level: acht dagen per reis, 56 levels in totaal.
+Twee gezinnen, negen personen, acht reizen. Kies een reis op de kaart van Europa en speel elke dag van de week een nieuw level: acht dagen per reis, 64 levels in totaal.
 
 Loop, spring, glij en zwem je een weg door elke dag. Vind de drie verdwenen dingen, help de anderen met een opdracht en kraak het codeslot met de aanwijzingen die onderweg op bordjes staan.
 
@@ -78,6 +79,7 @@ Elke reis speelt anders:
 • Nederland: molens, dijken en tegenwind, rondvaartboten in Amsterdam, Gouda bij kaarslicht en schaatsen in Giethoorn
 • Dalmatië in de zomer: zwemmen in de warme zee, de watervallen van Krka, de muren van Dubrovnik en eilandhoppen per boot
 • Småland in de zomer: rode huisjes aan het meer, fika, elanden om op te stuiteren, midzomer, kano's en een autotreffen met Saabs, een Volvo en een Scania
+• Schotland in de zomer: de Highlands, Loch Ness, kastelen, een ceilidh, veerboten naar de eilanden, de Old Town van Edinburgh en muziek in Glasgow, met lange dagen en wisselvallig weer
 
 • Speel als een van de negen, of maak je eigen held: lengte, haar, jas, bril, muts en sjaal
 • Allerlei sloten: codes, melodietjes, kleuren, pijlen, woorden en klokken, met tips als je vastzit
@@ -96,10 +98,10 @@ Geen advertenties, geen aankopen en geen gegevens die het apparaat verlaten.
 
 ```text
 <en-GB>
-Six trips on a map of Europe: the Ardennes, the North Pole, Tirol, Norway, the Netherlands and Dalmatia in summer. Every trip plays differently. Make your own hero. Faster and smaller app.
+Scotland joins the map: explore the Highlands, Loch Ness, castles, island ferries and a ceilidh in long summer daylight with changeable weather. Eight trips and 64 levels to play.
 </en-GB>
 <nl-NL>
-Zes reizen op een kaart van Europa: de Ardennen, de Noordpool, Tirol, Noorwegen, Nederland en Dalmatië in de zomer. Elke reis speelt anders. Maak je eigen held. Snellere en kleinere app.
+Schotland staat nu ook op de kaart: ontdek de Highlands, Loch Ness, kastelen, veerboten en een ceilidh tijdens lange zomerdagen met wisselvallig weer. Acht reizen en 64 levels om te spelen.
 </nl-NL>
 ```
 
