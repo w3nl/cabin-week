@@ -190,7 +190,13 @@ function getTex(theme, spikeKind) {
   const all = [...T.fill, ...T.top, T.plat, T.block, T.spike];
   T.atlas = mk(all.length * 34, 34); T.at = new Map();
   const actx = T.atlas.getContext("2d");
-  all.forEach((c, i) => { actx.drawImage(c, i * 34 + 1, 1); T.at.set(c, i * 34 + 1); });
+  all.forEach((c, i) => {
+    const x = i * 34 + 1;
+    actx.drawImage(c, x, 1); T.at.set(c, x);
+    // Copy each edge one pixel outwards, so a tile drawn on half a screen pixel never picks up an empty pixel next to it.
+    actx.drawImage(c, 0, 0, 1, 32, x - 1, 1, 1, 32); actx.drawImage(c, 31, 0, 1, 32, x + 32, 1, 1, 32);
+    actx.drawImage(c, 0, 0, 32, 1, x, 0, 32, 1); actx.drawImage(c, 0, 31, 32, 1, x, 33, 32, 1);
+  });
   return TEXCACHE[key] = T;
 }
 
@@ -908,7 +914,9 @@ function drawBackground(theme, camX) {
 }
 
 /* ---------- Tegels ---------- */
-function tile(T, tex, px, py) { g.drawImage(T.atlas, T.at.get(tex), 1, TS, TS, px, py, TS, TS); }
+// Tiles overlap the next one by one screen pixel: with a scale like ×1.35 their edges fall on half pixels, and the
+// background would shine through as thin lines that flicker while the camera moves.
+function tile(T, tex, px, py) { const o = 1 / scale; g.drawImage(T.atlas, T.at.get(tex), 1, TS, TS, px, py, TS + o, TS + o); }
 function drawTile(c, px, py, theme, tx, ty, T) {
   if (c === "#") {
     const top = cell(tx, ty - 1) !== "#" && cell(tx, ty - 1) !== "S";
@@ -1928,13 +1936,23 @@ function vignette() {
 
 /* ---------- Region gameplay: water, movers and darkness ---------- */
 /** Water in the gaps (North Pole and Norway): you see what you would fall into. */
-function drawWater(cx) {
-  const x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1), top = 12 * TS + 14;
+function waterColour() { return L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : L.d.scene === "smaland" ? "#2a6a9a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; }
+/** Water in the gaps. Each stretch of water is one rectangle (drawn per tile, the edges would show as thin lines).
+ *  With `front` (columns from–to, see-through) it is drawn again in front of a swimmer: the same colour as the water
+ *  behind, so you only see that the lower half of the swimmer is under water, not a box. */
+function drawWater(cx, front) {
+  let x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1);
+  const top = 12 * TS + 14, wet = x => x >= 0 && x < L.w && L.grid[ROWS - 1][x] !== "#";
+  if (front) { x0 = front[0]; x1 = front[1]; while (wet(x0 - 1)) x0--; while (wet(x1 + 1)) x1++; g.globalAlpha = .8; }
   for (let x = x0; x <= x1; x++) {
-    if (L.grid[ROWS - 1][x] === "#") continue;
-    g.fillStyle = L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : L.d.scene === "smaland" ? "#2a6a9a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; g.fillRect(x * TS, top, TS, VIEW_H - top);
-    g.fillStyle = "rgba(255,255,255,.45)"; for (let i = 0; i < 2; i++) g.fillRect(x * TS + ((frame * .4 + i * 16 + x * 7) % TS), top + 3 + i * 9, 8, 1.5);
+    if (!wet(x)) continue;
+    let e = x; while (e < x1 && wet(e + 1)) e++;
+    g.fillStyle = waterColour(); g.fillRect(x * TS, top, (e - x + 1) * TS, VIEW_H - top);
+    g.fillStyle = "rgba(255,255,255,.45)";
+    for (let c = x; c <= e; c++) for (let i = 0; i < 2; i++) g.fillRect(c * TS + ((frame * .4 + i * 16 + c * 7) % (TS - 8)), top + 3 + i * 9, 8, 1.5);
+    x = e;
   }
+  g.globalAlpha = 1;
 }
 /** An ice floe, a gondola of the cable car, or a little boat: you stand on top of it. */
 function drawMover(m) {
@@ -2083,7 +2101,11 @@ function render() {
       if (P.onGround) shadowAt(P.x + P.w / 2, P.y + P.h, 11);
       drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3, scarf, summer, indoor: theme === "huis" });
       // swimming: the water covers you up to your chest
-      if (P.swim) { g.fillStyle = "rgba(42,170,190,.8)"; g.fillRect(P.x - 10, SWIM_Y, P.w + 20, P.h); g.fillStyle = "#e8fbff"; g.fillRect(P.x - 10, SWIM_Y - 1 + Math.sin(frame / 8) * 1, P.w + 20, 2.5); }
+      if (P.swim) {
+        drawWater(cx, [fl(P.x / TS), fl((P.x + P.w) / TS)]);
+        // a small ripple around the swimmer, only as wide as the swimmer
+        g.fillStyle = "rgba(255,255,255,.7)"; g.beginPath(); g.ellipse(P.x + P.w / 2, SWIM_Y + 1 + Math.sin(frame / 8), P.w * .75, 2.2, 0, 0, 7); g.fill();
+      }
     }
   }
   // a found animal walks with you, drawn in front so you always see it
