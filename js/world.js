@@ -222,6 +222,13 @@ const LW = 1536;
 const per = (x, k, ph) => Math.sin(x / LW * Math.PI * 2 * k + ph);
 const ridge = (base, amps, x) => base - amps.reduce((s, [a, k, p]) => s + a * per(x, k, p), 0);
 function layerCanvas(fn) { const c = mk(LW, VIEW_H); withCtx(c.getContext("2d"), fn); return c; }
+/** Battlements on a wall from x0 to x1 whose top is at y: blocks of size s standing on the wall, with gaps between. */
+function battlements(x0, x1, y, s, line) {
+  const n = Math.max(2, Math.round((x1 - x0) / (s * 2))), step = (x1 - x0 - s) / (n - 1);
+  for (let i = 0; i < n; i++) { const x = x0 + i * step; g.fillRect(x, y - s, s, s + .5); if (line) g.strokeRect(x, y - s, s, s); }
+}
+/** The lowest ground (largest y) under something w wide at x, so a building on a slope stands on the hill instead of floating. */
+function groundUnder(top, x, w) { let y = 0; for (let d = 0; d <= w; d += 2) y = Math.max(y, top(x + d)); return y; }
 function fillRidge(base, amps, col, hi) {
   g.fillStyle = col; g.beginPath(); g.moveTo(0, VIEW_H);
   for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(base, amps, x));
@@ -618,8 +625,9 @@ function getSceneLayers(scene) {
   else if (scene === "highlands") {
     // Layered Highland ridges, a deep loch and stone castles in long summer light.
     out.far = layerCanvas(() => {
-      fillRidge(260, [[48, 3, 1], [27, 8, 2], [12, 15, 3]], "#647878");
-      fillRidge(286, [[32, 4, 2], [17, 10, 1]], "#526b67");
+      const back = [[48, 3, 1], [27, 8, 2], [12, 15, 3]], front = [[32, 4, 2], [17, 10, 1]];
+      fillRidge(260, back, "#647878");
+      fillRidge(286, front, "#526b67");
       g.fillStyle = "#315c70"; g.fillRect(0, 300, LW, 200);
       g.fillStyle = "rgba(220,240,240,.42)";
       for (let x = 0; x < LW; x += 22) g.fillRect(x + R() * 12, 306 + R() * 34, 12, 1.5);
@@ -627,17 +635,18 @@ function getSceneLayers(scene) {
         const y = 302 + R() * 5, w = 80 + R() * 55;
         g.fillStyle = "#45594f"; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + w * .5, y - 16, x + w, y); g.fill();
       }
-      // a small ruined castle on a ridge
-      g.fillStyle = "#6b6d64"; g.fillRect(850, 236, 48, 43); g.fillRect(844, 220, 14, 59); g.fillRect(889, 226, 14, 53);
+      // a small ruined castle on the highest hilltop, standing on the lowest point under its walls so it never floats
+      const cx = 544, base = groundUnder(x => Math.min(ridge(260, back, x), ridge(286, front, x)), cx, 60) + 3;
+      g.fillStyle = "#6b6d64"; g.fillRect(cx + 6, base - 43, 48, 43); g.fillRect(cx, base - 59, 14, 59); g.fillRect(cx + 45, base - 53, 14, 53);
       g.fillStyle = "#565b55";
-      for (let x = 844; x < 902; x += 10) g.fillRect(x, x % 2 ? 214 : 220, 7, 7);
-      g.fillRect(867, 253, 9, 26);
+      battlements(cx, cx + 14, base - 59, 4); battlements(cx + 17, cx + 42, base - 43, 4); battlements(cx + 45, cx + 59, base - 53, 4);
+      g.fillRect(cx + 23, base - 26, 9, 26);
     });
     out.mid = layerCanvas(() => {
       const a = [[18, 4, 1], [9, 9, 2]];
       fillRidge(340, a, "#557253", "#78905d");
       for (let x = 22; x < LW; x += 160 + R() * 130) {
-        const y = ridge(340, a, x), w = 42 + R() * 26, h = 28 + R() * 16;
+        const w = 42 + R() * 26, h = 28 + R() * 16, y = groundUnder(xx => ridge(340, a, xx), x, w) + 2;
         g.fillStyle = "#74766c"; g.fillRect(x, y - h, w, h);
         g.fillStyle = "#555d58"; g.fillRect(x + 6, y - h + 8, w - 12, 3);
         g.fillRect(x + 11, y - 11, 8, 11); g.fillRect(x + w - 19, y - 11, 8, 11);
@@ -1142,7 +1151,7 @@ function drawDeco(kind, x, theme, far) {
     g.fillStyle = "#666b65"; g.fillRect(px, by - 88, 24, 88); g.strokeRect(px, by - 88, 24, 88);
     g.fillRect(px + 68, by - 80, 24, 80); g.strokeRect(px + 68, by - 80, 24, 80);
     g.fillStyle = "#62675f";
-    for (let xx = px; xx < px + 94; xx += 12) g.fillRect(xx, by - (xx % 2 ? 88 : 80) - 7, 8, 8);
+    battlements(px, px + 24, by - 88, 6, true); battlements(px + 29, px + 63, by - 66, 6, true); battlements(px + 68, px + 92, by - 80, 6, true);
     g.fillStyle = "#424b4d"; g.fillRect(px + 39, by - 34, 16, 34); g.strokeRect(px + 39, by - 34, 16, 34);
     g.fillStyle = "#a9a48d"; g.fillRect(px + 16, by - 59, 5, 12); g.fillRect(px + 76, by - 70, 5, 12);
   } else if (kind === "tartan") {
