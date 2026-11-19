@@ -914,6 +914,13 @@ function drawBackground(theme, camX) {
 }
 
 /* ---------- Tegels ---------- */
+/** A ladder tile: two wooden rails and three rungs (indoors a steep attic ladder in light wood). */
+function drawLadder(px, py, theme) {
+  const wood = theme === "huis" ? "#c8955a" : "#8a5a32", dark = theme === "huis" ? "#8a5a32" : "#5a3a20";
+  g.fillStyle = dark; g.fillRect(px + 5, py, 5, TS + .5); g.fillRect(px + 22, py, 5, TS + .5);
+  g.fillStyle = wood; g.fillRect(px + 6, py, 3, TS + .5); g.fillRect(px + 23, py, 3, TS + .5);
+  for (let i = 0; i < 3; i++) { const y = py + 4 + i * 11; g.fillStyle = dark; g.fillRect(px + 8, y, 16, 4); g.fillStyle = wood; g.fillRect(px + 8, y, 16, 2.5); }
+}
 // Tiles overlap the next one by one screen pixel: with a scale like ×1.35 their edges fall on half pixels, and the
 // background would shine through as thin lines that flicker while the camera moves.
 function tile(T, tex, px, py) { const o = 1 / scale; g.drawImage(T.atlas, T.at.get(tex), 1, TS, TS, px, py, TS + o, TS + o); }
@@ -926,6 +933,7 @@ function drawTile(c, px, py, theme, tx, ty, T) {
     if (cell(tx - 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : "#f4f8ff"; g.fillRect(px - 3, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px - 3, py + 10, 5, 2); g.fillRect(px - 5, py + 2, 2, 8); } }
     if (cell(tx + 1, ty) !== "#") { g.fillStyle = pe; g.fillRect(px + TS - 2, py, 2, TS); if (top && theme !== "huis") { g.fillStyle = theme === "bos" ? "#4f9e3c" : theme === "kust" ? "#b9a95a" : "#f4f8ff"; g.fillRect(px + TS - 2, py + 2, 5, 8); g.fillStyle = pe; g.fillRect(px + TS - 2, py + 10, 5, 2); g.fillRect(px + TS + 3, py + 2, 2, 8); } }
   } else if (c === "=") tile(T, T.plat, px, py);
+  else if (c === "|") drawLadder(px, py, theme);
   else if (c === "S") tile(T, T.block, px, py);
   else if (c === "^") tile(T, T.spike, px, py);
 }

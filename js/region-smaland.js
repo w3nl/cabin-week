@@ -143,7 +143,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Three paddles found, one canoe tipped over, everyone wet and laughing.", "Drie peddels gevonden, één kano omgeslagen, iedereen nat en lachend.")
   }),
   genLevel({ ...SWE,
-    seed: 8707, w: 160, day: dayLabel(6), name: T("The Car Meet", "De autotreffen"),
+    seed: 8707, ladders: true, w: 160, day: dayLabel(6), name: T("The Car Meet", "De autotreffen"),
     sub: T("The village car meet! Saabs, a Volvo and a Scania timber truck, polished until they shine. Three spanners rolled under the cars.",
       "De autotreffen in het dorp! Saabs, een Volvo en een Scania-houtwagen, gepoetst tot ze glimmen. Drie moersleutels zijn onder de auto's gerold."),
     keyType: "🔧", keyHud: "🔧", keyName: T("spanners", "moersleutels"),

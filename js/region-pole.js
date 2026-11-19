@@ -45,7 +45,7 @@ const POLE_LEVELS = [
     doneMsg: T("All bells are back and the stable is spotless. The reindeer look very pleased with themselves.", "Alle belletjes zijn terug en de stal is brandschoon. De rendieren kijken erg tevreden.")
   }),
   genLevel({
-    seed: 3303, interior: "workshop", w: 150, day: dayLabel(2), name: T("Santa's Workshop", "De werkplaats van de Kerstman"), theme: "huis",
+    seed: 3303, ladders: true, interior: "workshop", w: 150, day: dayLabel(2), name: T("Santa's Workshop", "De werkplaats van de Kerstman"), theme: "huis",
     sub: T("Busy, busy, busy. Three teddy bears fell off the conveyor belt. And a toy robot has escaped.",
       "Druk, druk, druk. Drie teddyberen zijn van de lopende band gevallen. En er is een speelgoedrobot ontsnapt."),
     keyType: "🧸", keyHud: "🧸", keyName: T("teddy bears", "teddyberen"),
@@ -93,7 +93,7 @@ const POLE_LEVELS = [
     doneMsg: T("The igloo is finished. It's round, it's white and it's ours. No fish yet.", "De iglo is af. Hij is rond, hij is wit en hij is van ons. Nog geen vis.")
   }),
   genLevel({
-    seed: 3505, interior: "workshop", w: 150, day: dayLabel(4), name: T("The Post Office", "Het postkantoor"), theme: "huis",
+    seed: 3505, ladders: true, interior: "workshop", w: 150, day: dayLabel(4), name: T("The Post Office", "Het postkantoor"), theme: "huis",
     sub: T("The wish lists have blown all over the post office. Find three letters, and help Santa read them.",
       "De verlanglijstjes zijn door het hele postkantoor gewaaid. Vind drie brieven, en help de Kerstman ze te lezen."),
     keyType: "✉️", keyHud: "✉️", keyName: T("letters", "brieven"),

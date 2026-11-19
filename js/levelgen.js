@@ -16,7 +16,8 @@ function genLevel(o) {
   const gated = !!(o.quest || o.task), gateX = gated ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
   const ground = [], plats = [], blocks = [], spikes = [], ents = [], slots = [], bad = new Set(), used = new Set();
   const coin = (x, y) => { if (o.coins !== false) ents.push(["coin", x, y]); };
-  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers;
+  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers, lofts = 0;
+  const ladderCols = [], ladderSigns = [];
   const [hLow, hHigh] = o.hills || [12, 12];
   const limit = (o.code ? codeX : w - 8) - 10;
   while (x < limit) {
@@ -24,8 +25,10 @@ function genLevel(o) {
     let type;
     if (!towerDone && x > w * .3) type = "tower";
     else if (!ferryDone && x > w * .12) type = "ferry";
+    // ladders: a loft too high to jump onto, with a ladder up (twice per level: before and after the gate)
+    else if (o.ladders && lofts < 2 && x > w * (lofts ? .66 : .2)) type = "loft";
     else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .3 && o.movers ? "ferry" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
-    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11 }[type];
+    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11, loft: 10 }[type];
     if (x + width > limit || (gated && x <= gateX - 9 && x + width > gateX - 9)) { x += 3; continue; }
     // Hills: before a piece the ground may go up (at most 2 rows, so you can always jump it) or down.
     if (o.hills && type !== "ferry") {
@@ -51,6 +54,13 @@ function genLevel(o) {
       [3, 5, 7].forEach(i => coin(x + i, 8 + d + Math.round(rise * (i - 2) / 6)));
       cur = x + 9; ferryDone = true;
       gy += rise;
+    } else if (type === "loft") {
+      // a loft (a plank 6 rows up, too high to jump onto) with a ladder from the floor; one of the things may be up there
+      const top = 6 + d;
+      plats.push([x + 2, top, 6]); ladderCols.push([x + 2, top + 1, 11 + d]); slots.push([x + 6, top - 1]);
+      [3, 4, 5, 7].forEach(i => coin(x + i, top - 1));
+      bad.add(x + 2); if (!lofts) ladderSigns.push(x);
+      lofts++;
     } else if (type === "plat2") {
       plats.push([x + 1, 9 + d, 3], [x + 5, 7 + d, 3]); slots.push([x + 2, 8 + d], [x + 6, 6 + d]);
       coin(x + 1, 10 + d); coin(x + 3, 10 + d); coin(x + 7, 5 + d);
@@ -79,6 +89,8 @@ function genLevel(o) {
   const room = c => { for (let d = -2; d <= 2; d++) used.add(c + d); return c; };
 
   if (o.intro) { const c = free(5); ents.push(["sign", c, yAt(c), o.intro]); }
+  ladderSigns.forEach(lx => { const c = free(lx - 2, lx - 6, lx); ents.push(["sign", c, yAt(c), [T("A ladder! Hold ↑ (or jump) to climb up, and ↓ (or 💬) to climb down.", "Een ladder! Houd ↑ (of springen) ingedrukt om naar boven te klimmen, en ↓ (of 💬) om naar beneden te gaan."),
+    T("Standing on a plank? Press ↓ to drop down through it.", "Sta je op een plank? Druk ↓ om erdoorheen naar beneden te zakken.")]]); });
   let gate = null, code = null;
   if (gated) {
     gate = [gateX, 2, yAt(gateX)];
@@ -155,7 +167,7 @@ function genLevel(o) {
   }
   if (o.lantern) { const l = ents.find(e => e[0] === "lantern"); deco.push(o.lanternDeco === "church" ? ["church", l[1] - 3] : ["bench", l[1] + 1]); }
   (o.decoExtra || []).filter(([k]) => !counted.includes(k)).forEach(([k, f]) => deco.push([k, Math.round(w * f)]));
-  return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded });
+  return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded, ladderCols });
 }
 /** The keys on the lock for each kind of lock: digits, notes, colours, arrows or letters. */
 const NOTES = [["1", "do", 523, "#e8423a"], ["2", "re", 587, "#f2a03a"], ["3", "mi", 659, "#f5d23a"], ["4", "sol", 784, "#4cb860"], ["5", "la", 880, "#4a8ae8"]];

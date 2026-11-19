@@ -114,7 +114,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Six runs, two crashes, one bowl of soup halfway. The best Christmas Day ever.", "Zes ritten, twee keer in de sneeuw, één kom soep halverwege. De beste eerste kerstdag ooit.")
   }),
   genLevel({
-    seed: 4606, interior: "wood", w: 150, day: dayLabel(5), name: T("The Mountain Hut", "De berghut"), theme: "huis",
+    seed: 4606, ladders: true, interior: "wood", w: 150, day: dayLabel(5), name: T("The Mountain Hut", "De berghut"), theme: "huis",
     sub: T("Boxing Day in the mountain hut. Kaiserschmarrn for nine: we need three eggs and the big pan.",
       "Tweede kerstdag in de berghut. Kaiserschmarrn voor negen: we hebben drie eieren en de grote pan nodig."),
     keyType: "🥚", keyHud: "🥚", keyName: T("eggs", "eieren"),
@@ -140,7 +140,7 @@ const TIROL_LEVELS = [
     doneMsg: T("Nine plates of Kaiserschmarrn. Nine empty plates. Nine happy faces.", "Negen borden Kaiserschmarrn. Negen lege borden. Negen blije gezichten.")
   }),
   genLevel({
-    seed: 4707, interior: "wood", w: 150, day: dayLabel(6), name: T("Fondue Night", "Fondue-avond"), theme: "huis",
+    seed: 4707, ladders: true, interior: "wood", w: 150, day: dayLabel(6), name: T("Fondue Night", "Fondue-avond"), theme: "huis",
     sub: T("The last evening in the chalet: cheese fondue! Find three fondue forks, and the bread.",
       "De laatste avond in het chalet: kaasfondue! Vind drie fonduevorkjes, en het brood."),
     keyType: "🍴", keyHud: "🍴", keyName: T("fondue forks", "fonduevorkjes"),
