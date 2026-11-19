@@ -421,7 +421,7 @@ function chaletShape(x, y, s, wall, roof) {
   g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 30 * s); g.fill();
   g.fillStyle = "#ffd27a"; g.fillRect(x + 5 * s, y - 15 * s, 5 * s, 5 * s); g.fillRect(x + 20 * s, y - 15 * s, 5 * s, 5 * s);
 }
-const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls", "smaland", "highlands", "ardeche", "grotte"]);
+const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls", "smaland", "highlands", "ardeche", "grotte", "laguna", "venezia", "burano", "verona", "dolomiti"]);
 /** A small windmill in the background (sails do not turn there: the layer is drawn once). */
 function farMill(x, y, s, body, sail) {
   g.fillStyle = body; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x - 3 * s, y - 26 * s); g.lineTo(x + 3 * s, y - 26 * s); g.lineTo(x + 6 * s, y); g.fill();
@@ -474,7 +474,7 @@ function caveArt(kind, x, y) {
 }
 function getSceneLayers(scene) {
   if (LAYERS[scene]) return LAYERS[scene];
-  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009, smaland: 9010, highlands: 9011, ardeche: 9012, grotte: 9013 }[scene] || 1), out = {};
+  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009, smaland: 9010, highlands: 9011, ardeche: 9012, grotte: 9013, laguna: 9014, venezia: 9015, burano: 9016, verona: 9017, dolomiti: 9018 }[scene] || 1), out = {};
   if (scene === "pole") {
     // ice floes and icebergs far away
     out.far = layerCanvas(() => {
@@ -741,6 +741,141 @@ function getSceneLayers(scene) {
       for (let x = 20; x < LW; x += 60 + R() * 80) { const y = ridge(392, a, x) + 2; g.fillStyle = "#5a6a2a"; g.beginPath(); g.arc(x, y - 6, 9 + R() * 5, Math.PI, 0); g.fill(); }
     });
   }
+  else if (scene === "laguna") {
+    // the Venetian lagoon: flat water, low marsh islands, wooden channel poles, flamingos, Venice far away
+    out.far = layerCanvas(() => {
+      fillRidge(292, [[6, 2, 1], [3, 7, 2]], "#9ab0c0");
+      // Venice on the horizon: towers and domes
+      for (const vx of [380, 1150]) {
+        g.fillStyle = "#8a98a8"; for (let i = 0; i < 14; i++) g.fillRect(vx + i * 9, 296 - 8 - (i * 7) % 12, 8, 14 + (i * 7) % 12);
+        g.fillRect(vx + 50, 248, 9, 50); g.beginPath(); g.moveTo(vx + 48, 248); g.lineTo(vx + 54.5, 234); g.lineTo(vx + 61, 248); g.fill();
+        g.beginPath(); g.arc(vx + 90, 286, 10, Math.PI, 0); g.fill();
+      }
+      g.fillStyle = "#3a8a96"; g.fillRect(0, 300, LW, 200);
+      g.fillStyle = "rgba(230,250,250,.45)"; for (let x = 0; x < LW; x += 20) g.fillRect(x + R() * 10, 304 + R() * 30, 10, 1.5);
+      // flamingos wading in the shallow water
+      for (let x = 60; x < LW; x += 120 + R() * 160) for (let k = 0; k < 3 + R() * 4; k++) {
+        const fx = x + k * 9 + R() * 4, fy = 318 + R() * 10;
+        g.strokeStyle = "#e88a9a"; g.lineWidth = 1; g.beginPath(); g.moveTo(fx, fy); g.lineTo(fx, fy - 9); g.stroke();
+        g.fillStyle = "#f4a0b0"; g.beginPath(); g.ellipse(fx, fy - 11, 4, 2.5, 0, 0, 7); g.fill();
+        g.strokeStyle = "#f4a0b0"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(fx + 3, fy - 12); g.quadraticCurveTo(fx + 6, fy - 18, fx + 4, fy - 20); g.stroke();
+      }
+      // groups of wooden poles that mark the channels
+      for (let x = 30; x < LW; x += 90 + R() * 80) { g.fillStyle = "#6a5a48"; [0, 4, 8].forEach((d, i) => g.fillRect(x + d, 306 - (i === 1 ? 14 : 10), 2.5, 22)); }
+    });
+    out.mid = layerCanvas(() => {
+      // low marsh islands (barene) with grass and the odd fisherman's hut
+      const a = [[6, 3, 1], [3, 9, 2]];
+      for (let x = 0; x < LW; x += 220 + R() * 140) {
+        const w = 120 + R() * 120, y = 340;
+        g.fillStyle = "#8a9a5a"; g.beginPath(); g.moveTo(x, y + 6); g.quadraticCurveTo(x + w / 2, y - 16, x + w, y + 6); g.fill();
+        g.strokeStyle = "#6a7a3a"; g.lineWidth = 1; for (let i = 8; i < w - 8; i += 5) { g.beginPath(); g.moveTo(x + i, y + 2); g.lineTo(x + i + 1, y - 6 - R() * 6); g.stroke(); }
+        if (R() < .5) { const hx = x + w * .4; g.fillStyle = "#7a5a3a"; g.fillRect(hx, y - 22, 3, 22); g.fillRect(hx + 22, y - 22, 3, 22); g.fillStyle = "#a07a4a"; g.fillRect(hx - 2, y - 36, 30, 14); g.fillStyle = "#c8a868"; g.beginPath(); g.moveTo(hx - 6, y - 36); g.lineTo(hx + 13, y - 50); g.lineTo(hx + 32, y - 36); g.fill(); }
+      }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[8, 4, 2], [5, 9, 1]];
+      fillRidge(396, a, "#d8c898", "#e8dab0");
+      for (let x = 0; x < LW; x += 9) { const y = ridge(396, a, x) + 3; if (R() < .4) { g.strokeStyle = "#9aa060"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 2, y - 6 - R() * 8); g.stroke(); } }
+    });
+  }
+  else if (scene === "venezia" || scene === "burano") {
+    // Venice (or Burano): the lagoon, rows of houses along the water, a bell tower, domes, gondolas
+    const bur = scene === "burano";
+    out.far = layerCanvas(() => {
+      g.fillStyle = "#3a8a96"; g.fillRect(0, 300, LW, 200);
+      g.fillStyle = "rgba(230,250,250,.4)"; for (let x = 0; x < LW; x += 20) g.fillRect(x + R() * 10, 306 + R() * 30, 10, 1.5);
+      for (let x = 0; x < LW; x += 420) {
+        // a bell tower (on Burano it leans: it really does) and domes
+        g.save(); g.translate(x + 120, 300); if (bur) g.rotate(.06);
+        g.fillStyle = bur ? "#d8c0a0" : "#b8584a"; g.fillRect(-8, -110, 16, 110);
+        g.fillStyle = "#e8e0d0"; g.fillRect(-10, -122, 20, 12); g.fillStyle = bur ? "#a07a5a" : "#5a8a6a"; g.beginPath(); g.moveTo(-10, -122); g.lineTo(0, -150); g.lineTo(10, -122); g.fill();
+        g.restore();
+        if (!bur) { g.fillStyle = "#c8c0b0"; [[200, 18], [232, 22], [264, 18]].forEach(([dx, r]) => { g.beginPath(); g.arc(x + dx, 268, r, Math.PI, 0); g.fill(); g.fillRect(x + dx - r, 268, r * 2, 32); });
+          // the long pink-and-white palace with arcades
+          g.fillStyle = "#e8c8b8"; g.fillRect(x + 300, 262, 90, 38); g.fillStyle = "#c89a88"; for (let i = 0; i < 9; i++) g.fillRect(x + 304 + i * 10, 288, 6, 12); }
+      }
+    });
+    out.mid = layerCanvas(() => {
+      // houses straight out of the water: Venice in ochre and terracotta, Burano in bright colours
+      const cols = bur ? ["#e84a4a", "#f2c42a", "#3a8ad8", "#4ab868", "#e87ab0", "#f28a2a", "#8a5ad8"] : ["#d8a868", "#c87858", "#e0c098", "#b86a4a", "#e8d0a8"];
+      for (let x = 0; x < LW; ) {
+        const w = 34 + R() * 26, h = 50 + R() * 50, y = 330;
+        g.fillStyle = cols[Math.floor(R() * cols.length)]; g.fillRect(x, y - h, w, h);
+        g.fillStyle = "rgba(0,0,0,.12)"; g.fillRect(x + w - 3, y - h, 3, h);
+        g.fillStyle = "#b8584a"; g.fillRect(x - 2, y - h - 4, w + 4, 5);
+        g.fillStyle = "#3a3a42"; for (let wy = y - h + 10; wy < y - 14; wy += 18) for (let wx = x + 6; wx < x + w - 8; wx += 12) { g.fillRect(wx, wy, 6, 10); if (!bur) { g.beginPath(); g.arc(wx + 3, wy, 3, Math.PI, 0); g.fill(); } }
+        if (R() < .3) { g.fillStyle = "#6a5a48"; g.fillRect(x + w / 2 - 1, y - 2, 2, 14); }
+        x += w + (R() < .25 ? 30 + R() * 40 : 0);
+      }
+      g.fillStyle = "#3a8a96"; g.fillRect(0, 330, LW, 200);
+      g.fillStyle = "rgba(230,250,250,.4)"; for (let x = 0; x < LW; x += 16) g.fillRect(x + R() * 8, 334 + R() * 20, 8, 1.5);
+      // gondolas on the water
+      for (let x = 80; x < LW; x += 260 + R() * 200) { g.fillStyle = "#1d1d26"; g.beginPath(); g.moveTo(x, 338); g.quadraticCurveTo(x + 30, 346, x + 60, 338); g.quadraticCurveTo(x + 64, 330, x + 66, 326); g.lineTo(x + 58, 340); g.quadraticCurveTo(x + 30, 350, x + 2, 340); g.fill(); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[4, 4, 2], [2, 9, 1]];
+      fillRidge(398, a, "#9a9284", "#b0a898");
+    });
+  }
+  else if (scene === "verona") {
+    // Verona: cypress hills, a tall brick tower, terracotta roofs and the Roman Arena
+    out.far = layerCanvas(() => {
+      const a = [[20, 2, 1], [10, 6, 2]];
+      fillRidge(262, a, "#8aa06a");
+      for (let x = 10; x < LW; x += 18 + R() * 30) { const y = ridge(262, a, x) + 6; g.fillStyle = "#2a4a2a"; g.beginPath(); g.ellipse(x, y - 12, 3.5, 12, 0, 0, 7); g.fill(); }
+      for (const tx of [260, 1040]) { g.fillStyle = "#b86a4a"; g.fillRect(tx, 200, 16, 120); g.fillStyle = "#e8d8c0"; g.fillRect(tx - 2, 190, 20, 12); g.fillStyle = "#b86a4a"; g.beginPath(); g.moveTo(tx - 2, 190); g.lineTo(tx + 8, 172); g.lineTo(tx + 18, 190); g.fill(); }
+    });
+    out.mid = layerCanvas(() => {
+      // terracotta roofs
+      for (let x = 0; x < LW; x += 30 + R() * 20) { const h = 30 + R() * 40, w = 30 + R() * 22; g.fillStyle = ["#e0c8a0", "#d8b088", "#e8d8b8"][Math.floor(R() * 3)]; g.fillRect(x, 340 - h, w, h); g.fillStyle = "#b8603a"; g.fillRect(x - 2, 340 - h - 6, w + 4, 7); }
+      // the Arena: a huge oval of pink stone with rows of arches
+      for (const ax of [520]) {
+        const w = 420, top = 236;
+        g.fillStyle = "#d8a88a"; g.beginPath(); g.moveTo(ax, 340); g.lineTo(ax, top + 14); g.quadraticCurveTo(ax + w / 2, top - 10, ax + w, top + 14); g.lineTo(ax + w, 340); g.fill();
+        g.fillStyle = "#8a5a48";
+        for (let row = 0; row < 3; row++) for (let i = 0; i < 18; i++) {
+          const wx = ax + 10 + i * 22.5, wy = top + 24 + row * 30;
+          g.beginPath(); g.moveTo(wx, wy + 20); g.lineTo(wx, wy + 6); g.arc(wx + 7, wy + 6, 7, Math.PI, 0); g.lineTo(wx + 14, wy + 20); g.fill();
+        }
+        g.fillStyle = "rgba(255,240,220,.35)"; g.fillRect(ax, top + 16, w, 3); g.fillRect(ax, top + 50, w, 2); g.fillRect(ax, top + 80, w, 2);
+      }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[6, 4, 2], [3, 9, 1]];
+      fillRidge(396, a, "#a89a84", "#c0b49c");
+    });
+  }
+  else if (scene === "dolomiti") {
+    // the Dolomites: pale, jagged towers of rock with a pink glow, green meadows and larch forests
+    out.far = layerCanvas(() => {
+      g.fillStyle = "#d8c8c8";
+      for (let x = -40; x < LW; x += 70 + R() * 60) {
+        const h = 120 + R() * 110, w = 40 + R() * 50, base = 300;
+        g.beginPath(); g.moveTo(x, base);
+        for (let i = 0; i <= 6; i++) g.lineTo(x + w * i / 6 + (R() - .5) * 8, base - h * (i % 2 ? .85 + R() * .15 : .6 + R() * .2) * (i === 0 || i === 6 ? .3 : 1));
+        g.lineTo(x + w, base); g.fill();
+      }
+      // the three peaks, side by side
+      const tx = 700; g.fillStyle = "#e0cccc";
+      [[0, 150, 30], [36, 190, 36], [80, 160, 30]].forEach(([dx, h, w]) => { g.beginPath(); g.moveTo(tx + dx, 300); g.lineTo(tx + dx + w * .2, 300 - h); g.lineTo(tx + dx + w * .7, 300 - h + 6); g.lineTo(tx + dx + w, 300); g.fill(); });
+      // the pink glow of sunset and the dark lines of the cliffs: only on the rock, never on the sky
+      g.globalCompositeOperation = "source-atop";
+      g.fillStyle = "rgba(240,150,165,.3)"; g.fillRect(0, 0, LW, 300);
+      g.strokeStyle = "rgba(120,100,110,.35)"; g.lineWidth = 1.2; for (let x = 0; x < LW; x += 11) { g.beginPath(); g.moveTo(x, 300); g.lineTo(x + 2, 200 + R() * 60); g.stroke(); }
+      g.globalCompositeOperation = "source-over";
+    });
+    out.mid = layerCanvas(() => {
+      const a = [[16, 3, 1], [8, 8, 2]];
+      fillRidge(330, a, "#5a9a4a", "#7ab85a");
+      for (let x = 0; x < LW; x += 12 + R() * 22) { const y = ridge(330, a, x) + 6; pineShape(x, y, 34 + R() * 28, "#3a6a3a", "#2e5a30", null, "#1e3a20"); }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[10, 4, 2], [6, 9, 1]];
+      fillRidge(392, a, "#6aaa4a", "#8ac85a");
+      for (let x = 0; x < LW; x += 7) { const y = ridge(392, a, x) + 4; if (R() < .15) { g.fillStyle = ["#f4f4f0", "#f5d23a", "#9a5ad8", "#e8423a"][Math.floor(R() * 4)]; g.beginPath(); g.arc(x + 2, y - 6, 2, 0, 7); g.fill(); } }
+    });
+  }
   else if (scene === "grotte") {
     // inside the Chauvet Cave: a pale rock wall with paintings in charcoal and red ochre, stalactites above, a rocky floor
     out.far = layerCanvas(() => {
@@ -901,12 +1036,12 @@ function drawSceneSky(scene) {
   const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"],
     polder: ["#4a6488", "#8ea6c4", "#d8c8b8"], grachten: ["#0a1430", "#2a3466", "#6a5a82"], duinen: ["#5a7ca8", "#a8c4dc", "#f0dcc0"],
     adriatic: ["#2a7ad8", "#7ac0f0", "#d8f0fa"], smaland: ["#3a7ad8", "#9ad0f0", "#eef8f4"], oldtown: ["#3a7ad0", "#f0b878", "#f8d8a8"], falls: ["#3a8ad8", "#9ad0f0", "#e0f4f8"],
-    highlands: ["#7298b1", "#bdd0ce", "#f2dbac"], ardeche: ["#2a78d0", "#8ac6ee", "#f6e6c0"], grotte: ["#0e0a08", "#1e1610", "#2e2218"] }[scene];
+    highlands: ["#7298b1", "#bdd0ce", "#f2dbac"], ardeche: ["#2a78d0", "#8ac6ee", "#f6e6c0"], laguna: ["#3a80d0", "#a0d0ee", "#f6e0c8"], venezia: ["#3a7ad0", "#9acaee", "#f8e2c4"], burano: ["#3a80d8", "#a0d4f2", "#f4ecd8"], verona: ["#2a5aa8", "#e8a888", "#f8d8a8"], dolomiti: ["#2a6ad0", "#8ac0ee", "#f0e4f0"], grotte: ["#0e0a08", "#1e1610", "#2e2218"] }[scene];
   g.fillStyle = grad("sky-" + scene, () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, skies[0]); gr.addColorStop(.62, skies[1]); gr.addColorStop(1, skies[2]); return gr; });
   g.fillRect(0, 0, viewW, VIEW_H);
   if (scene === "grotte") return; // inside a cave: no sun, no stars
   g.fillStyle = "#fff";
-  if (scene === "adriatic" || scene === "oldtown" || scene === "falls" || scene === "smaland" || scene === "highlands" || scene === "ardeche") {
+  if (scene === "adriatic" || scene === "oldtown" || scene === "falls" || scene === "smaland" || scene === "highlands" || scene === "ardeche" || scene === "laguna" || scene === "venezia" || scene === "burano" || scene === "verona" || scene === "dolomiti") {
     // summer: a big warm sun, no stars
     const sx = viewW * (scene === "oldtown" || scene === "ardeche" ? .78 : scene === "highlands" ? .76 : .2), sy = scene === "oldtown" ? 150 : scene === "highlands" ? 74 : 80;
     g.fillStyle = grad("sun-" + scene, () => { const sg = g.createRadialGradient(sx, sy, 10, sx, sy, 160); sg.addColorStop(0, "rgba(255,250,210,1)"); sg.addColorStop(.25, "rgba(255,236,160,.7)"); sg.addColorStop(1, "rgba(255,236,160,0)"); return sg; });
@@ -1229,7 +1364,7 @@ function sign2(x, y, w, h, bg, text, fg) {
 /* ---------- Decoratie ---------- */
 /** Animals in the scenery that stand still: drawn smaller, a bit higher and a bit faded, as if further away, so you
  *  can see at once that they are background and not something to bump into or stand on. */
-const BG_ANIMALS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow"]);
+const BG_ANIMALS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow", "flamingo"]);
 function drawDeco(kind, x, theme, far) {
   if (!far && BG_ANIMALS.has(kind)) {
     const bx = x * TS + 32, gy = groundTop(x) * TS;
@@ -1312,6 +1447,125 @@ function drawDeco(kind, x, theme, far) {
     [[28], [104]].forEach(([dx]) => { g.fillStyle = shade(col, -.15); g.beginPath(); g.ellipse(px + dx, by - 16, 17, 13, 0, Math.PI, 0); g.fill(); g.stroke(); g.fillStyle = "#1c1c20"; g.beginPath(); g.arc(px + dx, by - 10, 10, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#d8dce0"; g.beginPath(); g.arc(px + dx, by - 10, 5, 0, 7); g.fill(); });
     g.fillStyle = "#fff6d8"; g.beginPath(); g.arc(px + 114, by - 40, 5, 0, 7); g.fill(); g.stroke();
     g.fillStyle = "#c9ced6"; g.fillRect(px + 118, by - 22, 8, 3); g.fillRect(px, by - 22, 6, 3);
+  } else if (kind === "flamingo") {
+    // a flamingo on one leg, its neck in an S
+    const f = H < .5 ? 1 : -1;
+    g.strokeStyle = "#d8707e"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px + 16, by); g.lineTo(px + 16, by - 34); g.moveTo(px + 16, by - 22); g.lineTo(px + 16 - 7 * f, by - 28); g.lineTo(px + 16, by - 32); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    blob("#f49aaa", () => g.ellipse(px + 16, by - 40, 13, 8, -.15 * f, 0, 7));
+    g.fillStyle = "#e0707e"; g.beginPath(); g.ellipse(px + 16 - 6 * f, by - 40, 6, 4, 0, 0, 7); g.fill();
+    g.strokeStyle = OUT; g.lineWidth = 6; g.beginPath(); g.moveTo(px + 16 + 9 * f, by - 44); g.quadraticCurveTo(px + 16 + 24 * f, by - 54, px + 16 + 12 * f, by - 62); g.quadraticCurveTo(px + 16 + 4 * f, by - 70, px + 16 + 12 * f, by - 76); g.stroke();
+    g.strokeStyle = "#f49aaa"; g.lineWidth = 3.5; g.stroke();
+    blob("#f49aaa", () => g.arc(px + 16 + 13 * f, by - 77, 5, 0, 7));
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.moveTo(px + 16 + 17 * f, by - 78); g.lineTo(px + 16 + 24 * f, by - 72); g.lineTo(px + 16 + 17 * f, by - 74); g.fill();
+    g.fillStyle = "#f4f4f0"; g.beginPath(); g.moveTo(px + 16 + 17 * f, by - 79); g.lineTo(px + 16 + 21 * f, by - 76); g.lineTo(px + 16 + 17 * f, by - 76); g.fill();
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(px + 16 + 14 * f, by - 79, 1.2, 0, 7); g.fill();
+  } else if (kind === "vespa") {
+    // a mint-green Vespa scooter
+    shadowAt(px + 30, by, 30);
+    g.fillStyle = "#9ad8c0"; g.beginPath(); g.moveTo(px + 6, by - 14); g.quadraticCurveTo(px + 4, by - 34, px + 24, by - 32); g.lineTo(px + 36, by - 22); g.lineTo(px + 46, by - 22); g.quadraticCurveTo(px + 50, by - 34, px + 52, by - 46); g.lineTo(px + 58, by - 46); g.quadraticCurveTo(px + 60, by - 26, px + 56, by - 14); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#6a4a3a"; g.beginPath(); rp(px + 12, by - 38, 20, 6, 3); g.fill(); g.stroke();
+    g.strokeStyle = "#5a5a62"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px + 54, by - 46); g.lineTo(px + 48, by - 56); g.lineTo(px + 60, by - 56); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#fff6d8"; g.beginPath(); g.arc(px + 58, by - 46, 3, 0, 7); g.fill();
+    [[14], [52]].forEach(([dx]) => { g.fillStyle = "#1c1c20"; g.beginPath(); g.arc(px + dx, by - 7, 7, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#c9ced6"; g.beginPath(); g.arc(px + dx, by - 7, 3, 0, 7); g.fill(); });
+  } else if (kind === "capanna") {
+    // a striped wooden beach hut on the Lido
+    shadowAt(px + 28, by, 30);
+    for (let i = 0; i < 7; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : ["#3a8ad8", "#e8582a", "#2a9a6a"][Math.floor(H * 3)]; g.fillRect(px + 4 + i * 7, by - 50, 7, 50); }
+    g.strokeRect(px + 4, by - 50, 49, 50);
+    g.fillStyle = "#e8e0d0"; g.beginPath(); g.moveTo(px - 2, by - 48); g.lineTo(px + 28, by - 66); g.lineTo(px + 58, by - 48); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#5a4a3a"; g.fillRect(px + 20, by - 30, 16, 30); g.strokeRect(px + 20, by - 30, 16, 30);
+  } else if (kind === "palazzo") {
+    // a Venetian palace: pastel plaster, pointed Gothic windows, a balcony and a mooring pole
+    const col = ["#e8c8a8", "#d89a7a", "#f0d8b0", "#c8a088"][Math.floor(H * 4)];
+    shadowAt(px + 44, by, 46);
+    g.fillStyle = col; g.fillRect(px, by - 104, 88, 104); g.strokeRect(px, by - 104, 88, 104);
+    g.fillStyle = "#e8e0d0"; g.fillRect(px - 3, by - 108, 94, 6); g.strokeRect(px - 3, by - 108, 94, 6);
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 4; i++) {
+      const wx = px + 10 + i * 19, wy = by - 92 + r * 38;
+      g.fillStyle = "#2a3542"; g.beginPath(); g.moveTo(wx, wy + 24); g.lineTo(wx, wy + 8); g.quadraticCurveTo(wx + 6, wy - 2, wx + 6, wy - 4); g.quadraticCurveTo(wx + 6, wy - 2, wx + 12, wy + 8); g.lineTo(wx + 12, wy + 24); g.closePath(); g.fill();
+    }
+    g.fillStyle = "#e8e0d0"; g.fillRect(px + 6, by - 52, 76, 4); g.strokeRect(px + 6, by - 52, 76, 4);
+    g.fillStyle = "#5a3a2a"; g.fillRect(px + 34, by - 30, 20, 30); g.strokeRect(px + 34, by - 30, 20, 30);
+  } else if (kind === "gondola") {
+    // a moored black gondola with its curly iron prow, and a striped pole
+    shadowAt(px + 50, by, 50);
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.moveTo(px, by - 16); g.quadraticCurveTo(px + 50, by + 4, px + 96, by - 16); g.quadraticCurveTo(px + 100, by - 26, px + 104, by - 34); g.lineTo(px + 96, by - 10); g.quadraticCurveTo(px + 50, by + 8, px + 4, by - 10); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#c9ced6"; g.fillRect(px + 98, by - 36, 6, 2); g.fillRect(px + 99, by - 32, 6, 2); g.fillRect(px + 100, by - 28, 6, 2);
+    g.fillStyle = "#b8302a"; g.beginPath(); rp(px + 40, by - 16, 22, 7, 3); g.fill();
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#2a5ab8"; g.fillRect(px - 10, by - 70 + i * 12, 6, 12); }
+    g.strokeRect(px - 10, by - 70, 6, 70); g.fillStyle = "#c8a838"; g.beginPath(); g.arc(px - 7, by - 72, 4, 0, 7); g.fill(); g.stroke();
+  } else if (kind === "lion") {
+    // the winged lion of St Mark on a column
+    shadowAt(px + 20, by, 18);
+    g.fillStyle = "#d8d0c0"; g.fillRect(px + 12, by - 70, 16, 70); g.strokeRect(px + 12, by - 70, 16, 70); g.fillRect(px + 6, by - 76, 28, 7); g.strokeRect(px + 6, by - 76, 28, 7);
+    // a golden lion lying down, with a big mane, a raised wing and a tail with a tuft
+    const ly = by - 76;
+    g.strokeStyle = "#a07a28"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px + 6, ly - 8); g.quadraticCurveTo(px - 4, ly - 16, px + 2, ly - 24); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+    blob("#a07a28", () => g.arc(px + 2, ly - 25, 3, 0, 7));
+    blob("#d8b048", () => g.ellipse(px + 18, ly - 8, 15, 7, 0, 0, 7));
+    blob("#d8b048", () => { g.moveTo(px + 28, ly - 2); g.lineTo(px + 40, ly - 2); g.lineTo(px + 40, ly + 1); g.lineTo(px + 26, ly + 1); g.closePath(); });
+    blob("#e8c868", () => { g.moveTo(px + 12, ly - 12); g.quadraticCurveTo(px + 2, ly - 30, px + 8, ly - 44); g.quadraticCurveTo(px + 16, ly - 30, px + 24, ly - 26); g.quadraticCurveTo(px + 22, ly - 18, px + 20, ly - 12); g.closePath(); });
+    g.strokeStyle = "#b08a30"; g.lineWidth = 1; [[10, -20, 20, -24], [8, -28, 18, -30], [8, -36, 14, -36]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(px + a, ly + b); g.lineTo(px + c, ly + d); g.stroke(); }); g.strokeStyle = OUT; g.lineWidth = 2;
+    blob("#b8862a", () => { for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5, r = i % 2 ? 9 : 11; g.lineTo(px + 33 + Math.cos(a) * r, ly - 16 + Math.sin(a) * r); } g.closePath(); });
+    blob("#e0b850", () => g.arc(px + 34, ly - 16, 6, 0, 7));
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(px + 36, ly - 18, 1.2, 0, 7); g.fill(); g.fillRect(px + 37, ly - 13, 3, 1.2);
+  } else if (kind === "gelatocart") {
+    // a gelato cart with a striped umbrella
+    shadowAt(px + 26, by, 26);
+    g.fillStyle = "#f4f1ea"; g.beginPath(); rp(px + 4, by - 40, 44, 28, 4); g.fill(); g.stroke();
+    ["#f4a0b0", "#9ad8c0", "#f2d07a", "#8a5a3a"].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(px + 12 + i * 9, by - 41, 4.5, Math.PI, 0); g.fill(); });
+    g.fillStyle = "#1c1c20"; [[12], [40]].forEach(([dx]) => { g.beginPath(); g.arc(px + dx, by - 7, 6, 0, 7); g.fill(); g.stroke(); });
+    g.strokeStyle = "#6a6a6a"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 26, by - 40); g.lineTo(px + 26, by - 74); g.stroke(); g.strokeStyle = OUT;
+    for (let i = 0; i < 5; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#e8582a"; g.beginPath(); g.moveTo(px + 26, by - 82); g.lineTo(px - 4 + i * 12, by - 70); g.lineTo(px + 8 + i * 12, by - 70); g.closePath(); g.fill(); }
+  } else if (kind === "buranohouse") {
+    // a house on Burano, painted a bright colour so the fishermen find it in the fog
+    const col = ["#e84a4a", "#f2c42a", "#3a8ad8", "#4ab868", "#e87ab0", "#8a5ad8"][Math.floor(H * 6)];
+    shadowAt(px + 34, by, 36);
+    g.fillStyle = col; g.fillRect(px, by - 76, 68, 76); g.strokeRect(px, by - 76, 68, 76);
+    g.fillStyle = "#f4f1ea"; g.fillRect(px - 2, by - 80, 72, 5); g.strokeRect(px - 2, by - 80, 72, 5);
+    [[px + 10, by - 64], [px + 42, by - 64], [px + 10, by - 34]].forEach(([wx, wy]) => { g.fillStyle = "#f4f1ea"; g.fillRect(wx - 2, wy - 2, 18, 22); g.fillStyle = "#2a3542"; g.fillRect(wx, wy, 14, 18); g.fillStyle = "#3a6a3a"; g.fillRect(wx - 6, wy, 4, 18); g.fillRect(wx + 16, wy, 4, 18); });
+    g.fillStyle = "#5a3a2a"; g.fillRect(px + 42, by - 30, 16, 30); g.strokeRect(px + 42, by - 30, 16, 30);
+    g.strokeStyle = "#6a6a6a"; g.lineWidth = 1; g.beginPath(); g.moveTo(px + 2, by - 50); g.lineTo(px + 66, by - 50); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+    ["#f4f1ea", "#e8423a", "#3a8ad8"].forEach((c, i) => { g.fillStyle = c; g.fillRect(px + 14 + i * 16, by - 50, 8, 9); });
+  } else if (kind === "glassshop") {
+    // a glass blower's workshop on Murano: an orange glowing furnace and glass in the window
+    shadowAt(px + 40, by, 42);
+    g.fillStyle = "#c8a888"; g.fillRect(px, by - 70, 80, 70); g.strokeRect(px, by - 70, 80, 70);
+    g.fillStyle = "#b8584a"; g.beginPath(); g.moveTo(px - 6, by - 68); g.lineTo(px + 40, by - 86); g.lineTo(px + 86, by - 68); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#3a2a22"; g.beginPath(); rp(px + 8, by - 46, 30, 46, 14); g.fill(); g.stroke();
+    g.fillStyle = `rgba(255,${150 + Math.sin(frame / 6) * 30 | 0},60,.95)`; g.beginPath(); g.arc(px + 23, by - 22, 8, 0, 7); g.fill();
+    g.fillStyle = "#e8f4f8"; g.fillRect(px + 46, by - 50, 28, 22); g.strokeRect(px + 46, by - 50, 28, 22);
+    ["#3a8ad8", "#e8423a", "#4ab868"].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.ellipse(px + 52 + i * 8, by - 36, 3, 6, 0, 0, 7); g.fill(); });
+  } else if (kind === "casone") {
+    // a fisherman's hut on stilts in the lagoon, with a thatched roof
+    shadowAt(px + 30, by, 30);
+    g.fillStyle = "#6a5a48"; [6, 26, 46].forEach(dx => g.fillRect(px + dx, by - 26, 4, 26));
+    g.fillStyle = "#a07a4a"; g.fillRect(px, by - 50, 56, 26); g.strokeRect(px, by - 50, 56, 26);
+    g.fillStyle = "#c8a868"; g.beginPath(); g.moveTo(px - 8, by - 48); g.lineTo(px + 28, by - 78); g.lineTo(px + 64, by - 48); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#3a2a1a"; g.fillRect(px + 22, by - 44, 12, 20);
+  } else if (kind === "balcony") {
+    // a stone balcony on an old house, with flowers: Juliet's balcony in Verona
+    shadowAt(px + 36, by, 38);
+    g.fillStyle = "#d8b890"; g.fillRect(px, by - 110, 72, 110); g.strokeRect(px, by - 110, 72, 110);
+    g.fillStyle = "#3a2a22"; g.beginPath(); g.moveTo(px + 24, by - 66); g.lineTo(px + 24, by - 90); g.arc(px + 36, by - 90, 12, Math.PI, 0); g.lineTo(px + 48, by - 66); g.fill();
+    g.fillStyle = "#e8e0d0"; g.beginPath(); rp(px + 12, by - 68, 48, 14, 3); g.fill(); g.stroke();
+    g.strokeStyle = "#b8a888"; g.lineWidth = 1.5; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(px + 16 + i * 8, by - 66); g.lineTo(px + 16 + i * 8, by - 56); g.stroke(); } g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = "#4a8a3a"; for (let i = 0; i < 8; i++) { g.beginPath(); g.arc(px + 14 + i * 6, by - 54 + (i % 2) * 3, 3, 0, 7); g.fill(); }
+    g.fillStyle = "#e8423a"; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(px + 18 + i * 12, by - 54, 2, 0, 7); g.fill(); }
+    g.fillStyle = "#5a3a2a"; g.fillRect(px + 26, by - 34, 20, 34); g.strokeRect(px + 26, by - 34, 20, 34);
+  } else if (kind === "rifugio") {
+    // a mountain hut: stone below, wood above, red-and-white shutters and a flag
+    shadowAt(px + 44, by, 46);
+    g.fillStyle = "#a8a098"; g.fillRect(px, by - 30, 88, 30); g.strokeRect(px, by - 30, 88, 30);
+    g.fillStyle = "#8a5a32"; g.fillRect(px, by - 64, 88, 34); g.strokeRect(px, by - 64, 88, 34);
+    g.fillStyle = "#5a4a3a"; g.beginPath(); g.moveTo(px - 10, by - 62); g.lineTo(px + 44, by - 92); g.lineTo(px + 98, by - 62); g.closePath(); g.fill(); g.stroke();
+    [[px + 12, by - 56], [px + 62, by - 56]].forEach(([wx, wy]) => { g.fillStyle = "#2a3542"; g.fillRect(wx, wy, 14, 14); for (let i = 0; i < 4; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#c4202a"; g.fillRect(wx - 6, wy + i * 3.5, 5, 3.5); g.fillRect(wx + 15, wy + i * 3.5, 5, 3.5); } });
+    g.fillStyle = "#5a3a2a"; g.fillRect(px + 38, by - 28, 14, 28);
+    g.fillStyle = "#6a6a6a"; g.fillRect(px + 92, by - 100, 2.5, 100); ["#009246", "#ffffff", "#ce2b37"].forEach((c, i) => { g.fillStyle = c; g.fillRect(px + 94.5 + i * 7, by - 100, 7, 14); });
+  } else if (kind === "larch") {
+    // a larch: a soft, light-green conifer of the Alps
+    pineShape(px + 16, by, 90 + H * 30, "#5a9a4a", "#4a8a3a", null, OUT);
   } else if (kind === "canoe") {
     // canoes pulled up on the bank, with a paddle against them
     shadowAt(px + 40, by, 44);
@@ -2095,6 +2349,7 @@ function drawSign(s) {
 const FLAGS = {
   ardennes: [3, (i, r) => ["#1d1d1d", "#fdda24", "#ef3340"][fl(i / 4)]],
   ardeche: [3, (i, r) => ["#002395", "#ffffff", "#ed2939"][fl(i / 4)]],
+  veneto: [3, (i, r) => ["#009246", "#ffffff", "#ce2b37"][fl(i / 4)]],
   tirol: [3, (i, r) => r === 1 ? "#ffffff" : "#c8102e"],
   norway: [7, (i, r) => { const v = i === 4 || r === 3, w = i >= 3 && i <= 5 || r >= 2 && r <= 4; return v ? "#00205b" : w ? "#ffffff" : "#ba0c2f"; }],
   pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]],
@@ -2302,7 +2557,7 @@ function vignette() {
 
 /* ---------- Region gameplay: water, movers and darkness ---------- */
 /** Water in the gaps (North Pole and Norway): you see what you would fall into. */
-function waterColour() { return L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : L.d.scene === "ardeche" ? "#3a9a88" : L.d.scene === "smaland" ? "#2a6a9a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; }
+function waterColour() { return L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" : L.d.scene === "ardeche" ? "#3a9a88" : ["laguna", "venezia", "burano"].includes(L.d.scene) ? "#3a8a96" : L.d.scene === "smaland" ? "#2a6a9a" : "#2aa0b8") : L.d.scene === "pole" ? "#2a5f8f" : "#1d3b66"; }
 /** Water in the gaps. Each stretch of water is one rectangle (drawn per tile, the edges would show as thin lines).
  *  With `front` (columns from–to, see-through) it is drawn again in front of a swimmer: the same colour as the water
  *  behind, so you only see that the lower half of the swimmer is under water, not a box. */
@@ -2371,6 +2626,15 @@ function drawMover(m) {
     g.fillStyle = "#ffe7a8"; g.fillRect(x + 8, y - 42, w - 16, 16); g.strokeRect(x + 8, y - 42, w - 16, 16);
     g.fillStyle = "#f4f8ff"; g.fillRect(x + 2, y - 4, w - 4, 4);
     g.fillStyle = "#b8332c"; g.fillRect(x, y - 2, w, 6); g.strokeRect(x, y - 2, w, 6);
+  } else if (st === "boat" && L.d.boatLook === "vaporetto") {
+    // a vaporetto, the water bus of Venice: a white hull, a blue stripe and a cabin with windows
+    const bob = Math.sin(frame / 20 + x * .01) * 1.2;
+    g.fillStyle = "#f4f1ea"; g.beginPath(); g.moveTo(x - 10, y + bob); g.lineTo(x + w + 14, y + bob); g.quadraticCurveTo(x + w + 10, y + 14 + bob, x + w, y + 16 + bob); g.lineTo(x - 6, y + 16 + bob); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#2a5ab8"; g.fillRect(x - 8, y + 6 + bob, w + 20, 3); g.fillStyle = "#f2c42a"; g.fillRect(x - 8, y + 10 + bob, w + 18, 2);
+    // the cabin roof is behind you, so you stand on the deck in front of it
+    g.fillStyle = "#e8e4dc"; g.fillRect(x - 6, y - 26 + bob, 14, 26); g.strokeRect(x - 6, y - 26 + bob, 14, 26);
+    g.fillStyle = "#9ad0f0"; g.fillRect(x - 3, y - 22 + bob, 8, 8);
+    g.fillStyle = "#2a5ab8"; g.fillRect(x - 8, y - 30 + bob, 18, 5);
   } else if (st === "boat") {
     const bob = Math.sin(frame / 20 + x * .01) * 1.5;
     g.fillStyle = "#8a5a32"; g.beginPath(); g.moveTo(x - 6, y + bob); g.lineTo(x + w + 6, y + bob); g.lineTo(x + w - 6, y + 16 + bob); g.lineTo(x + 6, y + 16 + bob); g.closePath(); g.fill(); g.stroke();

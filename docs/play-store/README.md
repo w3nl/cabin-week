@@ -23,7 +23,7 @@ Trips through Europe: a level a day, with puzzles, code locks and your own hero.
 **Full description** (max. 4000 characters)
 
 ```text
-Two families, nine people, nine trips. Pick a trip on the map of Europe and play a new level every day of the week: eight days per trip, 72 levels in all.
+Two families, nine people, ten trips. Pick a trip on the map of Europe and play a new level every day of the week: eight days per trip, 80 levels in all.
 
 Walk, jump, slide and swim your way through every day. Find the three lost things, help the others with a task and crack the code lock with the clues on the signs along the way.
 
@@ -37,6 +37,7 @@ Every trip plays differently:
 • Småland in summer: red cottages by the lake, fika, moose to bounce on, midsummer, canoes and a car meet with Saabs, a Volvo and a Scania
 • Scotland in summer: the Highlands, Loch Ness, castles, a ceilidh, island ferries, Edinburgh's Old Town and music in Glasgow, in long daylight and changeable weather
 • The Ardèche in summer: canoe under the Pont d'Arc, explore the Chauvet Cave with its ancient paintings, market day, lavender and sunflowers, the grape harvest and a 2CV on every corner
+• The Veneto in summer: hop by vaporetto from island to island in Venice, Murano and Burano, flamingos in the lagoon, opera in Verona's Arena, the Dolomites and the Lido
 
 • Play as one of the nine, or make your own hero: height, hair, coat, glasses, hat and scarf
 • Locks of every kind: codes, tunes, colours, arrows, words and clocks, with hints if you get stuck
@@ -68,7 +69,7 @@ Reis door Europa: elke dag een level, met puzzels, codesloten en je eigen held.
 **Volledige beschrijving**
 
 ```text
-Twee gezinnen, negen personen, negen reizen. Kies een reis op de kaart van Europa en speel elke dag van de week een nieuw level: acht dagen per reis, 72 levels in totaal.
+Twee gezinnen, negen personen, tien reizen. Kies een reis op de kaart van Europa en speel elke dag van de week een nieuw level: acht dagen per reis, 80 levels in totaal.
 
 Loop, spring, glij en zwem je een weg door elke dag. Vind de drie verdwenen dingen, help de anderen met een opdracht en kraak het codeslot met de aanwijzingen die onderweg op bordjes staan.
 
@@ -82,6 +83,7 @@ Elke reis speelt anders:
 • Småland in de zomer: rode huisjes aan het meer, fika, elanden om op te stuiteren, midzomer, kano's en een autotreffen met Saabs, een Volvo en een Scania
 • Schotland in de zomer: de Highlands, Loch Ness, kastelen, een ceilidh, veerboten naar de eilanden, de Old Town van Edinburgh en muziek in Glasgow, met lange dagen en wisselvallig weer
 • De Ardèche in de zomer: met de kano onder de Pont d'Arc door, de grot van Chauvet met eeuwenoude schilderingen, marktdag, lavendel en zonnebloemen, de druivenoogst en op elke hoek een 2CV
+• Veneto in de zomer: met de vaporetto van eiland naar eiland in Venetië, Murano en Burano, flamingo's in de lagune, opera in de Arena van Verona, de Dolomieten en het Lido
 
 • Speel als een van de negen, of maak je eigen held: lengte, haar, jas, bril, muts en sjaal
 • Allerlei sloten: codes, melodietjes, kleuren, pijlen, woorden en klokken, met tips als je vastzit
@@ -100,10 +102,10 @@ Geen advertenties, geen aankopen en geen gegevens die het apparaat verlaten.
 
 ```text
 <en-GB>
-Two new summer trips on the map! Scotland: the Highlands, Loch Ness, castles, island ferries and a ceilidh, with changeable weather. The Ardèche: canoe under the Pont d'Arc, see the paintings in the Chauvet Cave, market day, lavender, sunflowers and the grape harvest. Nine trips and 72 levels to play.
+Three new summer trips! Scotland: the Highlands, Loch Ness, castles and a ceilidh. The Ardèche: a canoe ride down the river, the Chauvet Cave, lavender and the grape harvest. The Veneto: hop by boat from island to island in Venice, see the flamingos, opera in Verona's Arena and the Dolomites. Ten trips and 80 levels to play.
 </en-GB>
 <nl-NL>
-Twee nieuwe zomerreizen op de kaart! Schotland: de Highlands, Loch Ness, kastelen, veerboten en een ceilidh, met wisselvallig weer. De Ardèche: met de kano onder de Pont d'Arc door, de schilderingen in de grot van Chauvet, marktdag, lavendel, zonnebloemen en de druivenoogst. Negen reizen en 72 levels om te spelen.
+Drie nieuwe zomerreizen! Schotland: de Highlands, Loch Ness, kastelen en een ceilidh. De Ardèche: met de kano de rivier af, de grot van Chauvet, lavendel en de druivenoogst. Veneto: met de boot van eiland naar eiland in Venetië, flamingo's, opera in de Arena van Verona en de Dolomieten. Tien reizen en 80 levels om te spelen.
 </nl-NL>
 ```
 

@@ -8,6 +8,7 @@ function genLevel(o) {
   //   hills: [low, high] – the ground goes up and down between those rows (12 = normal ground, 9 = high), like a mountain.
   //   movers: "floe" | "gondola" | "boat" – wide gaps (too wide to jump) with something that carries you across.
   //     A gondola rides on a slanted cable: up the mountain (2 or 3 rows), or down where the ground is already high.
+  //   islands: n – with movers "boat": n boat crossings spread over the level (Venice: hop from island to island).
   //   river: { len } – a stretch of river to canoe down, near the start (the Ardèche): you sit in a canoe, the current
   //     carries you, rocks stick out of the water to jump over, and the river drops down two small waterfalls,
   //     each followed by rapids. Gives the level a `river` ({ x0, x1, surf, rapids }) and `rocks`.
@@ -19,7 +20,7 @@ function genLevel(o) {
   const gated = !!(o.quest || o.task), gateX = gated ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
   const ground = [], plats = [], blocks = [], spikes = [], ents = [], slots = [], bad = new Set(), used = new Set();
   const coin = (x, y) => { if (o.coins !== false) ents.push(["coin", x, y]); };
-  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers, lofts = 0, riverDone = !o.river, river = null;
+  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferries = o.movers ? (o.islands || 1) : 0, fi = 0, lofts = 0, riverDone = !o.river, river = null;
   const rocks = [], riverDeco = [];
   const ladderCols = [], ladderSigns = [];
   const [hLow, hHigh] = o.hills || [12, 12];
@@ -29,7 +30,8 @@ function genLevel(o) {
     let type;
     if (!riverDone) type = "river";
     else if (!towerDone && x > w * .3) type = "tower";
-    else if (!ferryDone && x > w * .12) type = "ferry";
+    // islands (Venice): several boat crossings spread over the level, so you hop from island to island
+    else if (fi < ferries && x > w * (o.islands ? .1 + .8 * fi / ferries : .12)) type = "ferry";
     // ladders: a loft too high to jump onto, with a ladder up (twice per level: before and after the gate)
     else if (o.ladders && lofts < 2 && x > w * (lofts ? .66 : .2)) type = "loft";
     else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .3 && o.movers ? "ferry" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
@@ -82,7 +84,7 @@ function genLevel(o) {
       if (o.movers === "gondola") { const up = gy - hHigh, down = hLow - gy; rise = up >= 2 ? -Math.min(3, up) : down >= 2 ? Math.min(3, down) : 0; }
       ents.push(["mover", x + 2, gy, { range: 5, n: 2, rise }]);
       [3, 5, 7].forEach(i => coin(x + i, 8 + (gy - 12) + Math.round(rise * (i - 2) / 6)));
-      cur = x + 9; ferryDone = true;
+      cur = x + 9; fi++;
       gy += rise;
     } else if (type === "loft") {
       // a loft (a plank 6 rows up, too high to jump onto) with a ladder from the floor; one of the things may be up there
