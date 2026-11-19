@@ -1,6 +1,6 @@
 # Cabin Week
 
-A platform game in the browser about trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway, the Netherlands, Dalmatia, Småland or Scotland) and play its week: eight days, **one level a day**.
+A platform game in the browser about trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway, the Netherlands, Dalmatia, Småland, Scotland or the Ardèche) and play its week: eight days, **one level a day**.
 
 Play as one of the nine, or **make your own hero** (name, height, skin, hair, coat, glasses, hat and scarf). You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, get through a gate halfway (bring something, pull levers, light lamps, race the bell or walk a lost animal home) and open a lock at the end: a code, a tune, colours, arrows, a word or a clock, with clues along the way. Every trip mixes them differently. Finish a day to unlock the next one.
 
@@ -52,8 +52,9 @@ Choose a trip on the **map of Europe** (🗺️ on the title screen). Every trip
 | ☀️ **Dalmatia** (summer!) | Camp Lavanda on the Croatian coast | the camping, the Krka waterfalls, the walls of Dubrovnik, island hopping, the Plitvice lakes, Zadar and the sea organ, the rocky beach of Šibenik, going home. The sea is warm: you can swim |
 | 🛶 **Småland** (summer!) | a red cottage by a lake near Lingonby, Sweden | arrival by the lake, fika in the village, the moose forest (bounce on a moose!), the glassworks, midsummer, canoeing on the lake, a car meet with Saabs, a Volvo and a Scania, going home |
 | 🏰 **Scotland** (summer!) | the fictional Highland village of Glen Rowan | Glen Coe, Loch Ness, an old castle, a ceilidh, island-hopping, Edinburgh's Old Town, music in Glasgow, going home. Long summer daylight and changeable weather |
+| 🌻 **Ardèche** (summer!) | Camping Les Cigales near the fictional village of Roquelune, France | the campsite by the river, canoeing to the Pont d'Arc, market day, the Chauvet Cave with its 36,000-year-old paintings, lavender and sunflowers, the grape harvest, an old village by the river, going home. Swim in the river, and watch out for wasps |
 
-Coming later: Iceland, Tuscany, Veneto, Catalonia, Ardèche and Greece (ideas in [docs/ideas.md](docs/ideas.md)).
+Coming later: Iceland, Tuscany, Veneto, Catalonia and Greece (ideas in [docs/ideas.md](docs/ideas.md)).
 
 ## Contributing
 

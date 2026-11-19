@@ -72,7 +72,16 @@ const REGIONS = [
       ["⛴️", "Isles", "Eilanden"], ["🏘️", "Edinburgh", "Edinburgh"], ["🎻", "Glasgow", "Glasgow"], ["🏠", "Home", "Naar huis"]]),
     finale: [T("Slàinte, Scotland! 🏰🚗", "Slàinte, Schotland! 🏰🚗"),
       T("The Highlands, a loch-side boat trip, old castle stones, a braw ceilidh, island ferries, Edinburgh's closes and Glasgow's music. The long summer light came all the way home with us. Haste ye back!",
-        "De Highlands, een boottocht op de loch, oude kasteelstenen, een ceilidh, veerboten naar de eilanden, de steegjes van Edinburgh en de muziek van Glasgow. Het lange zomerlicht ging met ons mee naar huis. Haste ye back!")] }
+        "De Highlands, een boottocht op de loch, oude kasteelstenen, een ceilidh, veerboten naar de eilanden, de steegjes van Edinburgh en de muziek van Glasgow. Het lange zomerlicht ging met ons mee naar huis. Haste ye back!")] },
+  { id: "ardeche", name: "Ardèche", icon: "🌻", lon: 4.4, lat: 44.7, labelLeft: true, scene: "ardeche", summer: true,
+    place: "Roquelune", blurb: T("A summer week at a campsite by the river near Roquelune: canoes, the Pont d'Arc, a painted cave, markets, lavender and sunflowers.",
+      "Een zomerweek op een camping aan de rivier bij Roquelune: kano's, de Pont d'Arc, een beschilderde grot, markten, lavendel en zonnebloemen."),
+    levels: ARDECHE_LEVELS,
+    week: regionWeek([["🏕️", "Campsite", "Camping"], ["🛶", "Pont d'Arc", "Pont d'Arc"], ["🥖", "Market", "Markt"], ["🦣", "Chauvet Cave", "Grot van Chauvet"],
+      ["🌻", "Lavender", "Lavendel"], ["🍇", "Grape harvest", "Druivenoogst"], ["⛪", "Old village", "Oud dorp"], ["🏠", "Home", "Naar huis"]]),
+    finale: [T("Merci, Ardèche! 🌻🚗", "Merci, Ardèche! 🌻🚗"),
+      T("Cicadas, a canoe under the Pont d'Arc, Josette the hen, 36,000-year-old horses on a cave wall, lavender, grape juice from our own harvest and a picnic in an old village. And a 2CV on every corner.",
+        "Cicaden, een kano onder de Pont d'Arc, Josette de kip, paarden van 36.000 jaar oud op een grotwand, lavendel, druivensap van onze eigen oogst en een picknick in een oud dorp. En op elke hoek een 2CV.")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [
@@ -80,7 +89,6 @@ const SOON = [
   { name: T("Tuscany", "Toscane"), lon: 11.1, lat: 43.4 },
   { name: "Veneto", lon: 12.3, lat: 45.5 },
   { name: T("Catalonia", "Catalonië"), lon: 1.8, lat: 41.9 },
-  { name: T("Ardèche", "Ardèche"), lon: 4.4, lat: 44.7 },
   { name: T("Greece", "Griekenland"), lon: 22.0, lat: 39.6 }
 ];
 let REGION = REGIONS[0];
