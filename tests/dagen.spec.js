@@ -16,7 +16,7 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dal
     await expect(page.locator('#hLvl')).toContainText(day);
     // Elke sleutel, het opdrachtvoorwerp en de uitgang zijn te bereiken met de sprongen die het poppetje echt kan maken.
     const bad = await page.evaluate(() => {
-      const solid = (x, y, open) => { if (x < 0 || x >= L.w) return true; if (y < 0 || y >= ROWS) return false; const c = L.grid[y][x]; return c === '#' || c === 'S' || (!open && (c === 'G' || c === 'H')); };
+      const solid = (x, y, open) => { if (x < 0 || x >= L.w) return true; if (y < 0 || y >= ROWS) return false; const c = L.grid[y][x]; return c === '#' || c === 'S' || c === 'R' || (!open && (c === 'G' || c === 'H')); };
       // A mover (ice floe, gondola, boat) carries you across a gap: you can stand anywhere along its track.
       const ride = new Set();
       // A gondola can ride up or down a slanted cable: count every row it passes on the way.
@@ -25,7 +25,8 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dal
         for (let c = Math.floor(px / TS); c <= Math.floor((px + m.w - 1) / TS); c++) for (const r of [Math.floor(my / TS), Math.ceil(my / TS)]) ride.add(c + ',' + (r - 1));
       }
       // Where you can swim (Dalmatia), the water carries you too: count it a row lower than the ground, to be safe.
-      if (L.d.swim) for (let x = 0; x < L.w; x++) if (L.grid[ROWS - 1][x] !== '#') ride.add(x + ',12');
+      // In a river (the Ardèche) the water is higher upstream: count it at its own height.
+      if (L.d.swim) for (let x = 0; x < L.w; x++) if (L.grid[ROWS - 1][x] !== '#') ride.add(x + ',' + (inRiver(x) ? L.d.river.surf[x - L.d.river.x0] : 12));
       const stand = (x, y, open) => y >= 1 && y < ROWS - 1 && !solid(x, y, open) && !solid(x, y - 1, open) && (solid(x, y + 1, open) || L.grid[y + 1][x] === '=' || ride.has(x + ',' + y) || L.grid[y][x] === '|' || L.grid[y + 1][x] === '|') && L.grid[y][x] !== '^';
       const wall = (a, b) => { const s = Math.sign(b - a); for (let x = a + s; x !== b + s && a !== b; x += s) if ('GH'.includes(L.grid[2][x])) return true; return false; };
       const reach = open => {

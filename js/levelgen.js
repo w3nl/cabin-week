@@ -8,6 +8,9 @@ function genLevel(o) {
   //   hills: [low, high] – the ground goes up and down between those rows (12 = normal ground, 9 = high), like a mountain.
   //   movers: "floe" | "gondola" | "boat" – wide gaps (too wide to jump) with something that carries you across.
   //     A gondola rides on a slanted cable: up the mountain (2 or 3 rows), or down where the ground is already high.
+  //   river: { len } – a stretch of river to canoe down, near the start (the Ardèche): you sit in a canoe, the current
+  //     carries you, rocks stick out of the water to jump over, and the river drops down two small waterfalls,
+  //     each followed by rapids. Gives the level a `river` ({ x0, x1, surf, rapids }) and `rocks`.
   //   ice, dark, water, interior – used by the game and the drawing code, not by the generator.
   // The gate halfway (see AGENTS.md, "Gates and locks"): quest (bring something), or task: { kind: "levers" | "lights" |
   //   "timer" | "follow", ... }, or neither (no gate). The lock at the end: code.kind "symbols" (default), "count",
@@ -16,28 +19,53 @@ function genLevel(o) {
   const gated = !!(o.quest || o.task), gateX = gated ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
   const ground = [], plats = [], blocks = [], spikes = [], ents = [], slots = [], bad = new Set(), used = new Set();
   const coin = (x, y) => { if (o.coins !== false) ents.push(["coin", x, y]); };
-  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers, lofts = 0;
+  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferryDone = !o.movers, lofts = 0, riverDone = !o.river, river = null;
+  const rocks = [], riverDeco = [];
   const ladderCols = [], ladderSigns = [];
   const [hLow, hHigh] = o.hills || [12, 12];
   const limit = (o.code ? codeX : w - 8) - 10;
   while (x < limit) {
     if (gated && x > gateX - 9 && x < gateX + 5) { x = gateX + 5; continue; }
     let type;
-    if (!towerDone && x > w * .3) type = "tower";
+    if (!riverDone) type = "river";
+    else if (!towerDone && x > w * .3) type = "tower";
     else if (!ferryDone && x > w * .12) type = "ferry";
     // ladders: a loft too high to jump onto, with a ladder up (twice per level: before and after the gate)
     else if (o.ladders && lofts < 2 && x > w * (lofts ? .66 : .2)) type = "loft";
     else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .3 && o.movers ? "ferry" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
-    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11, loft: 10 }[type];
+    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11, loft: 10, river: o.river ? o.river.len + 6 : 0 }[type];
     if (x + width > limit || (gated && x <= gateX - 9 && x + width > gateX - 9)) { x += 3; continue; }
     // Hills: before a piece the ground may go up (at most 2 rows, so you can always jump it) or down.
-    if (o.hills && type !== "ferry") {
+    if (o.hills && type !== "ferry" && type !== "river") {
       let ny = gy + [-2, -1, 0, 1, 2][Math.floor(R() * 5)];
       ny = Math.max(hHigh, Math.min(hLow, ny));
       if (ny !== gy) { ground.push([cur, x, gy]); cur = x + 1; gy = ny; bad.add(x); bad.add(x + 1); }
     }
     const d = gy - 12; // everything in a piece is placed relative to the ground here
-    if (type === "pit") {
+    if (type === "river") {
+      // The river: first a bank that steps up to row 10, so the river can drop down two small waterfalls (10 → 11 → 12).
+      if (gy > 10) { ground.push([cur, x, gy]); cur = x + 1; bad.add(x); bad.add(x + 1); gy = 10; }
+      const len = o.river.len, x0 = x + 3, x1 = x0 + len - 1, third = Math.floor(len / 3);
+      ground.push([cur, x0 - 1, gy]); riverDeco.push(x0 - 3);
+      const surf = [], rapids = [];
+      for (let i = 0; i < len; i++) { surf.push(gy + (i >= third ? 1 : 0) + (i >= 2 * third ? 1 : 0)); bad.add(x0 + i); }
+      // rapids right below each waterfall: the current is stronger there
+      rapids.push([x0 + third, x0 + third + 7], [x0 + 2 * third, x0 + 2 * third + 7]);
+      // rocks: never right at a waterfall or a bank, about every 6 to 9 tiles, now low, then tall
+      for (let i = 6; i < len - 4; i += 6 + Math.floor(R() * 4)) {
+        if (Math.abs(i - third) < 3 || Math.abs(i - 2 * third) < 3) continue;
+        const r = surf[i], tall = R() < .4;
+        rocks.push([x0 + i, tall ? r - 1 : r, tall ? 2 : 1]);
+        // peaches in an arc over the rock, to catch while you jump
+        [-1, 0, 1].forEach(dd => coin(x0 + i + dd, r - (tall ? 4 : 3) + (dd ? 1 : 0)));
+      }
+      // one of the things to find floats above the river, halfway down
+      slots.push([x0 + Math.floor(len / 2) + 3, surf[Math.floor(len / 2) + 3] - 3, "river"]);
+      river = { x0, x1, surf, rapids };
+      // the far bank, at the level of the lowest stretch
+      gy = surf[len - 1]; cur = x1 + 1; bad.add(x1 + 1); bad.add(x1 + 2); riverDeco.push(x1 + 2);
+      riverDone = true;
+    } else if (type === "pit") {
       const gw = R() < .5 ? 2 : 3;
       ground.push([cur, x + 1, gy]);
       for (let i = 0; i < gw; i++) { bad.add(x + 2 + i); coin(x + 2 + i, (i === 0 || i === gw - 1 ? 9 : 8) + d); }
@@ -83,7 +111,7 @@ function genLevel(o) {
   const topAt = Array(w).fill(ROWS_GEN);
   for (const [a, b, t] of ground) for (let c = a; c <= b; c++) topAt[c] = Math.min(topAt[c], t);
   const yAt = c => (topAt[c] < ROWS_GEN ? topAt[c] : 12) - 1;
-  const free = (t, lo = 3, hi = w - 3) => { t = Math.round(t); for (let dd = 0; dd < 30; dd++) for (const c of [t + dd, t - dd]) if (c >= lo && c <= hi && !bad.has(c) && !used.has(c) && topAt[c] < ROWS_GEN) { used.add(c); return c; } return t; };
+  const free = (t, lo = 3, hi = w - 3) => { t = Math.round(t); for (let dd = 0; dd < 80; dd++) for (const c of [t + dd, t - dd]) if (c >= lo && c <= hi && !bad.has(c) && !used.has(c) && topAt[c] < ROWS_GEN) { used.add(c); return c; } return t; };
   [gateX, gateX - 1, gateX + 1, codeX, codeX - 1, codeX + 1, w - 6].forEach(c => used.add(c));
   // Levers, lamps, the bell, the animal and clues get some room, so nobody stands right next to them.
   const room = c => { for (let d = -2; d <= 2; d++) used.add(c + d); return c; };
@@ -98,7 +126,7 @@ function genLevel(o) {
     ents.push(["check", gateX + 2, yAt(gateX + 2)]);
     const k = o.task && o.task.kind;
     if (o.quest) {
-      const pre = slots.filter(s => s[0] < gateX - 6).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+      const pre = slots.filter(s => s[0] < gateX - 6 && s[2] !== "river").sort((a, b) => a[1] - b[1] || a[0] - b[0]);
       const q = pre[0]; slots.splice(slots.indexOf(q), 1); ents.push(["quest", q[0], q[1]]);
     } else if (k === "levers" || k === "lights") {
       // three levers or lamps spread over the way to the gate
@@ -113,10 +141,20 @@ function genLevel(o) {
   const keysNeeded = o.keysNeeded ?? 3;
   if (keysNeeded) {
     while (slots.length < 3) { const fx = free(w * (.2 + slots.length * .25)), fy = yAt(fx) - 2; plats.push([fx, fy, 3]); slots.push([fx + 1, fy - 1]); }
+    // With a river, one of the three always floats above it; the other two are spread over the rest of the level.
+    const rs = slots.find(s => s[2] === "river");
+    if (rs) { slots.splice(slots.indexOf(rs), 1); ents.push(["key", rs[0], rs[1]]); }
     slots.sort((a, b) => a[0] - b[0]);
-    for (let i = 0; i < 3; i++) { const s = slots[Math.floor(slots.length * (i + .5) / 3)]; ents.push(["key", s[0], s[1]]); }
+    const n = rs ? 2 : 3;
+    for (let i = 0; i < n; i++) { const s = slots[Math.floor(slots.length * (i + .5) / n)]; ents.push(["key", s[0], s[1]]); }
   }
-  { const c = free(w * .3); ents.push(["check", c, yAt(c)]); }
+  // A river gets a sign at the start and a flag right after the far bank, so a bump later on never sends you back upstream.
+  if (river) {
+    const c = free(river.x0 - 5, 3, river.x0 - 2);
+    ents.push(["sign", c, yAt(c), [T("Into the canoe! The river carries you along. Paddle with ← and →, and jump over the rocks.", "In de kano! De rivier neemt je mee. Peddel met ← en →, en spring over de rotsen."),
+      T("Two small waterfalls and some rapids on the way. Hold on to your hat!", "Onderweg twee kleine watervallen en een paar stroomversnellingen. Houd je hoed vast!")]]);
+    const f = free(river.x1 + 5, river.x1 + 3); ents.push(["check", f, yAt(f)]);
+  } else { const c = free(w * .3); ents.push(["check", c, yAt(c)]); }
   if (!gated) { const c = free(w * .62); ents.push(["check", c, yAt(c)]); } // a gate already has a flag right behind it
   (o.npcs || []).forEach((lines, i) => { const c = free(w * [.2, .46, .8][i]); ents.push(["npc", c, yAt(c), { lines }]); });
   (o.signs || []).forEach(([f, lines]) => { const c = free(w * f); ents.push(["sign", c, yAt(c), lines]); });
@@ -167,7 +205,8 @@ function genLevel(o) {
   }
   if (o.lantern) { const l = ents.find(e => e[0] === "lantern"); deco.push(o.lanternDeco === "church" ? ["church", l[1] - 3] : ["bench", l[1] + 1]); }
   (o.decoExtra || []).filter(([k]) => !counted.includes(k)).forEach(([k, f]) => deco.push([k, Math.round(w * f)]));
-  return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded, ladderCols });
+  riverDeco.forEach(c => deco.push(["canoe", c]));
+  return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded, ladderCols, river, rocks });
 }
 /** The keys on the lock for each kind of lock: digits, notes, colours, arrows or letters. */
 const NOTES = [["1", "do", 523, "#e8423a"], ["2", "re", 587, "#f2a03a"], ["3", "mi", 659, "#f5d23a"], ["4", "sol", 784, "#4cb860"], ["5", "la", 880, "#4a8ae8"]];

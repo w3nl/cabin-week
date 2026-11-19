@@ -289,6 +289,38 @@ test('the Ardèche: summer, no snow anywhere, a dark painted cave, and every dec
   expect(r.cave).toEqual({ theme: 'grot', dark: true, enemies: false, lights: 'lights' });
 });
 
+test('the Ardèche, day 2: in the canoe the river carries you, a rock stops you until you jump, and down the waterfalls you go', async ({ page }) => {
+  await seed(page, { unlocked: 8, region: 'ardeche' });
+  await startDay(page, 1);
+  await skip(page);
+  const r = await page.evaluate(() => {
+    window.hurt = () => {}; L.enemies.length = 0;
+    const rv = L.d.river, at = c => rv.surf[c - rv.x0];
+    const float = c => { P.x = c * TS + 4; P.y = at(c) * TS + 14 - P.h * .45; P.vx = 0; P.vy = 0; for (let i = 0; i < 3; i++) step(); };
+    // 1. the river carries you along, without touching a key
+    const free = rv.x0 + 2; float(free);
+    const x0 = P.x, canoe = P.canoe, swim = P.swim; for (let i = 0; i < 30; i++) step();
+    const carried = P.x - x0;
+    // 2. a rock stops you, however long you wait; a jump (held) takes you over it
+    const rock = L.d.rocks.find(k => k[2] === 2); float(rock[0] - 3);
+    for (let i = 0; i < 120; i++) step();
+    const stopped = P.x + P.w <= rock[0] * TS + .5;
+    // jump and paddle on (→): over the rock, and back into the water on the other side
+    edges.push('jump'); held.jump = true; held.right = true; for (let i = 0; i < 18; i++) step(); held.jump = false; for (let i = 0; i < 30; i++) step(); held.right = false; for (let i = 0; i < 30; i++) step();
+    const over = P.x > (rock[0] + 1) * TS && P.swim;
+    // 3. down a waterfall: you land on the lower water, and can't paddle back up
+    const fall = rv.surf.findIndex((v, i) => i && v > rv.surf[i - 1]) + rv.x0;
+    float(fall - 2); for (let i = 0; i < 80 && P.x < (fall + 1) * TS; i++) step(); for (let i = 0; i < 20; i++) step();
+    const down = P.swim && Math.abs(P.y + P.h * .45 - (at(fall) * TS + 14)) < 4;
+    held.left = true; for (let i = 0; i < 120; i++) step(); held.left = false;
+    const notUp = Math.floor((P.x + P.w / 2) / TS) >= fall;
+    return { canoe, swim, carried: carried > 20, stopped, over, down, notUp, hearts: P.hearts };
+  });
+  expect(r).toEqual({ canoe: true, swim: true, carried: true, stopped: true, over: true, down: true, notUp: true, hearts: 3 });
+  // the canoe stretch makes the level longer, and the other days have no river
+  expect(await page.evaluate(() => [L.w, LEVELS.filter(l => l.river).length])).toEqual([230, 1]);
+});
+
 test('a summer region says "summer days" on the title screen', async ({ page }) => {
   await seed(page, { region: 'dalmatia' });
   await expect(page.locator('#cdWord')).toHaveText('summer days to play');

@@ -1163,6 +1163,18 @@ function drawTile(c, px, py, theme, tx, ty, T) {
   else if (c === "|") drawLadder(px, py, theme);
   else if (c === "S") tile(T, T.block, px, py);
   else if (c === "^") tile(T, T.spike, px, py);
+  else if (c === "R") drawRock(px, py, cell(tx, ty - 1) !== "R");
+}
+/** A rock in the river (the Ardèche): pale limestone, rounded on top, wet at the bottom. Jump over it in the canoe. */
+function drawRock(px, py, top) {
+  g.strokeStyle = OUT; g.lineWidth = 2; g.lineJoin = "round";
+  const h = hash(px * .37);
+  g.fillStyle = "#b8a888"; g.beginPath();
+  if (top) { g.moveTo(px + 1, py + TS); g.quadraticCurveTo(px - 1, py + 6 + h * 6, px + 10, py + 3 + h * 4); g.quadraticCurveTo(px + 20, py - 1, px + 28, py + 6 + h * 5); g.quadraticCurveTo(px + 33, py + 16, px + 31, py + TS); }
+  else { g.moveTo(px + 1, py); g.lineTo(px + 31, py); g.lineTo(px + 32, py + TS); g.lineTo(px, py + TS); }
+  g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = "#d4c6a6"; if (top) { g.beginPath(); g.ellipse(px + 12, py + 9 + h * 3, 7, 3, -.3, 0, 7); g.fill(); }
+  g.fillStyle = "#8a7a5e"; g.fillRect(px + 6 + h * 10, py + 18, 9, 2); g.fillRect(px + 18 - h * 6, py + 24, 7, 2);
 }
 
 /* ---------- Hek (opdracht) en codedeur ---------- */
@@ -1300,6 +1312,11 @@ function drawDeco(kind, x, theme, far) {
     [[28], [104]].forEach(([dx]) => { g.fillStyle = shade(col, -.15); g.beginPath(); g.ellipse(px + dx, by - 16, 17, 13, 0, Math.PI, 0); g.fill(); g.stroke(); g.fillStyle = "#1c1c20"; g.beginPath(); g.arc(px + dx, by - 10, 10, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#d8dce0"; g.beginPath(); g.arc(px + dx, by - 10, 5, 0, 7); g.fill(); });
     g.fillStyle = "#fff6d8"; g.beginPath(); g.arc(px + 114, by - 40, 5, 0, 7); g.fill(); g.stroke();
     g.fillStyle = "#c9ced6"; g.fillRect(px + 118, by - 22, 8, 3); g.fillRect(px, by - 22, 6, 3);
+  } else if (kind === "canoe") {
+    // canoes pulled up on the bank, with a paddle against them
+    shadowAt(px + 40, by, 44);
+    [["#d8402a", 0], ["#3a8ad8", 10]].forEach(([c, dy]) => { g.fillStyle = c; g.beginPath(); g.moveTo(px, by - 14 - dy); g.quadraticCurveTo(px + 6, by - dy, px + 24, by - dy); g.lineTo(px + 56, by - dy); g.quadraticCurveTo(px + 74, by - dy, px + 80, by - 14 - dy); g.quadraticCurveTo(px + 40, by - 8 - dy, px, by - 14 - dy); g.closePath(); g.fill(); g.stroke(); g.fillStyle = "#f2c42a"; g.fillRect(px + 8, by - 9 - dy, 64, 2); });
+    g.strokeStyle = "#6a4426"; g.lineWidth = 3; g.beginPath(); g.moveTo(px + 66, by); g.lineTo(px + 80, by - 44); g.stroke(); g.fillStyle = "#f2c42a"; g.strokeStyle = OUT; g.lineWidth = 1.5; g.beginPath(); g.ellipse(px + 81, by - 46, 4, 8, .3, 0, 7); g.fill(); g.stroke(); g.lineWidth = 2;
   } else if (kind === "sunflowers") {
     // a patch of sunflowers, their heads turned towards the sun
     shadowAt(px + 30, by, 30);
@@ -2291,17 +2308,47 @@ function waterColour() { return L.d.summer ? (L.d.scene === "falls" ? "#2aa88a" 
  *  behind, so you only see that the lower half of the swimmer is under water, not a box. */
 function drawWater(cx, front) {
   let x0 = Math.max(0, fl(cx / TS) - 1), x1 = Math.min(L.w - 1, fl((cx + viewW) / TS) + 1);
-  const top = 12 * TS + 14, wet = x => x >= 0 && x < L.w && L.grid[ROWS - 1][x] !== "#";
-  if (front) { x0 = front[0]; x1 = front[1]; while (wet(x0 - 1)) x0--; while (wet(x1 + 1)) x1++; g.globalAlpha = .8; }
+  const wet = x => x >= 0 && x < L.w && L.grid[ROWS - 1][x] !== "#";
+  if (front) { x0 = front[0]; x1 = front[1]; while (wet(x0 - 1) && waterTop(x0 - 1) === waterTop(x0)) x0--; while (wet(x1 + 1) && waterTop(x1 + 1) === waterTop(x1)) x1++; g.globalAlpha = .8; }
   for (let x = x0; x <= x1; x++) {
     if (!wet(x)) continue;
-    let e = x; while (e < x1 && wet(e + 1)) e++;
+    // one rectangle per stretch at the same height (the river steps down at its waterfalls)
+    const top = waterTop(x);
+    let e = x; while (e < x1 && wet(e + 1) && waterTop(e + 1) === top) e++;
     g.fillStyle = waterColour(); g.fillRect(x * TS, top, (e - x + 1) * TS, VIEW_H - top);
+    if (!front && L.d.river) {
+      const r = L.d.river;
+      // a waterfall where the next stretch is lower: a white sheet of water falling down, and foam at the bottom
+      if (wet(e + 1) && waterTop(e + 1) > top) {
+        const fx = (e + 1) * TS, low = waterTop(e + 1);
+        g.fillStyle = "rgba(235,250,250,.9)"; g.fillRect(fx - 4, top, 10, low - top + 4);
+        g.fillStyle = "rgba(255,255,255,.8)"; for (let i = 0; i < 3; i++) g.fillRect(fx - 3 + i * 3, top + ((frame * 2 + i * 9) % (low - top)), 1.5, 8);
+        for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(fx + 4 + i * 6, low + 2 + Math.sin(frame / 5 + i) * 1.5, 3.5 - i * .4, 0, 7); g.fill(); }
+      }
+      // the rapids: fast white foam streaks
+      g.fillStyle = "rgba(255,255,255,.75)";
+      for (const [a, b] of r.rapids) for (let c = Math.max(a, x); c <= Math.min(b, e); c++) for (let i = 0; i < 3; i++) g.fillRect(c * TS + ((frame * 2.4 + i * 11 + c * 5) % (TS - 6)), top + 2 + i * 6, 6, 1.5);
+    }
     g.fillStyle = "rgba(255,255,255,.45)";
     for (let c = x; c <= e; c++) for (let i = 0; i < 2; i++) g.fillRect(c * TS + ((frame * .4 + i * 16 + c * 7) % (TS - 8)), top + 3 + i * 9, 8, 1.5);
     x = e;
   }
   g.globalAlpha = 1;
+}
+/** A canoe around the player (cx, the waterline y): red with a yellow stripe, and a paddle going left and right. */
+function drawCanoe(cx, y, face, pace) {
+  g.save(); g.strokeStyle = OUT; g.lineWidth = 2; g.lineJoin = "round";
+  // the paddle: a shaft in your hands, the blade dipping in on one side, then the other
+  const a = Math.sin(frame / (pace ? 8 : 20)) * .7;
+  g.save(); g.translate(cx, y - 14); g.rotate(a);
+  g.strokeStyle = "#6a4426"; g.lineWidth = 3; g.beginPath(); g.moveTo(-26, 10); g.lineTo(26, -10); g.stroke();
+  g.fillStyle = "#f2c42a"; g.strokeStyle = OUT; g.lineWidth = 1.5; [[-26, 10], [26, -10]].forEach(([bx, by]) => { g.beginPath(); g.ellipse(bx, by, 7, 3.5, -.38, 0, 7); g.fill(); g.stroke(); });
+  g.restore();
+  // the hull, in front of your legs
+  g.fillStyle = "#d8402a"; g.beginPath(); g.moveTo(cx - 34, y - 8); g.quadraticCurveTo(cx - 30, y + 8, cx - 10, y + 10); g.lineTo(cx + 10, y + 10);
+  g.quadraticCurveTo(cx + 30, y + 8, cx + 34, y - 8); g.quadraticCurveTo(cx, y - 2, cx - 34, y - 8); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = "#f2c42a"; g.beginPath(); g.moveTo(cx - 31, y - 4); g.quadraticCurveTo(cx, y + 2, cx + 31, y - 4); g.lineTo(cx + 30, y - 1); g.quadraticCurveTo(cx, y + 5, cx - 30, y - 1); g.closePath(); g.fill();
+  g.restore();
 }
 /** An ice floe, a gondola of the cable car, or a little boat: you stand on top of it. */
 function drawMover(m) {
@@ -2477,8 +2524,11 @@ function render() {
       if (P.swim) {
         drawWater(cx, [fl(P.x / TS), fl((P.x + P.w) / TS)]);
         // a small ripple around the swimmer, only as wide as the swimmer
-        g.fillStyle = "rgba(255,255,255,.7)"; g.beginPath(); g.ellipse(P.x + P.w / 2, SWIM_Y + 1 + Math.sin(frame / 8), P.w * .75, 2.2, 0, 0, 7); g.fill();
+        const wt = waterTop(fl((P.x + P.w / 2) / TS));
+        g.fillStyle = "rgba(255,255,255,.7)"; g.beginPath(); g.ellipse(P.x + P.w / 2, wt + 1 + Math.sin(frame / 8), P.w * (P.canoe ? 1.4 : .75), 2.2, 0, 0, 7); g.fill();
       }
+      // in the river you sit in a canoe, also while you jump with it over a rock
+      if (P.canoe) drawCanoe(P.x + P.w / 2, P.y + P.h * .45 + 2, P.face, P.swim ? Math.abs(P.vx) + 1 : 0);
     }
   }
   // a found animal walks with you, drawn in front so you always see it
