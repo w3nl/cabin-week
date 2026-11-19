@@ -1,9 +1,11 @@
 # Publishes the game on GitHub Pages after every push to main (Settings → Pages → Source: GitHub Actions).
 name: Publish the game
 
+# Only when something on the site changes (see tools/build-site.js).
 on:
   push:
     branches: [main]
+    paths: ["index.html", "privacy.html", "manifest.webmanifest", "sw.js", "css/**", "js/**", "icons/**", "tools/build-site.js", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
