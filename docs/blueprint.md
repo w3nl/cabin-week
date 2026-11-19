@@ -34,6 +34,8 @@ Met dit recept maak je hetzelfde soort spel met een ander thema: een andere fami
 - **Een level per dag** van de vakantie of het feest, zodat het spel meegroeit met de week. Het titelscherm telt af in nachtjes slapen, en toont tijdens de week de hoeveelste nacht het is.
 - **Gevoelige dagen krijgen een eigen, rustig level.** Vraag de eigenaar of er dagen zijn met een bijzondere betekenis, en ontwerp die in overleg: geen vijanden, geen druk, geen grappen, en alleen wat de familie zelf wil.
 - **Altijd verder kunnen:** geen game over (bij nul hartjes terug naar de laatste vlag), tips na foute codes, vlaggen als bewaarpunten.
+- **Elke dag anders.** Hetzelfde patroon (een hek met "breng iets", dan een codeslot met bordjes) gaat na een paar dagen vervelen. Wissel de opdracht halverwege (iets brengen, drie hendels, lampen aansteken, een bel die een hek een paar seconden opent, een verdwaald dier terugbrengen, of geen hek) en het slot aan het eind (symbolen, tellen wat je onderweg ziet, een melodie, kleuren, pijlen, een woord, een klok). Laat een test de mix bewaken. En laat de wereld zelf anders spelen: heuvels, bewegende vlotten of gondels, ijs, wind, donker, zwemmen, een trap of ladder.
+- **Dieren en dingen horen bij de plek.** Op de Noordpool geen pinguïns (die wonen op de zuidpool), tenzij er één verdwaald is en het verhaal dat zegt; robotstofzuigers en Lego alleen in het huis waar ze thuishoren. Vraag de eigenaar wat typisch is voor de plek.
 - **Speelbaar op alles wat de familie heeft:** computer, telefoon en tablet (als web-app), tv (eigen app of casten), met toetsenbord, aanraken, controller of afstandsbediening.
 
 ### Checklist voor een level
@@ -113,8 +115,8 @@ AGENTS.md, CLAUDE.md, README.md, renovate.json, .nvmrc
 
 ### Invoer
 - Toetsen die één keer tellen (springen, praten) gaan via een wachtrij (`edges`); ingedrukt houden via `held` (toetsenbord, aanraakknoppen), `padHeld` (controller) en `tvHeld` (controller in de tv-app). `step()` telt ze samen.
-- **Precieze tikjes:** onthoud wanneer een knop werd ingedrukt en losgelaten (`event.timeStamp`, of in de tv-app hoe lang geleden). De spellus geeft elke stap een eigen moment en verwerkt de wachtrij per stap. Indrukken telt bij de volgende stap, loslaten even veel later als het tikje duurde. Slaat de spellus tijd over (een druk toestel), schuif het loslaten dan even ver op. Zonder dit loopt het poppetje op een tv te ver door.
-- **Eén knop, meer betekenissen:** ↓ (of E, □/○, OK, 💬) praat met wie in de buurt is, leest een bordje, steekt een kaarsje aan of opent het codeslot; is er niets in de buurt en loop je, dan glijd je op je buik.
+- **Precieze tikjes:** onthoud wanneer een knop werd ingedrukt en losgelaten (`event.timeStamp`, of in de tv-app hoe lang geleden). De spellus geeft elke stap een eigen moment en verwerkt de wachtrij per stap. Indrukken telt bij de volgende stap, loslaten even veel later als het tikje duurde. Slaat de spellus tijd over (een druk toestel), schuif het loslaten dan even ver op. Zonder dit loopt het poppetje op een tv te ver door. **Maar vertrouw de tijdstempel niet blind:** sommige Android- en tv-WebViews gebruiken een andere klok. Een tijdstempel die meer dan een seconde afwijkt of in de toekomst ligt, telt als "nu"; een wachtend loslaten houdt alleen zijn eigen toets op (nooit ← of → erna) en wacht nooit langer dan een seconde. Anders blijft het poppetje aan het begin van een level staan en zet het daarna ineens veel stappen.
+- **Eén knop, meer betekenissen:** ↓ (of E, □/○, OK, 💬) praat met wie in de buurt is, leest een bordje, steekt een kaarsje aan of opent het codeslot; is er niets in de buurt en loop je, dan glijd je op je buik. Sta je stil op een plank (niet op de grond), dan zak je er met ↓ doorheen. Bij een ladder klim je met ↑ omhoog en met ↓ omlaag (geen schuine trap: een helling is in een platformspel veel lastiger dan een ladder, en binnen ziet een steile zoldertrap er net zo uit).
 
 ### Natuurkunde (de waarden van *Cabin Week*)
 
@@ -139,6 +141,8 @@ AGENTS.md, CLAUDE.md, README.md, renovate.json, .nvmrc
 - **Binnen en buiten:** binnen geen jas of muts (de vader draagt dan zijn kersttrui), in de sneeuw iedereen een kerstmuts.
 - **Beweging:** lang haar zwaait bij lopen en waait op bij springen en glijden; armen en benen op de stappen. Glijden = het staande poppetje een kwartslag gedraaid, met het hoofd teruggekanteld (kijkt vooruit) en de armen naar voren.
 - **Laat elke versie zien** (een plaatje met alle poppetjes naast elkaar) en verbeter per persoon tot de familie zichzelf herkent.
+- **Een eigen held** (optioneel): dezelfde `drawPerson` met keuzes als knoppen (lengte, huid, haar en kleur, knotje/strik/haarband, jas en kleur, lange of korte broek, rok of jurk, bril, muts, sjaal). Knoppen in plaats van uitklaplijsten, zodat het ook met een afstandsbediening en controller werkt. "Geen sjaal" moet ook echt geen sjaal betekenen, ook in de sneeuw waar de anderen er een krijgen. Laat het venster passen op 960×540, 740×360 en een telefoon rechtop.
+- **Dieren lopen echt:** poten zwaaien vanuit de heup (`walkLeg`), viervoeters draven met de diagonale paren samen (`trotLegs`), het lijf veert mee (`stepBob`), en de stapfase komt uit de afgelegde weg, zodat de poten stilstaan als het dier stilstaat. **Dieren in het decor** die stilstaan teken je kleiner, iets hoger en iets vager, alsof ze verder weg staan: anders denkt de speler dat hij ertegenaan kan lopen of erop kan staan.
 
 ### De wereld
 - **Dure tekeningen één keer:** achtergrondlagen als naadloze stroken (1536 px), het interieur van een heel level, tegeltexturen. Daarna is elke frame een paar `drawImage`-aanroepen.
@@ -152,6 +156,7 @@ AGENTS.md, CLAUDE.md, README.md, renovate.json, .nvmrc
 - Emoji één keer als plaatje op schermgrootte maken en daarna kopiëren (kleuremoji tekenen is traag op Android).
 - Stippen (sterren, sneeuw) met `globalAlpha` in plaats van een nieuwe kleurtekst per stip.
 - Een ondoorzichtig canvas (`alpha: false`) zonder aparte wisbeurt; de achtergrond bedekt alles.
+- **Geen naden:** het scherm schaalt (×1,35 en zo), dus tegelranden vallen op halve pixels en de achtergrond schijnt erdoorheen als dunne lijntjes die flikkeren als de camera beweegt. Laat elke tegel de volgende één schermpixel overlappen (`TS + 1/scale`), kopieer in de atlas de rand van elke tegel één pixel naar buiten, en teken water en andere vlakken als één rechthoek per stuk, niet per tegel. Een zwemmer die half onder water ligt: teken het water er nog eens doorschijnend vóór, in dezelfde kleur, in plaats van een vierkant.
 - **Controleer dat het beeld gelijk blijft:** maak per level een beeld van `main` en van je branch, met vaste tijd, toeval, poppetje en vijanden, en vergelijk ze pixel voor pixel.
 
 ## 7. Schermen en menu's
@@ -186,11 +191,12 @@ Precies zoals in de escaperooms:
 
 ## 10. De Google TV-app en Google Play
 
-- **De app:** één `Activity` met een WebView die het spel uit de app-bestanden laadt via `WebViewAssetLoader` (`https://appassets.androidplatform.net/…`, zodat opslaan werkt). In het manifest `LEANBACK_LAUNCHER`, een banner (320×180) en `uses-feature` leanback/touchscreen/gamepad op `required="false"`, zodat dezelfde app ook op telefoons kan.
+- **De app:** één `Activity` met een WebView die het spel uit de app-bestanden laadt via `WebViewAssetLoader` (`https://appassets.androidplatform.net/…`, zodat opslaan werkt). In het manifest `LEANBACK_LAUNCHER`, een banner (320×180) en `uses-feature` leanback/touchscreen/gamepad op `required="false"`, zodat dezelfde app ook op telefoons kan. Staat er `screenOrientation="landscape"` in, zet dan ook `uses-feature` `android.hardware.screen.landscape` en `.portrait` op `required="false"`, anders denkt Google Play dat een liggend scherm verplicht is en vallen toestellen af.
 - **Controller in de app:** geef hem zelf door (de WebView geeft de Gamepad API niet op elk toestel door): hoogstens één keer per beeld (`postOnAnimation`), alleen als er iets veranderd is, met een teller per knop (een snelle tik gaat niet verloren). Links/rechts meteen, met hoe lang geleden het gebeurde. De terug-knop roept het spel aan (`window.tvBack()`); op het titelscherm sluit de app.
-- **De workflow** (*Maak de Android-app*) zet de site in de app, bouwt een `.apk` (voor Downloader) en een ondertekende `.aab` (voor Google Play) en zet ze bij een release. Gebruik de Android SDK van de runner (de setup-action installeert een verdwenen pakket). Versiecode = het nummer van de GitHub-run.
+- **De workflow** (*Maak de Android-app*) zet de site in de app, bouwt een `.apk` (voor Downloader) en een ondertekende `.aab` (voor Google Play) en zet de `.apk` bij een release. De `.aab` komt nooit openbaar: alleen als artifact in een 7z met wachtwoord (een artifact van een openbare repository kan iedereen met een GitHub-account downloaden). Gebruik de Android SDK van de runner (de setup-action installeert een verdwenen pakket). Versiecode = het nummer van de GitHub-run. **R8** (`isMinifyEnabled` en `isShrinkResources`, alleen voor de release) maakt de bundel kleiner en haalt de waarschuwing in Play Console weg; met één WebView zonder JavaScript-brug hoeft er niets bewaard te blijven (alleen regelnummers voor crashrapporten). Stop het mapping-bestand mee in de 7z. Een script (`npm run build:aab`) start de workflow, wacht, haalt de 7z op en pakt hem uit; zet het ook als taak in VS Code.
 - **De sleutel:** maak één keer een keystore (`keytool`), zet hem als secret met de GitHub CLI (`base64 -w0 sleutel.jks | gh secret set ANDROID_KEYSTORE_BASE64`), niet met kopiëren en plakken (dan breekt hij). Decodeer in de workflow met Python (tolerant voor regeleinden en URL-veilige tekens) en controleer met `keytool -list`. Nooit de sleutel of het wachtwoord in de repository.
-- **Google Play (alleen voor de familie):** een ontwikkelaarsaccount ($25 eenmalig), app maken, **Android TV** toevoegen als apparaattype, de vragenlijsten (privacybeleid, advertenties, inhoudsclassificatie, doelgroep, gegevensveiligheid), de winkelvermelding (teksten, icoon, feature graphic, schermafbeeldingen, tv-banner; `npm run store` maakt de plaatjes), en een **interne test** met de Google-accounts van de familie. Tot de eerste beoordeling heet de app "pakketnaam (unreviewed)", zonder plaatjes: stuur de wijzigingen in via *Publishing overview*.
+- **Google Play (alleen voor de familie):** een ontwikkelaarsaccount ($25 eenmalig), app maken, **Android TV** toevoegen als apparaattype, de vragenlijsten (privacybeleid, advertenties, inhoudsclassificatie, doelgroep, gegevensveiligheid), de winkelvermelding (teksten, icoon, feature graphic, schermafbeeldingen, tv-banner; `npm run store` maakt de plaatjes), en een **interne test** met de Google-accounts van de familie. Tot de eerste beoordeling heet de app "pakketnaam (unreviewed)", zonder plaatjes: stuur de wijzigingen in via *Publishing overview*. Een beoordeling duurt meestal uren tot een paar dagen (de eerste keer en bij een nieuw account langer). Een gesloten of open test is alleen te zien in de landen die je bij die test aanzet; staat je Google-account in een ander land, voeg dat land dan toe. Oude, verwijderde apps in hetzelfde ontwikkelaarsaccount kunnen een beleidsmelding geven: los die op (of laat de app definitief verwijderen) voor je publiceert.
+- **Release notes bij elke pull request**, in het formaat dat Play Console overneemt (`<nl-NL>…</nl-NL>`, eventueel `<en-GB>…</en-GB>`), hoogstens 500 tekens per taal en geschreven voor spelers. Gaan er meer PR's in één release, voeg ze samen.
 - **Google Play verhoogt elk jaar de vereiste Android-versie** (`targetSdk`); de Android-plugin, Gradle en Java hangen van elkaar af: laat Renovate ze als één groep bijwerken.
 - **Installeren op de tv:** vanaf de telefoon (*Installeren op meer apparaten*) of de computer; een testapp is in de Play Store op de tv vaak niet te vinden. Een eerder met Downloader geïnstalleerde versie eerst verwijderen (andere ondertekening).
 
@@ -212,6 +218,8 @@ Precies zoals in de escaperooms:
 - **Datums** (aftellen, zomertijd, bijzondere dagen), **voortgang en opslaan** (ook zonder `localStorage`), **de app** (installeerbaar, offline, elk bestand in de offline-lijst, versie gelijk aan de cache, metatags voor iOS) en **geen fouten in de console**.
 - **Controleer wat de speler ziet**, niet alleen de toestand: een venster dat open moet zijn, de tekst die erin moet staan, een knop die in beeld moet zijn.
 - **Geen Safari of echte tv in de CI:** test met de formaten in Chromium, en laat het op een echt toestel nakijken.
+- **Wacht op een toestand, niet op een vaste tijd:** `expect.poll(() => …)` in plaats van `waitForTimeout(700)`. Op een drukke CI-machine duurt alles langer; een test die een hendel overhaalt, probeert het opnieuw als een beest het poppetje net wegduwde.
+- **Niet te veel tests tegelijk** (`--workers`): tijdgevoelige tests (precieze tikjes) falen dan omdat de machine het niet bijhoudt, niet omdat het spel stuk is.
 
 ## 13. GitHub, CI en AI-agents
 
@@ -243,6 +251,9 @@ Uit dit project, over de code:
 - **Een waggel- of loopanimatie op `tijd + positie` trilt** zodra iets beweegt: laat hem van de afgelegde weg afhangen.
 - **Schuif een tekenpositie niet heen en terug** (`translate(x)` en `translate(-x)`): dat laat afrondingsfouten achter. Bewaar de matrix en zet hem terug met `setTransform`.
 - **Een snelheidsgrens met zacht afremmen erboven** moet ook het versnellen begrenzen, anders blijft de snelheid erboven hangen.
+- **Een vertaalfunctie op een lijst** (`T(["a","b"], …)`) of een zoek-en-vervang met een te ruime regex kan een lijst zinnen in losse letters veranderen: een tekstballon per letter. Laat `say()` een losse zin zelf in een lijst stoppen, en test dat elke ballon een hele zin is.
+- **Een extra bewaarvlag** die afhangt van "is er een opdracht" moet ook nieuwe soorten opdrachten kennen, anders staan er twee vlaggen naast elkaar.
+- **Emoji nemen de doorzichtigheid van `fillStyle` over:** zet een ondoorzichtige kleur vóór `emoji()` als er net een schaduw getekend is.
 
 Uit dit project, over apparaten:
 - **Een tv is trager en vaak 50 Hz:** interpolatie en minder tekenwerk per beeld. De blaadjes liepen soepel (die bewegen per beeld), het poppetje niet (dat beweegt per stap): dat was de aanwijzing.
@@ -252,12 +263,17 @@ Uit dit project, over apparaten:
 - **Ctrl+W sluit het tabblad** en is niet tegen te houden: noem Shift voor rennen.
 - **Een menu dat rechtop is ontworpen, past niet op een tv.** Ontwerp het brede menu op 960×540 en schaal het mee.
 - **iOS vergroot tekst bij draaien** en start geluid pas na een tik.
+- **Lopen dat blijft hangen en dan ineens doorschiet** komt van een tijdstempel van een andere klok (Android-WebView): begrens hoe ver een tijdstempel mag afwijken.
+- **Dunne flikkerende lijntjes in de grond** komen van schalen naar halve pixels: laat tegels overlappen.
 
 Uit dit project, over publiceren:
 - **Pages-bron op GitHub Actions**, anders faalt de ingebouwde publicatie.
 - **Een keystore als secret** via de GitHub CLI zetten, niet plakken; decoderen met Python; controleren met `keytool`.
 - **Afhankelijke updates (Android-plugin, Gradle, Java) falen apart**: laat Renovate ze groeperen.
 - **Een tijdelijke app-naam "(unreviewed)"** in Google Play verdwijnt pas na de eerste beoordeling.
+- **Een artifact van een openbare repository kan iedereen met een GitHub-account downloaden:** zet de `.aab` alleen in een 7z met wachtwoord, nooit bij een release.
+- **`screenOrientation="landscape"` maakt een liggend scherm verplicht** in de ogen van Google Play: zet de `uses-feature` op niet verplicht.
+- **Parallelle PR's die allemaal het versienummer verhogen, botsen op die ene regel.** Geef ze oplopende nummers en voeg na elke samenvoeging `main` in de volgende.
 - **Vraag naar gevoelige dagen** en behandel ze apart, rustig en zonder spelelementen die eraan afdoen.
 
 ## 15. Stappenplan voor een nieuw thema
@@ -287,6 +303,7 @@ Uit dit project, over publiceren:
 - `AGENTS.md` bijgewerkt.
 - Schermafbeeldingen bekeken van alles wat veranderde, op computer, telefoon en tv-formaat.
 - Bij optimalisaties: beelden van `main` en de branch pixel voor pixel vergeleken.
+- Release notes voor Google Play in de beschrijving.
 
 ## 17. Beginprompt voor een nieuw project
 
