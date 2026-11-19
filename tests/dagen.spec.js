@@ -26,7 +26,7 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dal
       }
       // Where you can swim (Dalmatia), the water carries you too: count it a row lower than the ground, to be safe.
       if (L.d.swim) for (let x = 0; x < L.w; x++) if (L.grid[ROWS - 1][x] !== '#') ride.add(x + ',12');
-      const stand = (x, y, open) => y >= 1 && y < ROWS - 1 && !solid(x, y, open) && !solid(x, y - 1, open) && (solid(x, y + 1, open) || L.grid[y + 1][x] === '=' || ride.has(x + ',' + y)) && L.grid[y][x] !== '^';
+      const stand = (x, y, open) => y >= 1 && y < ROWS - 1 && !solid(x, y, open) && !solid(x, y - 1, open) && (solid(x, y + 1, open) || L.grid[y + 1][x] === '=' || ride.has(x + ',' + y) || L.grid[y][x] === '|' || L.grid[y + 1][x] === '|') && L.grid[y][x] !== '^';
       const wall = (a, b) => { const s = Math.sign(b - a); for (let x = a + s; x !== b + s && a !== b; x += s) if ('GH'.includes(L.grid[2][x])) return true; return false; };
       const reach = open => {
         const seen = new Set(['2,11']), q = [[2, 11]];

@@ -14,7 +14,7 @@ function menuAutoFocus() {
   if (state === "play" || lastInput === "pointer") return;
   requestAnimationFrame(() => { if (state !== "play" && !gpCurrent()) gpFocus(gpDefault(gpFocusables())); });
 }
-const padHeld = { left: false, right: false, jump: false, run: false };
+const padHeld = { left: false, right: false, jump: false, run: false, down: false };
 const BTN = { A: 0, B: 1, X: 2, Y: 3, L1: 4, R1: 5, L2: 6, R2: 7, START: 9, UP: 12, DOWN: 13, LEFT: 14, RIGHT: 15 };
 
 function getPads(consume = false) {
@@ -122,7 +122,7 @@ function gpRumble(ms = 160, strong = .6) {
 
 /* ---------- Elke frame: de controllers uitlezen ---------- */
 function pollGamepads() {
-  padHeld.left = padHeld.right = padHeld.jump = padHeld.run = false;
+  padHeld.left = padHeld.right = padHeld.jump = padHeld.run = padHeld.down = false;
   const pads = getPads(true);
   if ((pads.length > 0) !== GP.on) gpStatus();
   if (!pads.length) return;
@@ -139,6 +139,7 @@ function pollGamepads() {
       if (!(GP.tvDir && p.id === "Google TV controller")) { padHeld.left = padHeld.left || L; padHeld.right = padHeld.right || R; }
       padHeld.jump = padHeld.jump || b(BTN.A) || b(BTN.UP);
       padHeld.run = padHeld.run || b(BTN.L1) || b(BTN.R1) || b(BTN.L2) || b(BTN.R2);
+      padHeld.down = padHeld.down || D; // down on a ladder
       if (down(BTN.A) || down(BTN.UP)) edges.push("jump");
       if (down(BTN.X) || down(BTN.B) || down(BTN.Y) || down(BTN.DOWN)) edges.push("act");
       if (down(BTN.START)) toTitle();

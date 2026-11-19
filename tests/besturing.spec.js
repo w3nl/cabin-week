@@ -263,3 +263,41 @@ test('dubbeltikken en vasthouden is ook rennen (voor afstandsbediening en touchs
   expect(r.dubbel).toBeGreaterThan(6);
   expect(r.telaat).toBeCloseTo(4.4, 1);   // twee losse tikken met een pauze: gewoon lopen
 });
+
+test('on a plank, ↓ drops you through it; on the ground ↓ does nothing of the sort', async ({ page }) => {
+  await seed(page, { region: 'pole', unlocked: 8 });
+  await startDay(page, 2);
+  const plank = await page.evaluate(() => {
+    window.hurt = () => {}; L.enemies.length = 0;
+    // a plank with empty space below and nothing to talk to nearby
+    const far = x => [...L.npcs, ...L.signs, ...L.clues].every(o => Math.abs(o.x - x) > 90);
+    for (let y = 3; y < 11; y++) for (let x = 4; x < L.w - 4; x++)
+      if (L.grid[y][x] === '=' && L.grid[y][x + 1] === '=' && L.grid[y + 1][x] === ' ' && L.grid[y + 1][x + 1] === ' ' && L.grid[y][x - 1] !== '|' && far(x * 32)) return { x, y };
+  });
+  await page.evaluate(p => { P.x = p.x * 32 + 5; P.y = p.y * 32 - P.h; P.vx = P.vy = 0; dialog = null; }, plank);
+  await expect.poll(() => page.evaluate(() => P.onGround)).toBe(true);
+  await page.keyboard.press('ArrowDown');
+  await expect.poll(() => page.evaluate(p => P.y + P.h > p.y * 32 + 40, plank)).toBe(true);
+});
+
+test('a ladder: hold ↑ to climb up onto the loft, hold ↓ to climb back down', async ({ page }) => {
+  await seed(page, { region: 'pole', unlocked: 8 });
+  await startDay(page, 2);
+  const lad = await page.evaluate(() => {
+    window.hurt = () => {}; L.enemies.length = 0;
+    for (let x = 0; x < L.w; x++) for (let y = 0; y < 12; y++) if (L.grid[y][x] === '|' && L.grid[y - 1][x] === '=') {
+      let b = y; while (L.grid[b + 1][x] === '|') b++;
+      return { x, top: y - 1, bottom: b };
+    }
+  });
+  expect(lad).toBeTruthy();
+  await page.evaluate(l => { P.x = l.x * 32 + 5; P.y = (l.bottom + 1) * 32 - P.h; P.vx = P.vy = 0; dialog = null; }, lad);
+  await page.keyboard.down('ArrowUp');
+  await expect.poll(() => page.evaluate(l => Math.round(P.y + P.h) <= l.top * 32 + 1, lad), { timeout: 5000 }).toBe(true);
+  await page.keyboard.up('ArrowUp');
+  // standing on the loft now
+  await expect.poll(() => page.evaluate(l => P.onGround && Math.abs(P.y + P.h - l.top * 32) < 1, lad)).toBe(true);
+  await page.keyboard.down('ArrowDown');
+  await expect.poll(() => page.evaluate(l => P.y + P.h >= (l.bottom + 1) * 32 - 1, lad), { timeout: 5000 }).toBe(true);
+  await page.keyboard.up('ArrowDown');
+});
