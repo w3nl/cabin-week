@@ -120,6 +120,7 @@ addEventListener("keydown", e => {
   // In menu's: pijltjes kiezen een knop, Enter/OK drukt (gamepad.js). Zo werkt ook een tv-afstandsbediening.
   if (state !== "play" && menuKey(e)) return;
   if (state === "pad") { padKey(e); return; }
+  if (e.code === "Escape" && state === "hero" && heroKeysOpen()) { closeHeroKeys(); return; }
   if (e.code === "Escape") { if (state === "play" || state === "intro" || state === "map" || state === "hero") toTitle(); return; }
   const a = KEYMAP[e.code];
   if (!a) return;

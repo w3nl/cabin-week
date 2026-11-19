@@ -45,6 +45,7 @@ let heroDraft = null, heroAnim = 0;
 function openHero() {
   heroDraft = Object.assign({}, HERO_DEFAULT, save.hero || {});
   $("heroName").value = heroDraft.name || "";
+  $("heroKeys").hidden = true; $("heroRows").hidden = false;
   buildHeroRows(); setScreen("hero"); heroPreview();
 }
 function buildHeroRows() {
@@ -93,8 +94,83 @@ function heroSave() {
   save.hero = Object.assign({}, heroDraft); save.char = "me"; persist();
   SFX.key(); toTitle();
 }
+/* ---------- Moving around the creator with arrows, a remote or a controller ----------
+   The creator is a grid of rows, so it gets its own navigation instead of "the nearest button in that direction"
+   (that jumped over rows of different lengths, and never reached the name field):
+   ↑/↓ always go to the row above or below, to the option closest to where you came from (and back again);
+   ←/→ go along a row; ← from the first option goes to the buttons by the preview, → from there back to the rows.
+   The name field sits above Done; ↑/↓ also leave the name field. */
+let heroNavX = null;
+function heroMove(dir) {
+  if (heroKeysOpen()) return false; // the letter keyboard is an even grid: the usual navigation works there
+  const name = $("heroName"), cur = document.activeElement;
+  const cta = [...document.querySelectorAll("#heroWrap .cta button")].filter(b => b.offsetParent !== null);
+  const rows = [...document.querySelectorAll("#heroRows .hero-row")].map(r => [...r.querySelectorAll("button")]);
+  if (!rows.length) return false;
+  const box = el => el.getBoundingClientRect(), cx = el => box(el).left + box(el).width / 2, cy = el => box(el).top + box(el).height / 2;
+  const near = (list, x) => list.reduce((a, b) => Math.abs(cx(b) - x) < Math.abs(cx(a) - x) ? b : a);
+  const chosen = list => list.find(b => b.getAttribute("aria-pressed") === "true") || list[0];
+  // Side by side (wide screens): the rows are to the right of the preview. Otherwise (an upright phone) below it.
+  const beside = box($("heroRows")).left >= box(document.querySelector("#heroWrap .hero-side")).right - 4;
+  const go = el => { if (el) gpFocus(el); return true; };
+  const ri = rows.findIndex(r => r.includes(cur));
+  if (ri >= 0) {
+    const row = rows[ri], i = row.indexOf(cur);
+    if (dir === "left") { heroNavX = null; return go(i > 0 ? row[i - 1] : beside ? cta[0] : null); }
+    if (dir === "right") { heroNavX = null; return go(row[i + 1]); }
+    const x = heroNavX ?? cx(cur), to = rows[ri + (dir === "down" ? 1 : -1)];
+    heroNavX = x;
+    if (to) return go(near(to, x));
+    return go(dir === "up" && !beside ? cta[0] : null);
+  }
+  heroNavX = null;
+  const ci = cta.indexOf(cur);
+  if (ci >= 0) {
+    if (dir === "left") return go(cta[ci - 1]);
+    if (dir === "right") return go(cta[ci + 1] || (beside ? chosen(rows.reduce((a, r) => Math.abs(cy(r[0]) - cy(cur)) < Math.abs(cy(a[0]) - cy(cur)) ? r : a)) : null));
+    if (dir === "up") return go(name);
+    return go(beside ? null : chosen(rows[0]));
+  }
+  if (cur === name) {
+    if (dir === "down") return go(cta[0]);
+    if (dir === "right" && beside) return go(chosen(rows[0]));
+    return true;
+  }
+  return false; // nothing in the creator has focus yet: the menu code puts it on Done
+}
+
 $("heroDone").onclick = heroSave;
 $("heroRandom").onclick = heroRandom;
 $("heroCancel").onclick = toTitle;
-// Typing a name: Enter saves; other keys stay in the field (not the game or the menu).
-$("heroName").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); heroSave(); } else if (e.key === "Escape") toTitle(); e.stopPropagation(); });
+/* ---------- Letters on screen: a name with a remote or a controller ----------
+   OK/Enter (without typing) or ✕/A on the name field shows a keyboard of letters in place of the rows. A name starts with
+   a capital, the rest is small. Back, Escape or OK closes it again. Typing on a real keyboard still works as before. */
+function heroKeysOpen() { return !$("heroKeys").hidden; }
+function openHeroKeys() {
+  const box = $("heroKeys"), name = $("heroName"); box.innerHTML = "";
+  const add = (label, fn, cls = "", aria) => { const b = document.createElement("button"); b.type = "button"; b.className = "key " + cls; b.textContent = label; if (aria) b.setAttribute("aria-label", aria); b.onclick = () => { fn(); tone(660, .03, "triangle", .03); }; box.appendChild(b); return b; };
+  const put = v => { name.value = v.slice(0, 12); heroDraft.name = name.value; };
+  [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].forEach(ch => add(ch, () => { const v = name.value; put(v + (!v || v.endsWith(" ") ? ch : ch.toLowerCase())); }));
+  add(T("Space", "Spatie"), () => { if (name.value && !name.value.endsWith(" ")) put(name.value + " "); }, "wide");
+  add("⌫", () => put(name.value.slice(0, -1)), "", T("Delete a letter", "Letter weg"));
+  add("OK", () => closeHeroKeys(), "ok");
+  $("heroRows").hidden = true; box.hidden = false; name.blur();
+  gpFocus(box.querySelector("button"));
+}
+function closeHeroKeys() {
+  $("heroKeys").hidden = true; $("heroRows").hidden = false;
+  gpFocus($("heroDone"));
+}
+
+// Typing a name: other keys stay in the field (not the game or the menu). ↑/↓ leave the field, Escape goes back.
+// Enter saves once you have typed something; Enter (or OK on a remote) on the field without typing does nothing
+// special, so on a TV it can open the on-screen keyboard instead of saving straight away.
+let heroNameTyped = false;
+$("heroName").addEventListener("focus", () => { heroNameTyped = false; });
+$("heroName").addEventListener("input", () => { heroNameTyped = true; });
+$("heroName").addEventListener("keydown", e => {
+  e.stopPropagation();
+  if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); lastInput = "key"; heroMove(e.key === "ArrowUp" ? "up" : "down"); }
+  else if (e.key === "Enter") { e.preventDefault(); if (heroNameTyped) heroSave(); else openHeroKeys(); }
+  else if (e.key === "Escape") toTitle();
+});

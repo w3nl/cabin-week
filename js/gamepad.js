@@ -57,11 +57,13 @@ function gpFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.sc
 function gpDefault(list) {
   if (state === "title") { const days = list.filter(b => b.closest("#levels")); return days[days.length - 1] || list[0]; }
   if (state === "map") return list.find(b => b.classList.contains("here")) || list[0];
-  if (state === "hero") return $("heroDone");
+  if (state === "hero") return heroKeysOpen() ? $("heroKeys").querySelector("button") : $("heroDone");
   return list[0];
 }
 /** Ga naar de dichtstbijzijnde knop in een richting. */
 function gpMove(dir) {
+  // the hero creator is a grid of rows, with its own navigation (heroMove() in hero.js)
+  if (state === "hero" && heroMove(dir)) return;
   const list = gpFocusables(); if (!list.length) return;
   const cur = gpCurrent(); if (!cur) return gpFocus(gpDefault(list));
   const r = cur.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -79,6 +81,8 @@ function gpMove(dir) {
 }
 /** Druk op de knop met focus; blijft de focus daarna hangen, zet hem terug op dezelfde plek. */
 function gpPress() {
+  // ✕/A on the name field: the letters on screen, to type a name without a keyboard
+  if (state === "hero" && document.activeElement === $("heroName")) { openHeroKeys(); return; }
   const list = gpFocusables(), cur = gpCurrent();
   if (!cur) return gpFocus(gpDefault(list));
   const idx = list.indexOf(cur), before = state;
@@ -90,7 +94,8 @@ function gpPress() {
   });
 }
 function gpBack() {
-  if (state === "pad") setScreen("play");
+  if (state === "hero" && heroKeysOpen()) closeHeroKeys(); // Back closes the letters first
+  else if (state === "pad") setScreen("play");
   else if (state === "intro" || state === "card" || state === "map" || state === "hero") toTitle();
 }
 
