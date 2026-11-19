@@ -2,7 +2,7 @@
 // - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding
 // - social-preview.png (1280×640): de social preview van de repository op GitHub (Settings → General → Social preview)
 // - tv-banner.png (1280×720): de banner voor Android TV (uit android-tv/banner.svg)
-// - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, seven regions and your own hero
+// - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, six regions and your own hero
 const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 const fs = require('fs');

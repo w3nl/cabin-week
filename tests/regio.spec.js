@@ -30,7 +30,7 @@ test('the map shows the regions; choosing one switches the days, and the choice 
   await expect(page.locator('#levels .t').first()).toHaveText('Arrival in Glen Rowan');
   await page.reload();
   await expect(page.locator('#regionName')).toHaveText('Scotland');
-  expect(await page.evaluate(KEY => JSON.parse(localStorage.getItem(KEY)).region, KEY)).toBe('tirol');
+  expect(await page.evaluate(KEY => JSON.parse(localStorage.getItem(KEY)).region, KEY)).toBe('scotland');
 });
 
 test('every region starts at day 1: you do not have to finish the Ardennes first', async ({ page }) => {
@@ -249,6 +249,22 @@ test('Dalmatia is summer: no snow, summer clothes, and in the warm sea you swim 
     return { swimming, hearts, up };
   });
   expect(r).toEqual({ swimming: true, hearts: 3, up: true });
+});
+
+test('Scotland is summer too: no snowy city, thistles instead of icicles, and every decoration is drawn', async ({ page }) => {
+  await seed(page, { unlocked: 8, region: 'scotland' });
+  const r = await page.evaluate(() => {
+    // the summer cities use their own theme, never the snowy Christmas-market city
+    const themes = LEVELS.map(l => l.theme);
+    // every decoration kind used in Scotland has its own drawing (an unknown kind draws nothing)
+    const src = drawDeco.toString();
+    const missing = [...new Set(LEVELS.flatMap(l => l.deco.map(d => d[0])))].filter(k => !src.includes(`kind === "${k}"`));
+    return { themes, missing, weather: LEVELS.every(l => l.weather) };
+  });
+  expect(r.themes).not.toContain('stad');
+  expect(r.themes).toContain('straat');
+  expect(r.missing).toEqual([]);
+  expect(r.weather).toBe(true);
 });
 
 test('a summer region says "summer days" on the title screen', async ({ page }) => {
