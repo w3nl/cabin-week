@@ -377,7 +377,7 @@ function chaletShape(x, y, s, wall, roof) {
   g.fillStyle = "#f4f8ff"; g.beginPath(); g.moveTo(x - 6 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 34 * s); g.lineTo(x + 36 * s, y - 20 * s); g.lineTo(x + 15 * s, y - 30 * s); g.fill();
   g.fillStyle = "#ffd27a"; g.fillRect(x + 5 * s, y - 15 * s, 5 * s, 5 * s); g.fillRect(x + 20 * s, y - 15 * s, 5 * s, 5 * s);
 }
-const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls", "smaland"]);
+const SCENES = new Set(["pole", "alps", "fjord", "polder", "grachten", "duinen", "adriatic", "oldtown", "falls", "smaland", "highlands"]);
 /** A small windmill in the background (sails do not turn there: the layer is drawn once). */
 function farMill(x, y, s, body, sail) {
   g.fillStyle = body; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x - 3 * s, y - 26 * s); g.lineTo(x + 3 * s, y - 26 * s); g.lineTo(x + 6 * s, y); g.fill();
@@ -386,7 +386,7 @@ function farMill(x, y, s, body, sail) {
 }
 function getSceneLayers(scene) {
   if (LAYERS[scene]) return LAYERS[scene];
-  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009, smaland: 9010 }[scene] || 1), out = {};
+  const R = rng({ pole: 9001, alps: 9002, fjord: 9003, polder: 9004, grachten: 9005, duinen: 9006, adriatic: 9007, oldtown: 9008, falls: 9009, smaland: 9010, highlands: 9011 }[scene] || 1), out = {};
   if (scene === "pole") {
     // ice floes and icebergs far away
     out.far = layerCanvas(() => {
@@ -598,6 +598,51 @@ function getSceneLayers(scene) {
         if (R() < .12) { g.fillStyle = ["#f5d23a", "#f4f4f0", "#9a5ad8", "#e8423a"][Math.floor(R() * 4)]; g.beginPath(); g.arc(x + 2, y - 8, 2, 0, 7); g.fill(); } }
     });
   }
+  else if (scene === "highlands") {
+    // Layered Highland ridges, a deep loch and stone castles in long summer light.
+    out.far = layerCanvas(() => {
+      fillRidge(260, [[48, 3, 1], [27, 8, 2], [12, 15, 3]], "#647878");
+      fillRidge(286, [[32, 4, 2], [17, 10, 1]], "#526b67");
+      g.fillStyle = "#315c70"; g.fillRect(0, 300, LW, 200);
+      g.fillStyle = "rgba(220,240,240,.42)";
+      for (let x = 0; x < LW; x += 22) g.fillRect(x + R() * 12, 306 + R() * 34, 12, 1.5);
+      for (let x = 130; x < LW; x += 390) {
+        const y = 302 + R() * 5, w = 80 + R() * 55;
+        g.fillStyle = "#45594f"; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + w * .5, y - 16, x + w, y); g.fill();
+      }
+      // a small ruined castle on a ridge
+      g.fillStyle = "#6b6d64"; g.fillRect(850, 236, 48, 43); g.fillRect(844, 220, 14, 59); g.fillRect(889, 226, 14, 53);
+      g.fillStyle = "#565b55";
+      for (let x = 844; x < 902; x += 10) g.fillRect(x, x % 2 ? 214 : 220, 7, 7);
+      g.fillRect(867, 253, 9, 26);
+    });
+    out.mid = layerCanvas(() => {
+      const a = [[18, 4, 1], [9, 9, 2]];
+      fillRidge(340, a, "#557253", "#78905d");
+      for (let x = 22; x < LW; x += 160 + R() * 130) {
+        const y = ridge(340, a, x), w = 42 + R() * 26, h = 28 + R() * 16;
+        g.fillStyle = "#74766c"; g.fillRect(x, y - h, w, h);
+        g.fillStyle = "#555d58"; g.fillRect(x + 6, y - h + 8, w - 12, 3);
+        g.fillRect(x + 11, y - 11, 8, 11); g.fillRect(x + w - 19, y - 11, 8, 11);
+        g.fillStyle = "#4a5a51"; g.fillRect(x + w * .48, y - 21, 8, 21);
+        g.fillStyle = "#6c7065"; g.fillRect(x - 4, y - h - 4, w + 8, 6);
+      }
+      for (let x = 0; x < LW; x += 8) if (R() < .35) {
+        const y = ridge(340, a, x) + 2;
+        g.fillStyle = ["#8b6680", "#ac7791", "#d0b38a"][Math.floor(R() * 3)];
+        g.fillRect(x, y - 5 - R() * 8, 2, 2);
+      }
+    });
+    out.near = layerCanvas(() => {
+      const a = [[11, 4, 2], [6, 9, 1]];
+      fillRidge(392, a, "#60794b", "#83945e");
+      for (let x = 0; x < LW; x += 7) {
+        const y = ridge(392, a, x) + 4;
+        g.strokeStyle = "#75855a"; g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + 2, y - 5 - R() * 7); g.stroke();
+      }
+    });
+  }
   else if (scene === "adriatic") {
     // the summer sea with islands, the grey coastal mountains behind (like the Velebit and the Biokovo)
     out.far = layerCanvas(() => {
@@ -681,13 +726,14 @@ function drawAurora(strength) {
 function drawSceneSky(scene) {
   const skies = { pole: ["#061024", "#14385a", "#3a6f92"], alps: ["#1a2a5a", "#5a6aa8", "#e0a5a0"], fjord: ["#050b22", "#1a2350", "#3b3f7a"],
     polder: ["#4a6488", "#8ea6c4", "#d8c8b8"], grachten: ["#0a1430", "#2a3466", "#6a5a82"], duinen: ["#5a7ca8", "#a8c4dc", "#f0dcc0"],
-    adriatic: ["#2a7ad8", "#7ac0f0", "#d8f0fa"], smaland: ["#3a7ad8", "#9ad0f0", "#eef8f4"], oldtown: ["#3a7ad0", "#f0b878", "#f8d8a8"], falls: ["#3a8ad8", "#9ad0f0", "#e0f4f8"] }[scene];
+    adriatic: ["#2a7ad8", "#7ac0f0", "#d8f0fa"], smaland: ["#3a7ad8", "#9ad0f0", "#eef8f4"], oldtown: ["#3a7ad0", "#f0b878", "#f8d8a8"], falls: ["#3a8ad8", "#9ad0f0", "#e0f4f8"],
+    highlands: ["#7298b1", "#bdd0ce", "#f2dbac"] }[scene];
   g.fillStyle = grad("sky-" + scene, () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, skies[0]); gr.addColorStop(.62, skies[1]); gr.addColorStop(1, skies[2]); return gr; });
   g.fillRect(0, 0, viewW, VIEW_H);
   g.fillStyle = "#fff";
-  if (scene === "adriatic" || scene === "oldtown" || scene === "falls" || scene === "smaland") {
+  if (scene === "adriatic" || scene === "oldtown" || scene === "falls" || scene === "smaland" || scene === "highlands") {
     // summer: a big warm sun, no stars
-    const sx = viewW * (scene === "oldtown" ? .78 : .2), sy = scene === "oldtown" ? 150 : 80;
+    const sx = viewW * (scene === "oldtown" ? .78 : scene === "highlands" ? .76 : .2), sy = scene === "oldtown" ? 150 : scene === "highlands" ? 74 : 80;
     g.fillStyle = grad("sun-" + scene, () => { const sg = g.createRadialGradient(sx, sy, 10, sx, sy, 160); sg.addColorStop(0, "rgba(255,250,210,1)"); sg.addColorStop(.25, "rgba(255,236,160,.7)"); sg.addColorStop(1, "rgba(255,236,160,0)"); return sg; });
     g.fillRect(sx - 160, sy - 160, 320, 320);
     g.fillStyle = "#fff8d8"; g.beginPath(); g.arc(sx, sy, 30, 0, 7); g.fill();
@@ -1051,6 +1097,41 @@ function drawDeco(kind, x, theme, far) {
     [[px + 12, by - 74], [px + 52, by - 74], [px + 12, by - 38]].forEach(([wx, wy]) => { g.fillStyle = "#3a2a1a"; g.fillRect(wx, wy, 16, 22); g.fillStyle = "#3a7a4a"; g.fillRect(wx - 7, wy, 6, 22); g.fillRect(wx + 17, wy, 6, 22); });
     g.fillStyle = "#6a4a2a"; g.fillRect(px + 50, by - 34, 18, 34); g.strokeRect(px + 50, by - 34, 18, 34);
     g.fillStyle = "#d83a8a"; for (let i = 0; i < 14; i++) { g.beginPath(); g.arc(px + 72 + Math.sin(i * 2.1) * 8, by - 20 - i * 4, 3, 0, 7); g.fill(); }
+  } else if (kind === "highlandhouse") {
+    shadowAt(px + 42, by, 42);
+    g.fillStyle = "#77796f"; g.fillRect(px, by - 54, 84, 54); g.strokeRect(px, by - 54, 84, 54);
+    g.fillStyle = "#686d66";
+    for (let y = by - 48; y < by - 4; y += 11) for (let xx = px + (y % 2 ? 7 : 0); xx < px + 84; xx += 18) g.fillRect(xx, y, 15, 2);
+    g.fillStyle = "#424b4d"; g.beginPath(); g.moveTo(px - 8, by - 52); g.lineTo(px + 42, by - 86); g.lineTo(px + 92, by - 52); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#525952"; g.fillRect(px + 63, by - 82, 9, 29); g.strokeRect(px + 63, by - 82, 9, 29);
+    [[px + 12, by - 40], [px + 52, by - 40]].forEach(([wx, wy]) => { g.fillStyle = "#3e4c50"; g.fillRect(wx, wy, 14, 17); g.strokeRect(wx, wy, 14, 17); g.fillStyle = "#e5d19c"; g.fillRect(wx + 2, wy + 2, 10, 13); });
+    g.fillStyle = "#4c4940"; g.fillRect(px + 33, by - 29, 18, 29); g.strokeRect(px + 33, by - 29, 18, 29);
+  } else if (kind === "castle") {
+    shadowAt(px + 48, by, 50);
+    g.fillStyle = "#77796f"; g.fillRect(px + 8, by - 66, 76, 66); g.strokeRect(px + 8, by - 66, 76, 66);
+    g.fillStyle = "#666b65"; g.fillRect(px, by - 88, 24, 88); g.strokeRect(px, by - 88, 24, 88);
+    g.fillRect(px + 68, by - 80, 24, 80); g.strokeRect(px + 68, by - 80, 24, 80);
+    g.fillStyle = "#62675f";
+    for (let xx = px; xx < px + 94; xx += 12) g.fillRect(xx, by - (xx % 2 ? 88 : 80) - 7, 8, 8);
+    g.fillStyle = "#424b4d"; g.fillRect(px + 39, by - 34, 16, 34); g.strokeRect(px + 39, by - 34, 16, 34);
+    g.fillStyle = "#a9a48d"; g.fillRect(px + 16, by - 59, 5, 12); g.fillRect(px + 76, by - 70, 5, 12);
+  } else if (kind === "tartan") {
+    shadowAt(px + 34, by, 24);
+    g.fillStyle = "#264d3a"; g.fillRect(px, by - 48, 68, 42); g.strokeRect(px, by - 48, 68, 42);
+    g.fillStyle = "#9c2935";
+    for (let xx = px + 7; xx < px + 68; xx += 18) g.fillRect(xx, by - 48, 5, 42);
+    for (let yy = by - 42; yy < by - 6; yy += 16) g.fillRect(px, yy, 68, 5);
+    g.fillStyle = "rgba(240,210,120,.72)";
+    for (let xx = px + 2; xx < px + 68; xx += 18) g.fillRect(xx, by - 48, 1.5, 42);
+    for (let yy = by - 42; yy < by - 6; yy += 16) g.fillRect(px, yy, 68, 1.5);
+    g.fillStyle = "#795333"; g.fillRect(px + 10, by - 6, 4, 6); g.fillRect(px + 54, by - 6, 4, 6);
+  } else if (kind === "bagpipes") {
+    shadowAt(px + 32, by, 22);
+    g.strokeStyle = "#26352e"; g.lineWidth = 5; g.beginPath(); g.moveTo(px + 27, by - 16); g.lineTo(px + 22, by - 72); g.moveTo(px + 39, by - 18); g.lineTo(px + 48, by - 70); g.stroke();
+    g.fillStyle = "#8b2934"; g.beginPath(); g.ellipse(px + 31, by - 22, 21, 17, -.2, 0, 7); g.fill(); g.stroke();
+    g.strokeStyle = "#d5b96e"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 18, by - 34); g.lineTo(px + 44, by - 33); g.stroke();
+    g.strokeStyle = "#26352e"; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 19, by - 29); g.quadraticCurveTo(px + 4, by - 17, px + 12, by - 2); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
   } else if (kind === "waterfall") {
     // a waterfall over limestone, splashing into a pool (Krka, Plitvice)
     const h = 150, w = 46;
@@ -1744,6 +1825,7 @@ const FLAGS = {
   pole: [3, (i, r) => ["#d8232a", "#ffffff", "#2a9a4a"][r]],
   netherlands: [3, (i, r) => ["#ae1c28", "#ffffff", "#21468b"][r]],
   smaland: [5, (i, r) => r === 2 || i === 3 || i === 4 ? "#fecc02" : "#006aa7"],
+  scotland: [1, () => "#0065bd"],
   dalmatia: [6, (i, r) => i >= 5 && i <= 6 && r >= 1 && r <= 3 ? ((i + r) % 2 ? "#ffffff" : "#d8232a") : ["#d8232a", "#d8232a", "#ffffff", "#ffffff", "#1a3a8a", "#1a3a8a"][r]]
 };
 function drawCheck(c) {
@@ -1754,6 +1836,14 @@ function drawCheck(c) {
   for (let i = 0; i < 12; i++) {
     const wav = Math.sin(frame / 8 - i * .5) * (1 + i * .25);
     for (let r = 0; r < rows; r++) { g.fillStyle = c.on ? col(i, r) : r % 2 ? "#b9c6d6" : "#d6dee8"; g.fillRect(c.x + 17 + i * 2, c.y - 28 + r * h + wav, 2.2, h + .3); }
+  }
+  if (REGION.id === "scotland") {
+    g.fillStyle = c.on ? "#ffffff" : "#d6dee8";
+    for (let i = 0; i < 12; i++) {
+      const wav = Math.sin(frame / 8 - i * .5) * (1 + i * .25), x = c.x + 17 + i * 2;
+      g.fillRect(x, c.y - 28 + i * 1.5 + wav, 2.2, 2.6);
+      g.fillRect(x, c.y - 11 - i * 1.5 + wav, 2.2, 2.6);
+    }
   }
 }
 function drawPad() {
@@ -2008,6 +2098,28 @@ function drawWind() {
   }
   g.globalAlpha = 1;
 }
+/** Scotland's weather turns from sun to wind to rain while the daylight stays long. */
+function drawScotlandWeather() {
+  const phase = Math.floor(frame / 600) % 3;
+  if (phase === 0) return;
+  g.save();
+  g.globalAlpha = phase === 1 ? .35 : .55;
+  if (phase === 1) {
+    g.strokeStyle = "#f4f8ff"; g.lineWidth = 1.5;
+    for (let i = 0; i < 20; i++) {
+      const x = (i * 83 + frame * 2.5) % viewW, y = 70 + (i * 47) % (VIEW_H - 120);
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x - 26, y + 2); g.stroke();
+    }
+  } else {
+    g.fillStyle = "rgba(55,70,82,.18)"; g.fillRect(0, 0, viewW, VIEW_H);
+    g.strokeStyle = "rgba(225,240,248,.72)"; g.lineWidth = 1;
+    for (let i = 0; i < 56; i++) {
+      const x = (i * 53 + frame * 1.7) % viewW, y = (i * 71 + frame * 4) % VIEW_H;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x - 3, y + 9); g.stroke();
+    }
+  }
+  g.restore();
+}
 /** Darkness with a circle of light around you (the troll forest, the northern lights night). Finding things makes it bigger. */
 /** How far you can see in the dark: more for every thing you find, the task item and every lamp or torch you light. */
 function darkRadius() { const dk = L.d.dark; return dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0) + L.switches.filter(s => s.on).length * (dk.lamp || 0); }
@@ -2033,6 +2145,7 @@ function render() {
   }
   const theme = L.d.theme, cx = Math.round(cam);
   drawBackground(theme, cx);
+  if (L.d.weather && L.d.scene === "highlands") drawScotlandWeather();
   g.save(); g.translate(-cx, 0);
 
   for (const [k, x] of L.d.deco) drawDeco(k, x, theme);

@@ -9,7 +9,7 @@ test('er is voor elke dag van de week een level, op volgorde', async ({ page }) 
   expect(labels.map(l => l.split(' · ').slice(0, 2).join(' · '))).toEqual(DAYS);
 });
 
-for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia', 'smaland']) DAYS.forEach((day, i) => {
+for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia', 'smaland', 'scotland']) DAYS.forEach((day, i) => {
   test(`${region}, ${day}: alles is bereikbaar en de dag is uit te spelen`, async ({ page }) => {
     await seed(page, { unlocked: 8, region });
     await startDay(page, i);

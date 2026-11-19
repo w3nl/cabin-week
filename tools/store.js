@@ -2,7 +2,7 @@
 // - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding
 // - social-preview.png (1280×640): de social preview van de repository op GitHub (Settings → General → Social preview)
 // - tv-banner.png (1280×720): de banner voor Android TV (uit android-tv/banner.svg)
-// - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, six regions and your own hero
+// - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, seven regions and your own hero
 const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -22,6 +22,7 @@ async function open(browser, { width, height, scale = 1, char = 0, lang = 'en', 
   await page.evaluate(([KEY, char, region, HERO]) => {
     // Every region unlocked, a few days played here and there, so the map shows progress.
     const regions = { pole: { unlocked: 8, best: { 0: 3, 1: 3 } }, tirol: { unlocked: 8, best: { 0: 3 } }, norway: { unlocked: 8, best: { 0: 3, 1: 3, 2: 3 } },
+      scotland: { unlocked: 8, best: { 0: 3, 1: 3 } },
       netherlands: { unlocked: 8, best: {} }, dalmatia: { unlocked: 8, best: { 0: 3 } } };
     localStorage.setItem(KEY, JSON.stringify({ unlocked: 8, char, best: { 0: 3, 1: 3, 2: 3, 3: 3 }, region, regions, hero: HERO }));
   }, [KEY, char, region, HERO]);
