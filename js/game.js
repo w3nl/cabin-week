@@ -17,6 +17,7 @@ function buildLevel(idx) {
   for (const [x, y, n] of d.plats) for (let i = 0; i < n; i++) grid[y][x + i] = "=";
   for (const [x, y, h] of d.blocks) for (let i = 0; i < h; i++) grid[y + i][x] = "S";
   for (const [x, y, n] of d.spikes) for (let i = 0; i < n; i++) grid[y][x + i] = "^";
+  for (const [x, y, h] of d.rocks || []) for (let i = 0; i < h; i++) grid[y + i][x] = "R";
   if (d.gate) for (let y = d.gate[1]; y <= d.gate[2]; y++) grid[y][d.gate[0]] = "G";
   if (d.code) for (let y = d.code.y1; y <= d.code.y2; y++) grid[y][d.code.x] = "H";
   // ladders: "|" cells from just below a plank down to the ground; you climb them with ↑ and ↓
@@ -33,7 +34,7 @@ function buildLevel(idx) {
     if (type === "coin" || type === "key" || type === "heart" || type === "quest") {
       lv.items.push({ type, x: px, y: py, w: TS, h: TS, taken: false });
       if (type === "coin") lv.coinTotal++;
-    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3, marmot: -1.2, speelgoed: -.9, pakje: -1.1, poolvos: -1.5, lemming: -1.7, mygga: -1.3, bever: -1 }[d.enemy] || -1, dead: 0 });
+    } else if (type === "enemy") lv.enemies.push({ kind: d.enemy, x: px, y: py + TS - 22, w: 30, h: 22, vx: { robot: -1.4, geit: -1.3, pinguin: -.8, gans: -1.2, meeuw: -1.5, krab: -1.3, marmot: -1.2, speelgoed: -.9, pakje: -1.1, poolvos: -1.5, lemming: -1.7, mygga: -1.3, wesp: -1.5, bever: -1 }[d.enemy] || -1, dead: 0 });
     else if (type === "npc") lv.npcs.push({ x: px + 5, y: py, who: others[(idx * 3 + npcN++) % others.length], ...extra, talked: false });
     else if (type === "sign") lv.signs.push({ x: px, y: py, lines: extra });
     else if (type === "check") lv.checks.push({ x: px, y: py, on: false });
@@ -61,8 +62,13 @@ function isSolid(tx, ty) {
   if (tx < 0 || tx >= L.w) return true;
   if (ty < 0 || ty >= ROWS) return false;
   const c = L.grid[ty][tx];
-  return c === "#" || c === "S" || (c === "G" && !L.gateOpen) || (c === "H" && !L.codeOpen);
+  return c === "#" || c === "S" || c === "R" || (c === "G" && !L.gateOpen) || (c === "H" && !L.codeOpen);
 }
+/** The river you canoe down (the Ardèche): is this column part of it, and where is the water there? */
+function inRiver(col) { const r = L.d.river; return !!r && col >= r.x0 && col <= r.x1; }
+function waterTop(col) { return inRiver(col) ? L.d.river.surf[col - L.d.river.x0] * TS + 14 : SWIM_Y; }
+/** How fast the river carries you along here: faster in the rapids below the waterfalls. */
+function riverCurrent(col) { return L.d.river.rapids.some(([a, b]) => col >= a && col <= b) ? 2.3 : 1.1; }
 
 function startLevel(idx) {
   L = buildLevel(idx);
@@ -365,12 +371,22 @@ function step() {
   // Wind (the Netherlands): gusts that push you, now this way, then the other way. Less in the air than on the ground.
   if (L.d.wind) P.x += windNow() * (P.onGround ? 1 : .6);
 
+  // The river (the Ardèche): in the canoe, the current carries you along, also while you jump. Standing on a rock it doesn't.
+  const pcol = Math.floor((P.x + P.w / 2) / TS);
+  P.canoe = inRiver(pcol);
+  const drift = P.canoe && (P.swim || !P.onGround) ? riverCurrent(pcol) : 0;
   // move X
-  P.x += P.vx;
+  const prevX = P.x, dxMove = P.vx + drift;
+  P.x += dxMove;
   {
     const y0 = Math.floor(P.y / TS), y1 = Math.floor((P.y + P.h - .01) / TS);
-    if (P.vx > 0) { const tx = Math.floor((P.x + P.w - .01) / TS); for (let ty = y0; ty <= y1; ty++) if (isSolid(tx, ty)) { P.x = tx * TS - P.w; P.vx = 0; break; } }
-    else if (P.vx < 0) { const tx = Math.floor(P.x / TS); for (let ty = y0; ty <= y1; ty++) if (isSolid(tx, ty)) { P.x = (tx + 1) * TS; P.vx = 0; break; } }
+    let hit = null;
+    if (dxMove > 0) { const tx = Math.floor((P.x + P.w - .01) / TS); for (let ty = y0; ty <= y1; ty++) if (isSolid(tx, ty)) { P.x = tx * TS - P.w; P.vx = 0; hit = cell(tx, ty); break; } }
+    else if (dxMove < 0) { const tx = Math.floor(P.x / TS); for (let ty = y0; ty <= y1; ty++) if (isSolid(tx, ty)) { P.x = (tx + 1) * TS; P.vx = 0; hit = cell(tx, ty); break; } }
+    // bumping into a rock in the canoe: a bonk, no harm done
+    if (hit === "R" && P.canoe && L.time - (P.bonk || -99) > 45) { P.bonk = L.time; pop(P.x + P.w / 2, P.y - 8, T("Bonk!", "Bonk!"), "#fff"); tone(140, .12, "triangle", .05); }
+    // You can't paddle up a waterfall: the water upstream is higher than you.
+    if (P.canoe && P.swim && dxMove < 0) { const nc = Math.floor((P.x + P.w / 2) / TS); if (inRiver(nc) && waterTop(nc) < waterTop(pcol) - 8) P.x = prevX; }
   }
   // move Y
   const prevBottom = P.y + P.h;
@@ -393,11 +409,14 @@ function step() {
   // Swimming (Dalmatia): the sea is warm, so you float in the water instead of falling. You can jump out again.
   P.swim = false;
   if (L.d.swim && !P.onGround) {
-    const col = Math.floor((P.x + P.w / 2) / TS), surf = SWIM_Y;
-    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55) {
+    const col = Math.floor((P.x + P.w / 2) / TS), surf = waterTop(col);
+    // in the river you only land on the water from above (going down a waterfall); everywhere else as before
+    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55 && (!inRiver(col) || prevBottom <= surf + P.h * .55 + 14)) {
       P.y = surf - P.h * .45 + Math.sin(L.time / 12) * 1.2; P.vy = 0; P.onGround = true; P.swim = true; P.mover = null;
       P.vx = Math.max(-2.6, Math.min(2.6, P.vx));
       if (L.time % 10 === 0) particles.push({ x: P.x + P.w / 2 + (Math.random() - .5) * 20, y: surf + 4, vx: 0, vy: -.6, life: 18, c: "#e8fbff", s: 2.5 });
+      // a splash when the canoe lands on the water (off a rock, or down a waterfall)
+      if (inRiver(col) && prevBottom < surf + P.h * .55 - 6) for (let i = 0; i < 8; i++) particles.push({ x: P.x + P.w / 2 + (Math.random() - .5) * 40, y: surf, vx: (Math.random() - .5) * 3, vy: -1.5 - Math.random() * 2, life: 22, c: "#e8fbff", s: 3 });
     }
   }
   if (P.inv > 0) P.inv--;
@@ -447,11 +466,11 @@ function step() {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
         e.dead = 1; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), wesp: T("Bzz... pop!", "Bzz... plop!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
         e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
-        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
-      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!"), mygga: T("Itchy!", "Jeuk!"), bever: T("Gnaw!", "Knaag!") }[e.kind]);
+        pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), wesp: T("Bzz... pop!", "Bzz... plop!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
+      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!"), mygga: T("Itchy!", "Jeuk!"), wesp: T("Sting!", "Steek!"), bever: T("Gnaw!", "Knaag!") }[e.kind]);
     }
   }
   L.enemies = L.enemies.filter(e => e.dead < 30);

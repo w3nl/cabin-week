@@ -10,6 +10,7 @@ Every region follows the same recipe as the others (see AGENTS.md, "Regions" and
 
 Småland (Sweden) is built now: see `js/region-smaland.js` and AGENTS.md.
 Scotland is built now: see `js/region-scotland.js` and AGENTS.md.
+The Ardèche is built now: see `js/region-ardeche.js` and AGENTS.md.
 
 ## The other dots
 
@@ -19,5 +20,4 @@ Short notes to start from; add ideas here when they come up.
 - **Tuscany:** cypress lanes, vineyards, hill towns, olive groves; summer or autumn.
 - **Veneto:** Venice with canals and gondolas (movers), bridges, carnival masks; Lake Garda.
 - **Catalonia:** beaches, Barcelona's colourful buildings, mountain monasteries; summer.
-- **Ardèche:** canoeing through the gorge, the stone arch over the river, caves, campings; summer.
 - **Greece:** white houses with blue doors, islands, olive trees, ancient temples; summer.

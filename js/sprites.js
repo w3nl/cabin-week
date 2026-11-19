@@ -349,6 +349,19 @@ function drawEnemy(e, t) {
     blob("#3a3a40", () => g.arc(6, -11, 3.5, 0, 7));
     g.strokeStyle = "#3a3a40"; g.beginPath(); g.moveTo(9, -10); g.lineTo(16, -7); g.stroke(); g.strokeStyle = OUT;
     g.fillStyle = "#ff5a5a"; g.beginPath(); g.arc(7, -12, 1.2, 0, 7); g.fill();
+  } else if (e.kind === "wesp") {
+    // a wasp after your lemonade and nougat: yellow and black, buzzing along at knee height
+    const hov = Math.sin(e.x * .18) * 3, wing = Math.abs(Math.sin(t / 22));
+    g.translate(0, -10 + hov);
+    g.fillStyle = "rgba(230,245,255,.75)"; g.beginPath(); g.ellipse(-2, -16 - wing * 3, 6, 3 + wing * 2, -.5, 0, 7); g.ellipse(4, -16 - wing * 3, 6, 3 + wing * 2, .4, 0, 7); g.fill();
+    g.strokeStyle = OUT; g.lineWidth = 1.4;
+    blob("#f2c42a", () => g.ellipse(-5, -9, 8, 4.5, -.2, 0, 7));
+    g.fillStyle = "#1d1d26"; [-9, -5, -1].forEach(x => g.fillRect(x, -13, 2, 8));
+    g.beginPath(); g.moveTo(-13, -8); g.lineTo(-17, -6); g.lineTo(-12, -6); g.fill();
+    blob("#2a2a2e", () => g.arc(5, -11, 3.5, 0, 7));
+    blob("#f2c42a", () => g.arc(9, -11, 3, 0, 7));
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(10, -12, 1.1, 0, 7); g.fill();
+    g.strokeStyle = "#2a2a2e"; g.lineWidth = 1; g.beginPath(); g.moveTo(10, -14); g.lineTo(13, -18); g.stroke(); g.strokeStyle = OUT;
   } else if (e.kind === "bever") {
     // a beaver from the lake, with a flat tail and big orange teeth
     const ph = e.x * .4;

@@ -8,14 +8,15 @@ test('the map shows the regions; choosing one switches the days, and the choice 
   await expect(page.locator('#levels .t').first()).toHaveText('Arrival in Pinebrook');
   await page.locator('#regionBtn').click();
   await expect(page.locator('#mapWrap')).toBeVisible();
-  await expect(page.locator('#mapBox .pin')).toHaveCount(8);
+  await expect(page.locator('#mapBox .pin')).toHaveCount(9);
   await expect(page.locator('#mapBox .pin.here')).toHaveAttribute('data-region', 'ardennes');
   await expect(page.locator('#mapSoon')).toContainText('Iceland');
   await expect(page.locator('#mapSoon')).toContainText('Greece');
   await expect(page.locator('#mapSoon')).not.toContainText('Scotland'); // Scotland is playable now
+  await expect(page.locator('#mapSoon')).not.toContainText('Ardèche'); // and the Ardèche too
   await expect(page.locator('#mapSoon')).toContainText('Iceland');
   await expect(page.locator('#mapSoon')).not.toContainText('Småland'); // Småland is playable now
-  await expect(page.locator('#mapBox .soon-dot')).toHaveCount(6);
+  await expect(page.locator('#mapBox .soon-dot')).toHaveCount(5);
   await page.locator('#mapBox .pin[data-region="tirol"]').click();
   await expect(page.locator('#title')).toBeVisible();
   await expect(page.locator('#regionName')).toHaveText('Tirol');
@@ -35,7 +36,7 @@ test('the map shows the regions; choosing one switches the days, and the choice 
 
 test('every region starts at day 1: you do not have to finish the Ardennes first', async ({ page }) => {
   await seed(page);
-  for (const id of ['pole', 'tirol', 'norway', 'scotland']) {
+  for (const id of ['pole', 'tirol', 'norway', 'scotland', 'ardeche']) {
     await page.evaluate(id => { setRegion(id, true); toTitle(); }, id);
     await expect(page.locator('#levels button').first()).toBeEnabled();
     await expect(page.locator('#levels button').nth(1)).toBeDisabled();
@@ -80,7 +81,7 @@ test('the map works with the keyboard and the remote: arrows, Enter, and Escape 
 test('the new regions have their own scenery, enemies and checkpoint flags', async ({ page }) => {
   await seed(page, { unlocked: 8 });
   const info = await page.evaluate(() => REGIONS.map(r => ({ id: r.id, n: r.levels.length, scenes: [...new Set(r.levels.map(l => l.scene || l.theme))], enemies: [...new Set(r.levels.filter(l => l.enemies !== false).map(l => l.enemy))] })));
-  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8, 8, 8, 8]);
+  expect(info.map(r => r.n)).toEqual([8, 8, 8, 8, 8, 8, 8, 8, 8]);
   expect(info.find(r => r.id === 'pole').scenes).toContain('pole');
   expect(info.find(r => r.id === 'tirol').enemies).toContain('geit');
   expect(info.find(r => r.id === 'norway').enemies).toContain('troll');
@@ -89,7 +90,9 @@ test('the new regions have their own scenery, enemies and checkpoint flags', asy
   expect(info.find(r => r.id === 'scotland').enemies).toContain('geit');
   expect(await page.evaluate(() => REGIONS.find(r => r.id === 'scotland').levels.every(l => l.summer && l.weather && l.scene === 'highlands'))).toBe(true);
   const codes = await page.evaluate(() => REGIONS.flatMap(r => r.levels.map(l => l.code && l.code.answer)));
-  expect(new Set(codes).size).toBe(64);
+  expect(info.find(r => r.id === 'ardeche').scenes).toEqual(expect.arrayContaining(['ardeche', 'grotte']));
+  expect(info.find(r => r.id === 'ardeche').enemies).toEqual(expect.arrayContaining(['wesp', 'zwijn']));
+  expect(new Set(codes).size).toBe(72);
   expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'meeuw', 'zwijn']));
 });
 
@@ -99,6 +102,7 @@ test('Dutch: the map and the region names are translated', async ({ page }) => {
   await expect(page.locator('#mapWrap h2')).toHaveText('Waar gaan we heen?');
   await expect(page.locator('#mapBox .pin[data-region="norway"] b')).toHaveText('Noorwegen');
   await expect(page.locator('#mapBox .pin[data-region="scotland"] b')).toHaveText('Schotland');
+  await expect(page.locator('#mapBox .pin[data-region="ardeche"] b')).toHaveText('Ardèche');
   await page.locator('#mapBox .pin[data-region="pole"]').click();
   await expect(page.locator('#levels .t').first()).toHaveText('Landen op de Noordpool');
 });
@@ -109,7 +113,7 @@ for (const [w, h, what] of [[960, 540, 'tv'], [740, 360, 'phone turned'], [412, 
     await seed(page, { lang: 'nl' });
     await page.locator('#regionBtn').click();
     expect(await page.evaluate(() => document.getElementById('mapWrap').scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia', 'smaland', 'scotland']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
+    for (const id of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dalmatia', 'smaland', 'scotland', 'ardeche']) await expect(page.locator(`#mapBox .pin[data-region="${id}"]`)).toBeInViewport({ ratio: .99 });
     await expect(page.locator('#mapClose')).toBeInViewport({ ratio: .99 });
   });
 }
@@ -128,6 +132,18 @@ test('every region plays differently: hills, movers, ice, water and darkness whe
   expect(f.netherlands.wind).toBeGreaterThanOrEqual(3); expect(f.netherlands.ice).toBe(1); expect(f.netherlands.movers).toBe(2); expect(f.netherlands.dark).toBe(1);
   expect(f.norway.movers).toBeGreaterThanOrEqual(2); expect(f.norway.dark).toBe(1); expect(f.norway.water).toBeGreaterThanOrEqual(6);
   expect(f.scotland.water).toBeGreaterThanOrEqual(2); expect(f.scotland.movers).toBeGreaterThanOrEqual(2);
+  expect(f.ardeche.water).toBeGreaterThanOrEqual(3); expect(f.ardeche.movers).toBeGreaterThanOrEqual(1); expect(f.ardeche.hills).toBeGreaterThanOrEqual(3); expect(f.ardeche.dark).toBe(1);
+});
+
+test('boats and ice floes float on the water, also where the ground is high (only a gondola rides in the air)', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  const high = await page.evaluate(() => {
+    const out = [];
+    for (const r of REGIONS) { setRegion(r.id, false); LEVELS.forEach((l, i) => { if (!l.movers || l.movers === 'gondola') return; startLevel(i);
+      for (const m of L.movers) if (m.y !== 12 * TS) out.push(`${r.id} day ${i + 1}: ${l.movers} at row ${m.y / TS}`); }); }
+    return out;
+  });
+  expect(high).toEqual([]);
 });
 
 test('a mover carries you across a gap that is too wide to jump', async ({ page }) => {
@@ -267,10 +283,61 @@ test('Scotland is summer too: no snowy city, thistles instead of icicles, and ev
   expect(r.weather).toBe(true);
 });
 
+test('the Ardèche: summer, no snow anywhere, a dark painted cave, and every decoration is drawn', async ({ page }) => {
+  await seed(page, { unlocked: 8, region: 'ardeche' });
+  const r = await page.evaluate(() => {
+    const src = drawDeco.toString();
+    const missing = [...new Set(LEVELS.flatMap(l => l.deco.map(d => d[0])))].filter(k => !src.includes(`kind === "${k}"`));
+    const cave = LEVELS.find(l => l.scene === 'grotte');
+    return { summer: LEVELS.every(l => l.summer), themes: [...new Set(LEVELS.map(l => l.theme))], missing,
+      cave: cave && { theme: cave.theme, dark: !!cave.dark, enemies: cave.enemies, lights: cave.task && cave.task.kind } };
+  });
+  expect(r.summer).toBe(true);
+  // never the snowy themes in summer
+  expect(r.themes).not.toContain('stad'); expect(r.themes).not.toContain('sneeuw');
+  expect(r.missing).toEqual([]);
+  // the Chauvet Cave: its own rock tiles, dark until you light the lamps, no animals to fight
+  expect(r.cave).toEqual({ theme: 'grot', dark: true, enemies: false, lights: 'lights' });
+});
+
+test('the Ardèche, day 2: in the canoe the river carries you, a rock stops you until you jump, and down the waterfalls you go', async ({ page }) => {
+  await seed(page, { unlocked: 8, region: 'ardeche' });
+  await startDay(page, 1);
+  await skip(page);
+  const r = await page.evaluate(() => {
+    window.hurt = () => {}; L.enemies.length = 0;
+    const rv = L.d.river, at = c => rv.surf[c - rv.x0];
+    const float = c => { P.x = c * TS + 4; P.y = at(c) * TS + 14 - P.h * .45; P.vx = 0; P.vy = 0; for (let i = 0; i < 3; i++) step(); };
+    // 1. the river carries you along, without touching a key
+    const free = rv.x0 + 2; float(free);
+    const x0 = P.x, canoe = P.canoe, swim = P.swim; for (let i = 0; i < 30; i++) step();
+    const carried = P.x - x0;
+    // 2. a rock stops you, however long you wait; a jump (held) takes you over it
+    const rock = L.d.rocks.find(k => k[2] === 2); float(rock[0] - 3);
+    for (let i = 0; i < 120; i++) step();
+    const stopped = P.x + P.w <= rock[0] * TS + .5;
+    // jump and paddle on (→): over the rock, and back into the water on the other side
+    edges.push('jump'); held.jump = true; held.right = true; for (let i = 0; i < 18; i++) step(); held.jump = false; for (let i = 0; i < 30; i++) step(); held.right = false; for (let i = 0; i < 30; i++) step();
+    const over = P.x > (rock[0] + 1) * TS && P.swim;
+    // 3. down a waterfall: you land on the lower water, and can't paddle back up
+    const fall = rv.surf.findIndex((v, i) => i && v > rv.surf[i - 1]) + rv.x0;
+    float(fall - 2); for (let i = 0; i < 80 && P.x < (fall + 1) * TS; i++) step(); for (let i = 0; i < 20; i++) step();
+    const down = P.swim && Math.abs(P.y + P.h * .45 - (at(fall) * TS + 14)) < 4;
+    held.left = true; for (let i = 0; i < 120; i++) step(); held.left = false;
+    const notUp = Math.floor((P.x + P.w / 2) / TS) >= fall;
+    return { canoe, swim, carried: carried > 20, stopped, over, down, notUp, hearts: P.hearts };
+  });
+  expect(r).toEqual({ canoe: true, swim: true, carried: true, stopped: true, over: true, down: true, notUp: true, hearts: 3 });
+  // the canoe stretch makes the level longer, and the other days have no river
+  expect(await page.evaluate(() => [L.w, LEVELS.filter(l => l.river).length])).toEqual([230, 1]);
+});
+
 test('a summer region says "summer days" on the title screen', async ({ page }) => {
   await seed(page, { region: 'dalmatia' });
   await expect(page.locator('#cdWord')).toHaveText('summer days to play');
   await seed(page, { region: 'scotland' });
+  await expect(page.locator('#cdWord')).toHaveText('summer days to play');
+  await seed(page, { region: 'ardeche' });
   await expect(page.locator('#cdWord')).toHaveText('summer days to play');
   await seed(page);
   await expect(page.locator('#cdWord')).toHaveText('winter days to play');
