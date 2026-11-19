@@ -71,8 +71,8 @@ const REGIONS = [
     week: regionWeek([["🏔️", "Glen Coe", "Glen Coe"], ["🌊", "Loch Ness", "Loch Ness"], ["🏰", "Castle", "Kasteel"], ["🎶", "Ceilidh", "Ceilidh"],
       ["⛴️", "Isles", "Eilanden"], ["🏘️", "Edinburgh", "Edinburgh"], ["🎻", "Glasgow", "Glasgow"], ["🏠", "Home", "Naar huis"]]),
     finale: [T("Slàinte, Scotland! 🏰🚗", "Slàinte, Schotland! 🏰🚗"),
-      T("The Highlands, a loch-side boat trip, old castle stones, a ceilidh, island ferries, Edinburgh's lanes and Glasgow's music. The long summer light came all the way home with us.",
-        "De Highlands, een boottocht op de loch, oude kasteelstenen, een ceilidh, veerboten naar de eilanden, de steegjes van Edinburgh en de muziek van Glasgow. Het lange zomerlicht ging met ons mee naar huis.")] }
+      T("The Highlands, a loch-side boat trip, old castle stones, a braw ceilidh, island ferries, Edinburgh's closes and Glasgow's music. The long summer light came all the way home with us. Haste ye back!",
+        "De Highlands, een boottocht op de loch, oude kasteelstenen, een ceilidh, veerboten naar de eilanden, de steegjes van Edinburgh en de muziek van Glasgow. Het lange zomerlicht ging met ons mee naar huis. Haste ye back!")] }
 ];
 /** Places on the map that are not playable yet. */
 const SOON = [
