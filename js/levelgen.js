@@ -73,13 +73,15 @@ function genLevel(o) {
       cur = x + 2 + gw;
     } else if (type === "ferry") {
       // a gap of 7 tiles: too wide to jump, so you ride across on an ice floe, a gondola or a boat
+      // A boat or an ice floe floats on the water (row 12): on high ground the bank first steps down to the water.
+      if (o.movers !== "gondola" && gy < 12) { ground.push([cur, x, gy]); cur = x + 1; bad.add(x); bad.add(x + 1); gy = 12; }
       ground.push([cur, x + 1, gy]);
       for (let i = 0; i < 7; i++) bad.add(x + 2 + i);
       bad.add(x + 1); bad.add(x + 9);
       let rise = 0;
       if (o.movers === "gondola") { const up = gy - hHigh, down = hLow - gy; rise = up >= 2 ? -Math.min(3, up) : down >= 2 ? Math.min(3, down) : 0; }
       ents.push(["mover", x + 2, gy, { range: 5, n: 2, rise }]);
-      [3, 5, 7].forEach(i => coin(x + i, 8 + d + Math.round(rise * (i - 2) / 6)));
+      [3, 5, 7].forEach(i => coin(x + i, 8 + (gy - 12) + Math.round(rise * (i - 2) / 6)));
       cur = x + 9; ferryDone = true;
       gy += rise;
     } else if (type === "loft") {

@@ -135,6 +135,17 @@ test('every region plays differently: hills, movers, ice, water and darkness whe
   expect(f.ardeche.water).toBeGreaterThanOrEqual(3); expect(f.ardeche.movers).toBeGreaterThanOrEqual(1); expect(f.ardeche.hills).toBeGreaterThanOrEqual(3); expect(f.ardeche.dark).toBe(1);
 });
 
+test('boats and ice floes float on the water, also where the ground is high (only a gondola rides in the air)', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  const high = await page.evaluate(() => {
+    const out = [];
+    for (const r of REGIONS) { setRegion(r.id, false); LEVELS.forEach((l, i) => { if (!l.movers || l.movers === 'gondola') return; startLevel(i);
+      for (const m of L.movers) if (m.y !== 12 * TS) out.push(`${r.id} day ${i + 1}: ${l.movers} at row ${m.y / TS}`); }); }
+    return out;
+  });
+  expect(high).toEqual([]);
+});
+
 test('a mover carries you across a gap that is too wide to jump', async ({ page }) => {
   await seed(page, { region: 'tirol', unlocked: 8 });
   await startDay(page, 2);
