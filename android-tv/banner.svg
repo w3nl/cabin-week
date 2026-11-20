@@ -20,7 +20,7 @@
   <path d="M269 64 Q262 56 270 50 T267 38" fill="none" stroke="#dfe8f4" stroke-width="3.5" stroke-linecap="round" opacity=".75"/>
   <path d="M202 108 L243 70 L284 108 L276 108 L243 78 L210 108Z" fill="#f4f8ff"/>
   <path d="M0 158 Q100 146 170 154 T320 152 V180 H0Z" fill="#f4f8ff"/>
-  <text x="62" y="70" font-family="Fredoka, 'Trebuchet MS', sans-serif" font-weight="700" font-size="40" fill="#eef4f8">Cabin</text>
-  <text x="64" y="108" font-family="Fredoka, 'Trebuchet MS', sans-serif" font-weight="700" font-size="40" fill="#7a3418">Week</text>
-  <text x="62" y="106" font-family="Fredoka, 'Trebuchet MS', sans-serif" font-weight="700" font-size="40" fill="#ff9b45">Week</text>
+  <text x="62" y="70" font-family="Fredoka, 'Trebuchet MS', sans-serif" font-weight="700" font-size="40" fill="#eef4f8">Trip</text>
+  <text x="64" y="108" font-family="Fredoka, 'Trebuchet MS', sans-serif" font-weight="700" font-size="40" fill="#7a3418">Scouts</text>
+  <text x="62" y="106" font-family="Fredoka, 'Trebuchet MS', sans-serif" font-weight="700" font-size="40" fill="#ff9b45">Scouts</text>
 </svg>

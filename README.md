@@ -1,6 +1,8 @@
-# Cabin Week
+# TripScouts
 
-A platform game in the browser about trips of two families, **the Hills and the Woods**: nine people, one cabin. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway, the Netherlands, Dalmatia, Småland, Scotland, the Ardèche or the Veneto) and play its week: eight days, **one level a day**.
+*Formerly Cabin Week.* The repository, the Android package (`nl.w3nl.cabinweek`) and the save data keep the old name, so nothing breaks for players.
+
+A platform game in the browser about two families, **the Hills and the Woods**, nine people in all. They want to go on holiday together, but they can't agree where. So you go ahead as their **trip scout**: try out every trip and tell them what you think. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway, the Netherlands, Dalmatia, Småland, Scotland, the Ardèche or the Veneto) and play its week: eight days, **one level a day**.
 
 Play as one of the nine, or **make your own hero** (name, height, skin, hair, coat, glasses, hat and scarf). You walk and jump through the forest, the cabin, the snow and a Christmas market. You find lost things, get through a gate halfway (bring something, pull levers, light lamps, race the bell or walk a lost animal home) and open a lock at the end: a code, a tune, colours, arrows, a word or a clock, with clues along the way. Every trip mixes them differently. Finish a day to unlock the next one.
 
@@ -8,8 +10,8 @@ Play as one of the nine, or **make your own hero** (name, height, skin, hair, co
 
 ## Play
 
-- **Online:** [cabinweek.online](https://cabinweek.online/) (GitHub Pages).
-- **Android app (test):** one app for **phones, tablets and Google TV** (touch, controller or TV remote). It is in a test on Google Play. Testers join once at [play.google.com/apps/testing/nl.w3nl.cabinweek](https://play.google.com/apps/testing/nl.w3nl.cabinweek) (with the Google account that is on the tester list), then install it from [Cabin Week on Google Play](https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek). Publishing it: [docs/publish-android.md](docs/publish-android.md).
+- **Online:** [tripscouts.online](https://tripscouts.online/) (GitHub Pages).
+- **Android app (test):** one app for **phones, tablets and Google TV** (touch, controller or TV remote). It is in a test on Google Play. Testers join once at [play.google.com/apps/testing/nl.w3nl.cabinweek](https://play.google.com/apps/testing/nl.w3nl.cabinweek) (with the Google account that is on the tester list), then install it from [TripScouts on Google Play](https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek). Publishing it: [docs/publish-android.md](docs/publish-android.md).
 - **On your phone or tablet:** open the site and choose "Add to Home screen" (or the Android app, offered in the game). After that the game also works offline. iPhone and iPad: see [docs/iphone-ipad.md](docs/iphone-ipad.md).
 - **On the TV (Google TV):** the Android app above, or a browser app, or casting. See [docs/google-tv.md](docs/google-tv.md).
 - **Locally:**
@@ -60,7 +62,7 @@ Coming later: Iceland, Tuscany, Catalonia and Greece (ideas in [docs/ideas.md](d
 ## Contributing
 
 - [AGENTS.md](AGENTS.md): how the code works, the solutions, the pitfalls and the checklists.
-- [docs/domain.md](docs/domain.md): the domain (cabinweek.online) and its DNS settings.
+- [docs/domain.md](docs/domain.md): the domain (tripscouts.online) and its DNS settings.
 - [docs/publish-android.md](docs/publish-android.md): publishing the Android app in Google Play, and getting the `.aab`, step by step.
 - [docs/android-key.md](docs/android-key.md): the signing key for the Android app, in detail.
 - [docs/blueprint.md](docs/blueprint.md): the recipe for a game like this (in Dutch).
@@ -74,4 +76,4 @@ npx playwright install chromium   # only the first time
 npm test                          # plays every day, plus controls, title, saving, phone and the app
 ```
 
-Cabin Week grew out of a game made for one family's Christmas week; this version has fictional names and places. Licence: GPL-3.0.
+TripScouts grew out of a game made for one family's Christmas week; this version has fictional names and places. Licence: GPL-3.0.

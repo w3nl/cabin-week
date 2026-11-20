@@ -36,7 +36,7 @@ jobs:
             --max-turns 40
             --allowedTools "Read,Glob,Grep,Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue list:*),Bash(git log:*)"
           prompt: |
-            You are the REFINE agent for "Cabin Week", a platform game in the browser about a Christmas week of two families in a holiday cabin.
+            You are the REFINE agent for "TripScouts", a platform game in the browser: two families can't choose a holiday, so the player scouts ten trips across Europe (it started as a Christmas week in a holiday cabin).
             AGENTS.md (loaded as project instructions) explains the code, the tone and the solutions. Follow it.
 
             Issue #${{ github.event.issue.number }} in ${{ github.repository }} is a new idea.

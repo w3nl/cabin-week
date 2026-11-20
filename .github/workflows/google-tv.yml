@@ -143,5 +143,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view google-tv >/dev/null 2>&1 || gh release create google-tv --title "Android app" --latest=false \
-            --notes "Cabin Week for Android (phone, tablet, Google TV). On the TV, install with the Downloader app: see docs/google-tv.md."
+            --notes "TripScouts for Android (phone, tablet, Google TV). On the TV, install with the Downloader app: see docs/google-tv.md."
           gh release upload google-tv cabin-week.apk --clobber

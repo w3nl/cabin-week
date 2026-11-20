@@ -2,7 +2,7 @@
   "name": "cabin-week",
   "version": "1.0.0",
   "private": true,
-  "description": "Cabin Week: a platform game in the browser about a Christmas week in a holiday cabin (English and Dutch)",
+  "description": "TripScouts: a platform game in the browser; two families can't choose a holiday, so you scout ten trips across Europe (English and Dutch)",
   "scripts": {
     "start": "node tests/serve.js",
     "test": "playwright test",

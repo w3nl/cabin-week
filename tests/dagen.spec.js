@@ -53,7 +53,7 @@ for (const region of ['ardennes', 'pole', 'tirol', 'norway', 'netherlands', 'dal
     });
     expect(bad).toEqual([]);
     await playDay(page);
-    await expect(page.locator('#card')).toContainText(i === DAYS.length - 1 ? 'All 8 days done' : DAYS[i + 1].split(' · ')[1]);
+    await expect(page.locator('#card')).toContainText(i === DAYS.length - 1 ? 'Trip scouted · all 8 days' : DAYS[i + 1].split(' · ')[1]);
   });
 });
 

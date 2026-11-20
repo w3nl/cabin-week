@@ -13,4 +13,4 @@ http.createServer((req, res) => {
   if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end('Niet gevonden'); }
   res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
   fs.createReadStream(file).pipe(res);
-}).listen(port, '127.0.0.1', () => console.log(`Cabin Week runs at http://127.0.0.1:${port}`));
+}).listen(port, '127.0.0.1', () => console.log(`TripScouts runs at http://127.0.0.1:${port}`));

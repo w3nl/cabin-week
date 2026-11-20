@@ -6,24 +6,28 @@ Everything Play Console asks for in **Grow users → Store presence → Main sto
 
 Set the **default language to English (United Kingdom) – en-GB** and add **Dutch (nl-NL)** as a translation (Store presence → Main store listing → Manage translations).
 
+**The new name:** the game was called Cabin Week; it is now **TripScouts**. In Play Console only the texts below change (app name, descriptions, website, privacy policy). The package name `nl.w3nl.cabinweek` stays: it can never change, and players never see it.
+
 ## Texts: English
 
 **App name** (max. 30 characters)
 
 ```text
-Cabin Week
+TripScouts
 ```
 
 **Short description** (max. 80 characters)
 
 ```text
-Trips through Europe: a level a day, with puzzles, code locks and your own hero.
+Scout ten holiday trips for the family: a level a day, with puzzles and codes.
 ```
 
 **Full description** (max. 4000 characters)
 
 ```text
-Two families, nine people, ten trips. Pick a trip on the map of Europe and play a new level every day of the week: eight days per trip, 80 levels in all.
+Two families want to go on holiday together, but they can't agree where. The snow or the sun? A cabin, a chalet or a campsite? So they send you ahead: you are the trip scout.
+
+Pick a trip on the map of Europe, try it out for a week and tell the families what you think. Every day is a new level: eight days per trip, ten trips, 80 levels in all.
 
 Walk, jump, slide and swim your way through every day. Find the three lost things, help the others with a task and crack the code lock with the clues on the signs along the way.
 
@@ -57,19 +61,21 @@ No ads, no purchases and no data leaves the device.
 **App-naam**
 
 ```text
-Cabin Week
+TripScouts
 ```
 
 **Korte beschrijving**
 
 ```text
-Reis door Europa: elke dag een level, met puzzels, codesloten en je eigen held.
+Verken tien vakanties voor het gezin: elke dag een level, met puzzels en codes.
 ```
 
 **Volledige beschrijving**
 
 ```text
-Twee gezinnen, negen personen, tien reizen. Kies een reis op de kaart van Europa en speel elke dag van de week een nieuw level: acht dagen per reis, 80 levels in totaal.
+Twee gezinnen willen samen op vakantie, maar ze kunnen niet kiezen waarheen. De sneeuw of de zon? Een huisje, een chalet of een camping? Dus sturen ze jou vooruit: jij bent de reisverkenner.
+
+Kies een reis op de kaart van Europa, probeer hem een week uit en vertel de gezinnen wat je ervan vindt. Elke dag is een nieuw level: acht dagen per reis, tien reizen, 80 levels in totaal.
 
 Loop, spring, glij en zwem je een weg door elke dag. Vind de drie verdwenen dingen, help de anderen met een opdracht en kraak het codeslot met de aanwijzingen die onderweg op bordjes staan.
 
@@ -134,14 +140,14 @@ The Android TV fields only appear after adding Android TV in **Test and release 
 | Category | Game → **Adventure** (or Puzzle) |
 | Tags | Platformer, Puzzle, Adventure |
 | Contact details | An email address is required; it is public for a public app |
-| Privacy policy | `https://cabinweek.online/privacy.html` |
-| Website | `https://cabinweek.online/` |
+| Privacy policy | `https://tripscouts.online/privacy.html` |
+| Website | `https://tripscouts.online/` |
 
 ## App content (the questionnaires)
 
 | Question | Answer |
 |---|---|
-| Privacy policy | `https://cabinweek.online/privacy.html` |
+| Privacy policy | `https://tripscouts.online/privacy.html` |
 | App access | All functionality is available without special access |
 | Ads | No |
 | Content rating | Category **Game**; the answers are below. Expected result: **PEGI 3**, ESRB **Everyone**, USK **0** |

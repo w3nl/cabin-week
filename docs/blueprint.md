@@ -1,8 +1,8 @@
 # Blueprint: een platformspel in de browser, met elk thema
 
-Dit is het recept achter *Cabin Week*: een platformspel (lopen, springen, zoeken, opdrachten, codes kraken) voor een familie, een vakantie of een feest. Het speelt op de computer, de telefoon, de tablet en de tv, met toetsenbord, aanraakscherm, controller of afstandsbediening. Het bouwt voort op de escaperooms *Hello, IT* ([w3nl/it](https://github.com/w3nl/it)), *Villa Kakelbont* ([w3nl/pippi](https://github.com/w3nl/pippi)), *Sinterklaas* ([w3nl/sinterklaas](https://github.com/w3nl/sinterklaas)) en *Het Geheim van de Albertsmaheert* ([w3nl/albertsmaheert](https://github.com/w3nl/albertsmaheert)). Hun lessen staan hieronder, samen met wat dit project zelf leerde.
+Dit is het recept achter *TripScouts* (eerst *Cabin Week*): een platformspel (lopen, springen, zoeken, opdrachten, codes kraken) voor een familie, een vakantie of een feest. Het speelt op de computer, de telefoon, de tablet en de tv, met toetsenbord, aanraakscherm, controller of afstandsbediening. Het bouwt voort op de escaperooms *Hello, IT* ([w3nl/it](https://github.com/w3nl/it)), *Villa Kakelbont* ([w3nl/pippi](https://github.com/w3nl/pippi)), *Sinterklaas* ([w3nl/sinterklaas](https://github.com/w3nl/sinterklaas)) en *Het Geheim van de Albertsmaheert* ([w3nl/albertsmaheert](https://github.com/w3nl/albertsmaheert)). Hun lessen staan hieronder, samen met wat dit project zelf leerde.
 
-Met dit recept maak je hetzelfde soort spel met een ander thema: een andere familie, een andere plek, een ander feest. Het projecteigen deel van *Cabin Week* (bestanden, oplossingen, toon) staat in [AGENTS.md](../AGENTS.md); kopieer de opzet daarvan.
+Met dit recept maak je hetzelfde soort spel met een ander thema: een andere familie, een andere plek, een ander feest. Het projecteigen deel van *TripScouts* (bestanden, oplossingen, toon) staat in [AGENTS.md](../AGENTS.md); kopieer de opzet daarvan.
 
 **Inhoud**
 1. Het idee
@@ -30,7 +30,7 @@ Met dit recept maak je hetzelfde soort spel met een ander thema: een andere fami
 - **Een platformspel in het genre van de oude DOS- en Linux-klassiekers:** een poppetje loopt door een landschap, springt over kuilen en op vijanden, zoekt dingen en doet opdrachten om verder te komen. Alles is eigen werk: geen namen, figuren, plaatjes of levels van bestaande spellen.
 - **Escaperoom-puzzels in een platformspel:** elk level heeft drie dingen om te zoeken, een opdracht voor een personage (breng iets, dan gaat een hek open) en een codeslot waarvan de cijfers onderweg op bordjes staan. Wie de bordjes leest, kan de code kraken; wie vastzit, krijgt na drie pogingen een tip.
 - **Over echte mensen en een echte plek.** De familie speelt zichzelf (poppetjes naar foto's), het huis is het echte vakantiehuis, de grappen gaan over wat ze echt gaan meemaken. Feiten over de plek (aantal kamers, sauna, parkeerplaatsen) worden de cijfers van de codes.
-- **Persoonlijke details maken het.** Wat iemand graag heeft of doet, komt terug: bij *Cabin Week* Lego op een verjaardag, de echte auto's (Saabs), thee in plaats van koffie, chocolade en friet. Vraag ernaar (zie de intake).
+- **Persoonlijke details maken het.** Wat iemand graag heeft of doet, komt terug: bij *TripScouts* Lego op een verjaardag, de echte auto's (Saabs), thee in plaats van koffie, chocolade en friet. Vraag ernaar (zie de intake).
 - **Een level per dag** van de vakantie of het feest, zodat het spel meegroeit met de week. Het titelscherm telt af in nachtjes slapen, en toont tijdens de week de hoeveelste nacht het is.
 - **Gevoelige dagen krijgen een eigen, rustig level.** Vraag de eigenaar of er dagen zijn met een bijzondere betekenis, en ontwerp die in overleg: geen vijanden, geen druk, geen grappen, en alleen wat de familie zelf wil.
 - **Altijd verder kunnen:** geen game over (bij nul hartjes terug naar de laatste vlag), tips na foute codes, vlaggen als bewaarpunten.
@@ -118,7 +118,7 @@ AGENTS.md, CLAUDE.md, README.md, renovate.json, .nvmrc
 - **Precieze tikjes:** onthoud wanneer een knop werd ingedrukt en losgelaten (`event.timeStamp`, of in de tv-app hoe lang geleden). De spellus geeft elke stap een eigen moment en verwerkt de wachtrij per stap. Indrukken telt bij de volgende stap, loslaten even veel later als het tikje duurde. Slaat de spellus tijd over (een druk toestel), schuif het loslaten dan even ver op. Zonder dit loopt het poppetje op een tv te ver door. **Maar vertrouw de tijdstempel niet blind:** sommige Android- en tv-WebViews gebruiken een andere klok. Een tijdstempel die meer dan een seconde afwijkt of in de toekomst ligt, telt als "nu"; een wachtend loslaten houdt alleen zijn eigen toets op (nooit ← of → erna) en wacht nooit langer dan een seconde. Anders blijft het poppetje aan het begin van een level staan en zet het daarna ineens veel stappen.
 - **Eén knop, meer betekenissen:** ↓ (of E, □/○, OK, 💬) praat met wie in de buurt is, leest een bordje, steekt een kaarsje aan of opent het codeslot; is er niets in de buurt en loop je, dan glijd je op je buik. Sta je stil op een plank (niet op de grond), dan zak je er met ↓ doorheen. Bij een ladder klim je met ↑ omhoog en met ↓ omlaag (geen schuine trap: een helling is in een platformspel veel lastiger dan een ladder, en binnen ziet een steile zoldertrap er net zo uit).
 
-### Natuurkunde (de waarden van *Cabin Week*)
+### Natuurkunde (de waarden van *TripScouts*)
 
 | Wat | Waarde | Waarom |
 |---|---|---|

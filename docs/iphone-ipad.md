@@ -1,4 +1,4 @@
-# Cabin Week on iPhone and iPad
+# TripScouts on iPhone and iPad
 
 No App Store app is needed: the game works as a web app. On the home screen it has its own icon, starts full screen and also works offline. Free.
 
@@ -6,10 +6,10 @@ No App Store app is needed: the game works as a web app. On the home screen it h
 
 The game shows a hint with these steps. This is how:
 
-1. Open **Safari** (not Chrome) and go to **https://cabinweek.online/**
+1. Open **Safari** (not Chrome) and go to **https://tripscouts.online/**
 2. Tap **Share** (the square with the arrow up, at the bottom or top).
 3. Scroll and tap **Add to Home Screen**.
-4. Tap **Add**. The **Cabin Week** icon is now on the home screen.
+4. Tap **Add**. The **TripScouts** icon is now on the home screen.
 
 From now on, open the game with that icon. Your progress stays on the device.
 
@@ -27,4 +27,4 @@ The game updates itself. When "A new version is ready" appears at the bottom, ta
 
 ---
 
-**Nederlands:** open **https://cabinweek.online/** in **Safari**, tik op **Deel** → **Zet op beginscherm** → **Voeg toe**. Draai het toestel in de breedte. Kies onderin het titelscherm **Nederlands**.
+**Nederlands:** open **https://tripscouts.online/** in **Safari**, tik op **Deel** → **Zet op beginscherm** → **Voeg toe**. Draai het toestel in de breedte. Kies onderin het titelscherm **Nederlands**.

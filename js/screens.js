@@ -54,7 +54,7 @@ function card(html, buttons) {
 function showIntro() {
   const d = L.d;
   setScreen("intro");
-  const head = `<div class="eyebrow">${d.day} · ${L.idx + 1}/${LEVELS.length}</div><h2 style="font-size:30px;margin-top:6px">${d.name}</h2><p>${d.sub}</p>`;
+  const head = `<div class="eyebrow">🧭 ${T("Scouting", "Op verkenning")}: ${REGION.name} · ${d.day} · ${L.idx + 1}/${LEVELS.length}</div><h2 style="font-size:30px;margin-top:6px">${d.name}</h2><p>${d.sub}</p>`;
   card(head + `<ul class="missions">
       <li>${d.keyHud} ${T(`Find <b>3 ${d.keyName}</b>. Without them you can't get to the exit.`, `Vind <b>3 ${d.keyName}</b>. Zonder kom je niet bij de uitgang.`)}</li>
       <li>${d.questHud} ${T(`Task: someone needs a <b>${d.questName}</b>. Talk to the people with a <b>!</b> above their head.`, `Opdracht: iemand zoekt een <b>${d.questName}</b>. Praat met de mensen met een <b>!</b> boven hun hoofd.`)}</li>
@@ -78,10 +78,14 @@ function completeLevel() {
     card(`<div class="eyebrow">${d.day} · ${T("done", "gehaald")}</div><h2 style="font-size:30px;margin-top:6px">${d.quiet ? d.name : T("You made it! 🎉", "Overleefd! 🎉")}</h2><p>${msg}</p>${stats}${d.quiet ? "" : `<p style="color:var(--muted)">${JOKES[Math.floor(Math.random() * JOKES.length)]}</p>`}`,
       [...next, ["Menu", toTitle, true]]);
   } else {
-    card(`<div class="eyebrow">${T(`All ${LEVELS.length} days done`, `Alle ${LEVELS.length} dagen gehaald`)}</div><h2 style="font-size:34px;margin-top:6px">${REGION.finale[0]}</h2>
+    const scouted = REGIONS.filter(r => regionDone(r.id) >= r.levels.length).length;
+    card(`<div class="eyebrow">${T(`Trip scouted · all ${LEVELS.length} days`, `Reis verkend · alle ${LEVELS.length} dagen`)}</div><h2 style="font-size:34px;margin-top:6px">${REGION.finale[0]}</h2>
       <p>${REGION.finale[1]}</p>
-      <p>${T("The Hills and the Woods: two families, one cabin, one big week. Same cabin next year?", "De Hills en de Woods: twee gezinnen, één huis, één grote week. Zelfde huis volgend jaar?")}</p>${stats}`,
-      [[T("Another trip", "Nog een reis"), openMap], [T("Start again", "Opnieuw beginnen"), () => startLevel(0), true], ["Menu", toTitle, true]]);
+      <p class="verdict"><b>${T("Scout's verdict", "Oordeel van de verkenner")}:</b> ${REGION.verdict}</p>
+      <p>${scouted >= REGIONS.length
+        ? T("Every trip scouted! The Hills and the Woods have a lot to choose from now. Maybe just go everywhere?", "Alle reizen verkend! De Hills en de Woods hebben nu genoeg te kiezen. Misschien gewoon overal heen?")
+        : T(`${scouted} of ${REGIONS.length} trips scouted. The Hills and the Woods still can't decide: where shall we look next?`, `${scouted} van de ${REGIONS.length} reizen verkend. De Hills en de Woods kunnen nog steeds niet kiezen: waar kijken we nu?`)}</p>${stats}`,
+      [[T("Scout another trip", "Nog een reis verkennen"), openMap], [T("Start again", "Opnieuw beginnen"), () => startLevel(0), true], ["Menu", toTitle, true]]);
   }
 }
 
@@ -184,14 +188,14 @@ function buildTitle() {
   $("regionName").textContent = REGION.name;
   if (done === 0) {
     $("cdNum").textContent = LEVELS.length;
-    $("cdWord").textContent = REGION.summer ? T("summer days to play", "zomerdagen om te spelen") : T("winter days to play", "winterdagen om te spelen");
+    $("cdWord").textContent = REGION.summer ? T("summer days to scout", "zomerdagen om te verkennen") : T("winter days to scout", "winterdagen om te verkennen");
     $("cdSub").textContent = REGION.blurb;
   } else if (done < LEVELS.length) {
     $("cdNum").textContent = `${done}/${LEVELS.length}`;
-    $("cdWord").textContent = T("days played", "dagen gespeeld");
+    $("cdWord").textContent = T("days scouted", "dagen verkend");
     $("cdSub").textContent = next >= 0 ? `${T("Next", "Volgende")}: ${LEVELS[next].name}` : "";
   } else {
-    $("cdNum").textContent = "🏆"; $("cdWord").textContent = T("The whole week done!", "De hele week gehaald!"); $("cdSub").textContent = T("Same cabin next year?", "Zelfde huis volgend jaar?");
+    $("cdNum").textContent = "🏆"; $("cdWord").textContent = T("Trip scouted!", "Reis verkend!"); $("cdSub").textContent = T("Where to next? Open the map 🗺️", "Waar nu heen? Open de kaart 🗺️");
   }
   $("special").hidden = true;
   const wkEl = $("week"); wkEl.innerHTML = "";

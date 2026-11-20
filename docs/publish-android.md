@@ -1,6 +1,6 @@
 # Publishing the Android app: step by step
 
-From nothing to Cabin Week in Google Play (phone, tablet and Google TV). Do part A once; part D for every new version.
+From nothing to TripScouts in Google Play (phone, tablet and Google TV). Do part A once; part D for every new version.
 
 Commands are for Ubuntu (Linux). Mac and Windows: see [android-key.md](android-key.md).
 
@@ -48,20 +48,20 @@ Full explanation: [android-key.md](android-key.md). In short:
 
 1. **Developer account:** [play.google.com/console](https://play.google.com/console). If you already have one (for another app), use that. A new account costs $25 once, and Google checks your identity (can take a few days).
 2. **Create app:** **Home → Create app**:
-   - App name: `Cabin Week`
+   - App name: `TripScouts`
    - Default language: **English (United Kingdom) – en-GB**
    - App or game: **Game**; Free or paid: **Free**
    - Tick the declarations → **Create app**.
-3. **Form factors:** the app is one Android app for phone, tablet and TV. Phone and tablet need nothing extra. For the TV: **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV. *Optional:* the same page also offers **Google Play Games on PC** (Windows). Check Google's requirements first; it is not turned on for Cabin Week yet.
+3. **Form factors:** the app is one Android app for phone, tablet and TV. Phone and tablet need nothing extra. For the TV: **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV. *Optional:* the same page also offers **Google Play Games on PC** (Windows). Check Google's requirements first; it is not turned on for TripScouts yet.
 4. **App content** (left menu **Policy → App content**). Fill in every item with the answers in [play-store/README.md](play-store/README.md#app-content-the-questionnaires):
-   - Privacy policy: `https://cabinweek.online/privacy.html` (until the domain works: `https://w3nl.github.io/cabin-week/privacy.html`)
+   - Privacy policy: `https://tripscouts.online/privacy.html` (until the domain works: `https://w3nl.github.io/cabin-week/privacy.html`)
    - App access, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health.
 5. **Store listing:** **Grow users → Store presence → Main store listing**:
    - Name, short description and full description: copy from [play-store/README.md](play-store/README.md).
    - App icon: `icons/icon-512.png`. Feature graphic: `docs/play-store/feature-graphic.png`.
    - Phone screenshots: the eight `docs/play-store/screenshot-*.png`, in order. The same eight for tablet and Android TV, plus `docs/play-store/tv-banner.png` as TV banner.
    - **Save.** Then **Manage translations → Add translations → Dutch – nl-NL** and paste the Dutch texts.
-6. **Store settings:** **Grow users → Store presence → Store settings**: category **Adventure**, an email address, website `https://cabinweek.online/`.
+6. **Store settings:** **Grow users → Store presence → Store settings**: category **Adventure**, an email address, website `https://tripscouts.online/`.
 
 ---
 
@@ -94,7 +94,7 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
 
 ### C3. Upload to internal testing
 
-1. Play Console → Cabin Week → **Test and release → Testing → Internal testing**.
+1. Play Console → TripScouts → **Test and release → Testing → Internal testing**.
 2. Tab **Testers** → **Create email list**: a name (e.g. "Family") and the Google accounts of your testers (up to 100) → **Save**. Tick the list → **Save**.
 3. **Create new release**:
    - Play App Signing: **Continue** (Google keeps the real signing key; your key is the upload key).
@@ -103,7 +103,7 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
    - **Next** → **Save and publish**.
 4. Back on **Internal testing → Testers**: copy the **Join on the web** link (opt-in link) and send it to the testers.
 
-   The links for Cabin Week:
+   The links for TripScouts:
    - **Join on the web** (opt-in, once per tester): https://play.google.com/apps/testing/nl.w3nl.cabinweek
    - **Join on Android** (the store page, after opting in): https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek
 
@@ -112,7 +112,7 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
 ### C4. Install
 
 - **Phone or tablet:** open the opt-in link with the tester's Google account → **Become a tester** → **Download it on Google Play** → **Install**.
-- **Google TV:** the Google account on the TV must be a tester (it opened the opt-in link once). Then, on the phone with the same account: Play Store → Cabin Week → **Install on more devices** → the TV. Or on the TV: Play Store → search **Cabin Week**. Just after the first upload it can take an hour.
+- **Google TV:** the Google account on the TV must be a tester (it opened the opt-in link once). Then, on the phone with the same account: Play Store → TripScouts → **Install on more devices** → the TV. Or on the TV: Play Store → search **TripScouts**. Just after the first upload it can take an hour.
 
 "Not available for this device" on the TV: Android TV is not on yet (B3), or the account on the TV is not a tester.
 

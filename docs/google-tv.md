@@ -1,4 +1,4 @@
-# Cabin Week on the TV (Google TV Streamer)
+# TripScouts on the TV (Google TV Streamer)
 
 There are four ways to play on the TV. All four work with the remote (arrows, OK and Back) and with a controller (PlayStation, Stadia, Xbox).
 
@@ -6,7 +6,7 @@ There are four ways to play on the TV. All four work with the remote (arrows, OK
 |---|---|---|
 | 1 | The game in a browser app on the Google TV | The site online (GitHub Pages) and a browser app |
 | 2 | Casting from a laptop, phone or tablet | Chrome or the Google Home app |
-| 3 | The **Cabin Week** app on the home screen | The Downloader app (once) |
+| 3 | The **TripScouts** app on the home screen | The Downloader app (once) |
 | 4 | The same app from Google Play, with automatic updates | A Google Play developer account |
 
 ## Controls on the TV
@@ -32,9 +32,9 @@ In every menu the gold outline is on a button right away, so you always see wher
 
 ## 1. In a browser app
 
-1. Put the game online: see [domain.md](domain.md). It is at `https://cabinweek.online/` (or `https://w3nl.github.io/cabin-week/`).
+1. Put the game online: see [domain.md](domain.md). It is at `https://tripscouts.online/` (or `https://w3nl.github.io/cabin-week/`).
 2. Install a browser from the Play Store on the Google TV, for example **TV Bro**.
-3. Open `cabinweek.online` and play with the remote or a controller.
+3. Open `tripscouts.online` and play with the remote or a controller.
 
 Whether a controller works in such a browser depends on the browser. If not, use the remote, or the app (3).
 
@@ -74,9 +74,9 @@ Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** 
 
 ### Once: Google Play Console
 
-1. **Create app:** name "Cabin Week", default language English (United Kingdom) – en-GB (add Dutch as a translation), type **Game**, **free**.
+1. **Create app:** name "TripScouts", default language English (United Kingdom) – en-GB (add Dutch as a translation), type **Game**, **free**.
 2. **Turn on Android TV:** Test and release → Advanced settings → Form factors → add **Android TV**. Without this the app does not show up in the Play Store on the Google TV.
-3. **The required questions** (content rating, target audience, data safety, privacy policy `https://cabinweek.online/privacy.html`): all answers, texts and images are in [play-store/](play-store/README.md).
+3. **The required questions** (content rating, target audience, data safety, privacy policy `https://tripscouts.online/privacy.html`): all answers, texts and images are in [play-store/](play-store/README.md).
 4. **Play App Signing** is on by default: Google keeps the real signing key; you upload with your upload key.
 
 ### Upload a version and share it
@@ -91,7 +91,7 @@ Google Play wants an **app bundle (`.aab`)** signed with a fixed **upload key** 
 1. Check that the release is also available for **Android TV** (Internal testing → Releases). Just turned on? It can take an hour.
 2. The Google account on the TV (**Settings → Accounts & sign-in**) must be on the tester list and have chosen **Become a tester**.
 3. Remove an app installed earlier with Downloader: Google Play signs with a different key.
-4. Install: from the phone (Play Store → Cabin Week → **Install on more devices** → the Google TV Streamer), from the computer (play.google.com → **Install** → the TV), or on the TV (Play Store → search "Cabin Week").
+4. Install: from the phone (Play Store → TripScouts → **Install on more devices** → the Google TV Streamer), from the computer (play.google.com → **Install** → the TV), or on the TV (Play Store → search "TripScouts").
 5. Move the tile to the home screen: **Apps → Your apps**, hold OK on the tile → **Move** or **Add to favourites**.
 
 **"Not available for this device"** almost always means: Android TV is not turned on in Play Console yet, or the TV is signed in with an account that is not a tester.

@@ -359,15 +359,15 @@ test('the Veneto: in Venice you hop from island to island on the vaporetto, and 
 
 test('a summer region says "summer days" on the title screen', async ({ page }) => {
   await seed(page, { region: 'dalmatia' });
-  await expect(page.locator('#cdWord')).toHaveText('summer days to play');
+  await expect(page.locator('#cdWord')).toHaveText('summer days to scout');
   await seed(page, { region: 'scotland' });
-  await expect(page.locator('#cdWord')).toHaveText('summer days to play');
+  await expect(page.locator('#cdWord')).toHaveText('summer days to scout');
   await seed(page, { region: 'ardeche' });
-  await expect(page.locator('#cdWord')).toHaveText('summer days to play');
+  await expect(page.locator('#cdWord')).toHaveText('summer days to scout');
   await seed(page, { region: 'veneto' });
-  await expect(page.locator('#cdWord')).toHaveText('summer days to play');
+  await expect(page.locator('#cdWord')).toHaveText('summer days to scout');
   await seed(page);
-  await expect(page.locator('#cdWord')).toHaveText('winter days to play');
+  await expect(page.locator('#cdWord')).toHaveText('winter days to scout');
 });
 
 test('Tirol: the cable car goes up the mountain on a slanted cable, and takes you along', async ({ page }) => {

@@ -39,7 +39,7 @@ test('voices are off by default; when on, every line is read aloud, each person 
   await expect(page.locator('#voiceBtn')).toHaveText('🔊 Voices on');
   await expect(page.locator('#voiceBtn')).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(async () => (await spoken(page)).length).toBe(1);
-  expect((await spoken(page))[0]).toMatchObject({ text: 'Voices on. Off to the cabin!', lang: 'en-GB' });
+  expect((await spoken(page))[0]).toMatchObject({ text: 'Voices on. Let\'s go scouting!', lang: 'en-GB' });
 
   // in a level: each line of a conversation is spoken; the next line when you go on
   await startDay(page, 0);
@@ -83,7 +83,7 @@ test('Dutch: the voices speak Dutch, and the button is translated', async ({ pag
   await page.locator('#voiceBtn').click();
   await expect(page.locator('#voiceBtn')).toHaveText('🔊 Stemmen aan');
   await expect.poll(async () => (await spoken(page)).length).toBe(1);
-  expect((await spoken(page))[0]).toMatchObject({ text: 'Stemmen aan. Op naar het huisje!', lang: 'nl-NL' });
+  expect((await spoken(page))[0]).toMatchObject({ text: 'Stemmen aan. Op verkenning!', lang: 'nl-NL' });
   // remembered after a reload
   await page.reload();
   await expect(page.locator('#voiceBtn')).toHaveText('🔊 Stemmen aan');

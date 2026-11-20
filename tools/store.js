@@ -119,8 +119,8 @@ async function play(page, i, walk) {
         const d = document.createElement('div');
         d.style.cssText = `position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding-left:${pad}px;` +
           'background:linear-gradient(90deg,rgba(11,22,49,.88),rgba(11,22,49,.55) 48%,transparent 75%);color:#fff;font-family:Fredoka,sans-serif;z-index:99';
-        d.innerHTML = `<div style="font-size:${big}px;font-weight:700;line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.35)">Cabin<br>Week</div>` +
-          `<div style="font-size:${small}px;font-weight:600;margin-top:16px;color:#ffd25e">A level a day, all across Europe</div>`;
+        d.innerHTML = `<div style="font-size:${big}px;font-weight:700;line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.35)">Trip<br>Scouts</div>` +
+          `<div style="font-size:${small}px;font-weight:600;margin-top:16px;color:#ffd25e">Ten trips to scout, all across Europe</div>`;
         document.body.appendChild(d);
       }, [pad, big, small]);
       await page.waitForTimeout(300);
