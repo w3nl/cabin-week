@@ -165,3 +165,7 @@ vite.config.ts.timestamp-*
 /android-tv/app/src/main/assets/
 /android-tv/keystore.jks
 /android-tv/local.properties
+
+# Linux app (snap): the game is copied in by the workflow, the build goes to dist/
+/linux/game/
+/linux/dist/

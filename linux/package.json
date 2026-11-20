@@ -1,0 +1,64 @@
+{
+  "name": "tripscouts",
+  "productName": "TripScouts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Two families can't agree where to go on holiday, so you scout ten trips across Europe for them. A platform game: walk, jump, find things and crack codes.",
+  "homepage": "https://tripscouts.online/",
+  "license": "GPL-3.0",
+  "author": {
+    "name": "w3nl",
+    "url": "https://github.com/w3nl/tripscouts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/w3nl/tripscouts.git"
+  },
+  "desktopName": "tripscouts.desktop",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "snap": "electron-builder --linux snap --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "nl.w3nl.tripscouts",
+    "productName": "TripScouts",
+    "files": [
+      "main.js",
+      "game/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "linux": {
+      "target": [
+        "snap"
+      ],
+      "category": "Game",
+      "executableName": "tripscouts",
+      "icon": "game/icons/icon-512.png",
+      "synopsis": "Scout ten family trips across Europe in a cosy platform game",
+      "desktop": {
+        "entry": {
+          "Name": "TripScouts",
+          "Comment": "Scout ten family trips across Europe",
+          "Keywords": "game;platform;family;holiday;"
+        }
+      },
+      "syncDesktopName": true
+    },
+    "snap": {
+      "summary": "Scout ten family trips across Europe in a cosy platform game",
+      "grade": "stable",
+      "confinement": "strict",
+      "plugs": [
+        "default",
+        "joystick"
+      ]
+    }
+  }
+}
