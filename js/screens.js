@@ -40,6 +40,7 @@ function setScreen(s) {
   if (s !== "play") { held.left = held.right = held.jump = false; }
   else if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   menuAutoFocus();
+  if (typeof ambFollow === "function") ambFollow(s);
   if (typeof updateHints === "function") updateHints();
 }
 function card(html, buttons) {

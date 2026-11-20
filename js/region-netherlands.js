@@ -3,7 +3,7 @@
 // Windmills, dikes, canals, cheese, stroopwafels, bikes, skating and the Wadden. Eight levels made with genLevel.
 const NL_LEVELS = [
   genLevel({
-    seed: 6101, w: 150, day: dayLabel(0), name: T("Arrival at the Zaanse Schans", "Aankomst bij de Zaanse Schans"), theme: "sneeuw", scene: "polder",
+    seed: 6101, w: 200, day: dayLabel(0), name: T("Arrival at the Zaanse Schans", "Aankomst bij de Zaanse Schans"), theme: "sneeuw", scene: "polder",
     water: true, wind: .35,
     sub: T("Green wooden houses, windmills and a canal. The keys of our little house blew off the bridge. Of course they did.",
       "Groene houten huisjes, molens en een vaart. De sleutels van ons huisje zijn van de brug gewaaid. Natuurlijk."),
@@ -28,7 +28,7 @@ const NL_LEVELS = [
     doneMsg: T("Keys found, little house open, the windmill turning outside the window. Gezellig!", "Sleutels gevonden, huisje open, de molen draait voor het raam. Gezellig!")
   }),
   genLevel({
-    seed: 6202, w: 160, day: dayLabel(1), name: T("The Windmills of Kinderdijk", "De molens van Kinderdijk"), theme: "sneeuw", scene: "polder",
+    seed: 6202, w: 215, day: dayLabel(1), name: T("The Windmills of Kinderdijk", "De molens van Kinderdijk"), theme: "sneeuw", scene: "polder",
     hills: [12, 10], water: true, wind: .5,
     sub: T("Nineteen windmills in a row, dikes and frozen ditches. Find three tulip bulbs, and help the miller pump the polder dry.",
       "Negentien molens op een rij, dijken en bevroren sloten. Vind drie tulpenbollen, en help de molenaar de polder droog te malen."),
@@ -52,7 +52,7 @@ const NL_LEVELS = [
     doneMsg: T("Nineteen windmills counted, one fixed, three bulbs in the pocket. Windblown and happy.", "Negentien molens geteld, één gerepareerd, drie bollen in de zak. Verwaaid en vrolijk.")
   }),
   genLevel({
-    seed: 6303, w: 150, day: dayLabel(2), name: T("Amsterdam by Canal Boat", "Amsterdam per rondvaartboot"), theme: "stad", scene: "grachten",
+    seed: 6303, w: 200, day: dayLabel(2), name: T("Amsterdam by Canal Boat", "Amsterdam per rondvaartboot"), theme: "stad", scene: "grachten",
     water: true, movers: "boat",
     sub: T("Canals, crooked houses and a million bikes. Find three bike bells, and the ticket for the canal boat.",
       "Grachten, scheve huizen en een miljoen fietsen. Vind drie fietsbellen, en het kaartje voor de rondvaartboot."),
@@ -77,7 +77,7 @@ const NL_LEVELS = [
     doneMsg: T("A canal boat under 20 bridges, chips with mayonnaise and nobody fell in the canal. A good day.", "Een rondvaart onder 20 bruggen door, patat met mayonaise en niemand in de gracht gevallen. Een goede dag.")
   }),
   genLevel({
-    seed: 6404, w: 140, day: dayLabel(3), name: T("Gouda by Candlelight", "Gouda bij Kaarslicht"), theme: "stad", scene: "grachten",
+    seed: 6404, w: 190, day: dayLabel(3), name: T("Gouda by Candlelight", "Gouda bij Kaarslicht"), theme: "stad", scene: "grachten",
     dark: { r: 170, quest: 150 },
     sub: T("Christmas Eve on the market square: the big tree will be lit with candles. Find three cheeses, and the big candle.",
       "Kerstavond op de Markt: de grote boom gaat aan met kaarsjes. Vind drie kazen, en de grote kaars."),
@@ -102,7 +102,7 @@ const NL_LEVELS = [
     doneMsg: T("The tree is lit, the square is full of candles and everyone has a warm stroopwafel. A beautiful Christmas Eve.", "De boom is aan, het plein staat vol kaarsjes en iedereen heeft een warme stroopwafel. Een mooie kerstavond.")
   }),
   genLevel({
-    seed: 6505, w: 160, day: dayLabel(4), name: T("Skating in Giethoorn", "Schaatsen in Giethoorn"), theme: "sneeuw", scene: "polder",
+    seed: 6505, w: 215, day: dayLabel(4), name: T("Skating in Giethoorn", "Schaatsen in Giethoorn"), theme: "sneeuw", scene: "polder",
     ice: true, water: true,
     sub: T("Christmas Day, and the canals are frozen! Find three pairs of skates. Watch out for holes in the ice.",
       "Eerste kerstdag, en de grachten zijn bevroren! Vind drie paar schaatsen. Pas op voor wakken."),
@@ -124,7 +124,7 @@ const NL_LEVELS = [
     doneMsg: T("Skating on Christmas Day, pea soup on the ice, and nobody fell through. A real Dutch winter fairy tale.", "Schaatsen op eerste kerstdag, erwtensoep op het ijs, en niemand erdoor gezakt. Een echt Hollands wintersprookje.")
   }),
   genLevel({
-    seed: 6606, w: 160, day: dayLabel(5), name: T("The Hoge Veluwe", "De Hoge Veluwe"), theme: "sneeuw", scene: "duinen",
+    seed: 6606, w: 215, day: dayLabel(5), name: T("The Hoge Veluwe", "De Hoge Veluwe"), theme: "sneeuw", scene: "duinen",
     hills: [12, 10],
     sub: T("Boxing Day in the national park: heath, drifting sand and forest. Find three white bikes for the family, and the museum ticket.",
       "Tweede kerstdag in het nationaal park: heide, stuifzand en bos. Vind drie witte fietsen voor de familie, en het museumkaartje."),
@@ -148,7 +148,7 @@ const NL_LEVELS = [
     doneMsg: T("Cycled across the whole park, saw the sunflowers and spotted one very surprised wild boar.", "Het hele park doorgefietst, de zonnebloemen gezien en één heel verbaasd wild zwijn gespot.")
   }),
   genLevel({
-    seed: 6707, w: 160, day: dayLabel(6), name: T("A Wadden Island", "Een Waddeneiland"), theme: "sneeuw", scene: "duinen",
+    seed: 6707, w: 215, day: dayLabel(6), name: T("A Wadden Island", "Een Waddeneiland"), theme: "sneeuw", scene: "duinen",
     hills: [12, 11], water: true, movers: "boat", wind: .7,
     sub: T("The ferry to the island! Dunes, a lighthouse and seals. Find three shells, and light the dike lamps for the ferry. Hold on to your hat.",
       "Met de boot naar het eiland! Duinen, een vuurtoren en zeehonden. Vind drie schelpen, en steek de dijklampen aan voor de veerboot. Hou je muts vast."),
@@ -173,7 +173,7 @@ const NL_LEVELS = [
     doneMsg: T("Windblown, salty and full of chips. And the seagulls didn't get a thing. Well, almost nothing.", "Verwaaid, zout en vol patat. En de meeuwen kregen niks. Nou ja, bijna niks.")
   }),
   genLevel({
-    seed: 6808, w: 160, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "polder",
+    seed: 6808, w: 215, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "polder",
     hills: [12, 10], water: true, wind: .4,
     sub: T("Everything has to go! Find three pairs of clogs, and the Gouda cheese for the neighbours, before the car leaves.",
       "Alles moet mee! Vind drie paar klompen, en de Goudse kaas voor de buren, voordat de auto vertrekt."),

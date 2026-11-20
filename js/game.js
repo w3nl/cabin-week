@@ -150,17 +150,18 @@ const isTouch = matchMedia("(pointer: coarse)").matches;
    ===================================================================== */
 function say(name, lines, cb, calm) {
   if (typeof lines === "string") lines = [lines]; // one text is one balloon, never one letter at a time
-  dialog = { name, lines, i: 0, cb };
+  dialog = { name, lines, i: 0, cb, calm };
   $("dialog").classList.toggle("calm", !!calm);
   $("dName").textContent = name; $("dText").textContent = lines[0];
   $("dialog").hidden = false;
+  if (typeof speakLine === "function") speakLine(name, lines[0], calm); // optional voices (voice.js)
 }
 function advanceDialog() {
   dialog.i++;
   if (dialog.i >= dialog.lines.length) { const cb = dialog.cb; dialog = null; hideDialog(); if (cb) cb(); }
-  else $("dText").textContent = dialog.lines[dialog.i];
+  else { $("dText").textContent = dialog.lines[dialog.i]; if (typeof speakLine === "function") speakLine(dialog.name, dialog.lines[dialog.i], dialog.calm); }
 }
-function hideDialog() { $("dialog").hidden = true; }
+function hideDialog() { $("dialog").hidden = true; if (typeof stopSpeaking === "function") stopSpeaking(); }
 
 /* =====================================================================
    SPELLOGICA
@@ -204,7 +205,7 @@ function interact() {
   if (sw && !sw.on) return switchOn(sw);
   if (L.bell && nearest([L.bell])) return ringBell();
   if (L.animal && !L.animal.follow && nearest([L.animal], 48)) {
-    L.animal.follow = true; L.animal.trail = []; tone(880, .08, "triangle", .05); tone(1100, .1, "triangle", .04);
+    L.animal.follow = true; L.animal.trail = []; L.animal.call = 400; animalSound(L.d.task.animal);
     pop(L.animal.x + 16, L.animal.y - 10, T(`The ${L.d.task.name} follows you!`, `${cap(L.d.task.name)} loopt met je mee!`), "#9fe8ff"); updateHud(); return;
   }
   const sign = nearest(L.signs);
@@ -220,6 +221,30 @@ function interact() {
 }
 
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+/** An animal that sees you close by (about 6 tiles, on about the same height) comes walking towards you, a bit faster
+    than it wanders, and calls once when it spots you. Further away it wanders again. Not the moose: it is friendly. */
+function animalChase(e) {
+  if (e.kind === "alg") return;
+  if (e.spd === undefined) e.spd = Math.abs(e.vx) || 1;
+  const dx = P.x + P.w / 2 - (e.x + e.w / 2), dy = P.y + P.h - (e.y + e.h);
+  const near = Math.abs(dx) < 6 * TS && Math.abs(dy) < 1.5 * TS && P.inv <= 0;
+  if (near) {
+    // it spotted you: one call (not again for a few seconds, and never two animals at once)
+    if (!e.chase && L.time - (e.spotted ?? -999) > 300 && L.time - (L.calls ?? -999) > 60) { e.spotted = L.calls = L.time; animalSound(e.kind, .8); e.call = 240 + Math.floor(Math.random() * 300); }
+    e.chase = true; e.vx = (Math.sign(dx) || 1) * e.spd * 1.4;
+  } else if (e.chase) { e.chase = false; e.vx = Math.sign(e.vx || 1) * e.spd; } // out of sight: back to wandering
+}
+/** Now and then an animal near you makes its sound: louder close by, never two at once (L.calls), and not while
+    you are talking to someone (step() does not run then). */
+function animalCall(e, kind = e.kind) {
+  const dx = Math.abs(e.x - P.x);
+  if (dx > 9 * TS) return;
+  if (e.call === undefined) e.call = 90 + Math.floor(Math.random() * 300);
+  if (--e.call > 0) return;
+  e.call = 240 + Math.floor(Math.random() * 300);
+  if (L.time - (L.calls || -999) < 100) return;
+  L.calls = L.time; animalSound(kind, .75 - dx / (9 * TS) * .6);
+}
 function gateNpc() { return L.npcs.find(n => n.task || n.quest); }
 function openGate(lines) {
   L.questDone = true; L.gateOpen = true; L.timer = 0; SFX.open();
@@ -231,7 +256,7 @@ function taskTalk(npc) {
   const t = L.d.task, nm = npc.who.name;
   if (L.questDone) return say(nm, t.after);
   if (t.kind === "follow" && L.animal && L.animal.follow && Math.abs(L.animal.x - npc.x) < 5 * TS) {
-    L.animal.home = true; L.animal.follow = false;
+    L.animal.home = true; L.animal.follow = false; animalSound(L.d.task.animal);
     return say(nm, t.done, () => openGate());
   }
   return say(nm, t.need);
@@ -408,11 +433,12 @@ function step() {
     if (P.x + P.w > m.x + 2 && P.x < m.x + m.w - 2 && prevBottom <= m.y + 1 && P.y + P.h >= m.y) { P.y = m.y - P.h; P.vy = 0; P.onGround = true; P.mover = m; break; }
   }
   // Swimming (Dalmatia): the sea is warm, so you float in the water instead of falling. You can jump out again.
-  P.swim = false;
+  // (while you float, the gentle bobbing must not count as leaving the water, or a jump out could fail: swimPrev)
+  P.swimPrev = P.swim; P.swim = false;
   if (L.d.swim && !P.onGround) {
     const col = Math.floor((P.x + P.w / 2) / TS), surf = waterTop(col);
     // in the river you only land on the water from above (going down a waterfall); everywhere else as before
-    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55 && (!inRiver(col) || prevBottom <= surf + P.h * .55 + 14)) {
+    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55 - (P.swimPrev ? 4 : 0) && (!inRiver(col) || prevBottom <= surf + P.h * .55 + 14)) {
       P.y = surf - P.h * .45 + Math.sin(L.time / 12) * 1.2; P.vy = 0; P.onGround = true; P.swim = true; P.mover = null;
       P.vx = Math.max(-2.6, Math.min(2.6, P.vx));
       if (L.time % 10 === 0) particles.push({ x: P.x + P.w / 2 + (Math.random() - .5) * 20, y: surf + 4, vx: 0, vy: -.6, life: 18, c: "#e8fbff", s: 2.5 });
@@ -452,26 +478,29 @@ function step() {
   // enemies
   for (const e of L.enemies) {
     if (e.dead) { e.dead++; continue; }
+    animalCall(e);
+    animalChase(e);
     const nx = e.x + e.vx, front = e.vx > 0 ? nx + e.w : nx;
     const ftx = Math.floor(front / TS), fty = Math.floor((e.y + e.h - 1) / TS);
     const below = cell(ftx, fty + 1);
-    if (isSolid(ftx, fty) || !(isSolid(ftx, fty + 1) || below === "=")) e.vx = -e.vx; else e.x = nx;
+    // at a wall or an edge it turns around; an animal coming for you waits there instead (it won't jump after you)
+    if (isSolid(ftx, fty) || !(isSolid(ftx, fty + 1) || below === "=")) { if (!e.chase) e.vx = -e.vx; } else e.x = nx;
     if (overlap(P, e) && e.kind === "alg") {
       // the moose: land on its back and you fly up high; bump into it and it gently pushes you away
-      if (P.vy > 0 && prevBottom <= e.y + 16) { P.y = e.y - P.h; P.vy = -15.5; P.slide = 0; tone(220, .18, "triangle", .06); tone(330, .2, "triangle", .04); pop(e.x + e.w / 2, e.y - 14, T("Boing!", "Boing!"), "#fff"); }
+      if (P.vy > 0 && prevBottom <= e.y + 16) { P.y = e.y - P.h; P.vy = -15.5; P.slide = 0; tone(220, .18, "triangle", .06); tone(330, .2, "triangle", .04); animalSound("alg", .6); pop(e.x + e.w / 2, e.y - 14, T("Boing!", "Boing!"), "#fff"); }
       else { const left = P.x + P.w / 2 < e.x + e.w / 2; P.vx = left ? -5 : 5; P.x = left ? Math.min(P.x, e.x - P.w) : Math.max(P.x, e.x + e.w); P.slide = 0;
-        if (!e.said || L.time - e.said > 120) { e.said = L.time; pop(e.x + e.w / 2, e.y - 14, T("Mmmooh?", "Mmmoeh?"), "#fff"); } }
+        if (!e.said || L.time - e.said > 120) { e.said = L.time; animalSound("alg"); pop(e.x + e.w / 2, e.y - 14, T("Mmmooh?", "Mmmoeh?"), "#fff"); } }
       continue;
     }
     if (overlap(P, e)) {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
-        e.dead = 1; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
+        e.dead = 1; SFX.stomp(); animalDefeat(e.kind); burst(e.x + 15, e.y + 10, "#ffffff", 14);
         pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), wesp: T("Bzz... pop!", "Bzz... plop!"), duif: T("Coo... flap!", "Roekoe... fladder!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
-        e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); burst(e.x + 15, e.y + 10, "#ffffff", 14);
+        e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); animalDefeat(e.kind); burst(e.x + 15, e.y + 10, "#ffffff", 14);
         pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), wesp: T("Bzz... pop!", "Bzz... plop!"), duif: T("Coo... flap!", "Roekoe... fladder!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
-      } else hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!"), mygga: T("Itchy!", "Jeuk!"), wesp: T("Sting!", "Steek!"), duif: T("Peck!", "Pik!"), bever: T("Gnaw!", "Knaag!") }[e.kind]);
+      } else animalSound(e.kind), hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!"), mygga: T("Itchy!", "Jeuk!"), wesp: T("Sting!", "Steek!"), duif: T("Peck!", "Pik!"), bever: T("Gnaw!", "Knaag!") }[e.kind]);
     }
   }
   L.enemies = L.enemies.filter(e => e.dead < 30);
@@ -482,6 +511,7 @@ function step() {
     if (P.x > gx + TS) { L.questDone = true; L.timer = 0; SFX.open(); pop(gx + 16, 8 * TS, T("Made it!", "Gehaald!"), "#8dffb5"); }
     else if (--L.timer <= 0) { if (P.x + P.w > gx && P.x < gx + TS) L.timer = 1; else { L.gateOpen = false; L.gateFade = 1; SFX.bad(); } }
     if (L.timer % 60 === 0) { tone(L.timer ? 700 : 300, .05, "square", .03); updateHud(); }
+    else if (L.timer < 120 && L.timer % 30 === 0) tone(880, .04, "square", .025); // the last two seconds tick faster
   }
   // A melody bell rings when you walk past it for the first time.
   for (const c of L.clues) { if (c.ring > 0) c.ring--; if (c.kind === "melody" && !c.heard && Math.abs(c.x + 16 - (P.x + P.w / 2)) < 20) { c.heard = true; ringClue(c); } }
@@ -493,6 +523,7 @@ function step() {
     if (last && Math.abs(last.x - P.x) + Math.abs(last.y - (P.y + P.h)) > 60) { tr.length = 0; a.x = P.x - P.face * 34; a.y = P.y + P.h - TS; }
     tr.push({ x: P.x, y: P.y + P.h, face: P.face });
     if (tr.length > 40) tr.shift();
+    animalCall(a, L.d.task.animal);
     // the newest footstep that is far enough behind you; if you stand still, it stays where it is
     for (let i = tr.length - 1; i >= 0; i--) if (Math.abs(tr[i].x - P.x) >= 30) { const s = tr[i]; a.face = Math.sign(P.x - s.x) || s.face; a.x += (s.x - a.x) * .35; a.y = s.y - TS; break; }
   } else if (L.animal && L.animal.home) { const n = gateNpc(); L.animal.x += (n.x - 26 - L.animal.x) * .1; L.animal.y = n.y; L.animal.face = 1; }

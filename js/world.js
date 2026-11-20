@@ -2687,12 +2687,42 @@ function drawWeather() {
 /** Darkness with a circle of light around you (the troll forest, the northern lights night). Finding things makes it bigger. */
 /** How far you can see in the dark: more for every thing you find, the task item and every lamp or torch you light. */
 function darkRadius() { const dk = L.d.dark; return dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0) + L.switches.filter(s => s.on).length * (dk.lamp || 0); }
+/* Darkness (dark levels): a dark layer with holes of light. One around you, and one around every lamp or torch you
+   lit: that place stays light when you walk on, so you can see the way back. The layer is drawn at half size on its own
+   canvas (DARK_CV) and scaled up: the edges are soft anyway, and it is quick enough for the TV. */
+let DARK_CV = null;
+const LAMP_LIGHT = 3.6 * TS; // how far a lit lamp lights up its surroundings
+function darkLights(cx) {
+  const r = darkRadius(), out = [[P.x + P.w / 2 - cx, P.y + P.h / 2, r, .45]];
+  for (const s of L.switches) if (s.on && L.d.task && L.d.task.kind === "lights") {
+    const lx = s.x + 16 - cx, ly = s.y + TS - 50;
+    if (lx > -LAMP_LIGHT && lx < viewW + LAMP_LIGHT) out.push([lx, ly + 10, LAMP_LIGHT * (1 + Math.sin(frame / 9 + s.x) * .03), .35]);
+  }
+  return out;
+}
 function drawDark(cx) {
-  const r = darkRadius();
-  const sx = P.x + P.w / 2 - cx, sy = P.y + P.h / 2;
-  const gr = g.createRadialGradient(sx, sy, r * .45, sx, sy, r);
-  gr.addColorStop(0, "rgba(4,6,18,0)"); gr.addColorStop(1, "rgba(4,6,18,.9)");
-  g.fillStyle = gr; g.fillRect(0, 0, viewW, VIEW_H);
+  const k = .5, w = Math.ceil(viewW * k), h = Math.ceil(VIEW_H * k);
+  DARK_CV = DARK_CV || document.createElement("canvas");
+  if (DARK_CV.width !== w || DARK_CV.height !== h) { DARK_CV.width = w; DARK_CV.height = h; }
+  const d = DARK_CV.getContext("2d");
+  d.globalCompositeOperation = "source-over"; d.clearRect(0, 0, w, h);
+  d.fillStyle = "rgba(4,6,18,.9)"; d.fillRect(0, 0, w, h);
+  d.globalCompositeOperation = "destination-out";
+  const lights = darkLights(cx);
+  for (const [x, y, r, inner] of lights) {
+    const gr = d.createRadialGradient(x * k, y * k, r * inner * k, x * k, y * k, r * k);
+    gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+    d.fillStyle = gr; d.fillRect((x - r) * k, (y - r) * k, 2 * r * k, 2 * r * k);
+  }
+  g.drawImage(DARK_CV, 0, 0, viewW, VIEW_H);
+  // a warm glow around the lit lamps
+  const m0 = g.globalCompositeOperation; g.globalCompositeOperation = "lighter";
+  for (const [x, y, r] of lights.slice(1)) {
+    const gl = g.createRadialGradient(x, y, 4, x, y, r * .8);
+    gl.addColorStop(0, "rgba(255,190,110,.22)"); gl.addColorStop(1, "rgba(255,190,110,0)");
+    g.fillStyle = gl; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  g.globalCompositeOperation = m0;
 }
 
 /* ---------- Alles samen ---------- */
@@ -2782,8 +2812,11 @@ function render() {
       drawPerson(ch, 0, 0, 1, P.face, 0, false, pHat, { t: frame * 16, scarf, summer, indoor: theme === "huis", slide: true });
       g.setTransform(m0);
     } else {
-      if (P.onGround) shadowAt(P.x + P.w / 2, P.y + P.h, 11);
-      drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3, scarf, summer, indoor: theme === "huis" });
+      if (P.onGround && !P.canoe) shadowAt(P.x + P.w / 2, P.y + P.h, 11);
+      // in a canoe you sit inside it: only draw what sticks out above the edge (no legs under the boat, also mid-jump)
+      if (P.canoe) { g.save(); g.beginPath(); g.rect(P.x - 80, P.y - 120, P.w + 160, 120 + P.h * .45 + 4); g.clip(); }
+      drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3 && !P.canoe, scarf, summer, indoor: theme === "huis" });
+      if (P.canoe) g.restore();
       // swimming: the water covers you up to your chest
       if (P.swim) {
         drawWater(cx, [fl(P.x / TS), fl((P.x + P.w) / TS)]);
@@ -2821,4 +2854,24 @@ function render() {
   drawAmbient(theme);
   if (theme === "sneeuw" || theme === "stad") drawFlakes();
   vignette();
+  if (L.timer > 0) drawGateTimer();
+}
+/** After ringing the bell: a big countdown at the top of the screen, with a bar that runs out and an arrow towards the gate.
+    Gold while there is time, red and pulsing in the last two seconds. */
+function drawGateTimer() {
+  const total = Math.round((L.d.task.secs || 5) * 60), left = Math.max(0, L.timer), secs = left / 60, hurry = secs <= 2;
+  const w = 236, h = 46, x = viewW / 2 - w / 2, y = 54, pulse = hurry ? 1 + Math.sin(frame / 3) * .04 : 1;
+  const gx = L.d.gate[0] * TS + 16, dir = gx > P.x + P.w / 2 ? "→" : "←";
+  g.save(); g.translate(viewW / 2, y + h / 2); g.scale(pulse, pulse); g.translate(-viewW / 2, -(y + h / 2));
+  g.fillStyle = "rgba(20,10,4,.78)"; g.strokeStyle = hurry ? "#ff6a5a" : "#ffd25e"; g.lineWidth = 2.5;
+  g.beginPath(); rp(x, y, w, h, 12); g.fill(); g.stroke();
+  // the bar that runs out
+  g.fillStyle = "rgba(255,255,255,.12)"; g.beginPath(); rp(x + 10, y + h - 13, w - 20, 6, 3); g.fill();
+  g.fillStyle = hurry ? "#ff6a5a" : "#ffd25e"; g.beginPath(); rp(x + 10, y + h - 13, Math.max(6, (w - 20) * left / total), 6, 3); g.fill();
+  g.textBaseline = "middle"; g.textAlign = "left"; g.font = "700 15px Fredoka, sans-serif"; g.fillStyle = "#fff";
+  emoji("🔔", x + 22, y + 17, 18);
+  g.fillStyle = "#fff"; g.fillText(T("Gate open", "Hek open") + "  " + dir, x + 38, y + 17);
+  g.textAlign = "right"; g.font = "700 20px Fredoka, sans-serif"; g.fillStyle = hurry ? "#ff8a7a" : "#ffd25e";
+  g.fillText(secs.toFixed(1) + " s", x + w - 12, y + 17);
+  g.restore();
 }

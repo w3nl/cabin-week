@@ -34,26 +34,26 @@ const nightsLabel = i => i < 7 ? `ðŸŒ™ ${T("night", "nacht")} ${i + 1}/7` : `ðŸ
    Two (fictional) families share the cabin: the Hills and the Woods. Laura and Anna are sisters.
    ===================================================================== */
 // size: height compared to an adult; kid: bigger head. hair: short, bald, bob, curly, long, flowing, ponytail.
-// coat: puffer, long, jacket. scarf: stripe colours. glasses: round or thick.
+// voice: f or m, for the voices (js/voice.js). coat: puffer, long, jacket. scarf: stripe colours. glasses: round or thick.
 // sweater: Paul wears his green Christmas jumper (with a Saab 900) indoors. beanieCold: only a hat outside in the cold.
 const CHARS = [
-  { name: "Paul", fam: "Hill", size: 1, hair: "short", hairCol: "#a87c4c",
+  { name: "Paul", voice: "m", fam: "Hill", size: 1, hair: "short", hairCol: "#a87c4c",
     coat: "jacket", coatCol: "#b8a586", pants: "#3d5a86", backpack: "#4a5560", sweater: "#1f6a3a" },
-  { name: "Laura", fam: "Hill", size: .94, hair: "bob", hairCol: "#e8c47c",
+  { name: "Laura", voice: "f", fam: "Hill", size: .94, hair: "bob", hairCol: "#e8c47c",
     coat: "long", coatCol: "#e6dccd", pants: "#2f4870", scarf: ["#e4573f", "#f08a70"], beanie: "#8a6a55", beanieCold: true },
-  { name: "Sophie", fam: "Hill", size: .88, hair: "ponytail", hairCol: "#ecc979", bow: "#b3202e",
+  { name: "Sophie", voice: "f", fam: "Hill", size: .88, hair: "ponytail", hairCol: "#ecc979", bow: "#b3202e",
     coat: "puffer", coatCol: "#f4f4f2", pants: "#1f2228", scarf: ["#f2a0a8"] },
-  { name: "Lily", fam: "Hill", size: .76, kid: true, hair: "flowing", hairCol: "#f2d184", bun: "#b67ad9", cute: true,
+  { name: "Lily", voice: "f", fam: "Hill", size: .76, kid: true, hair: "flowing", hairCol: "#f2d184", bun: "#b67ad9", cute: true,
     coat: "puffer", coatCol: "#f1ece3", pants: "#3a2a32", skirt: "#7a2236", shoes: "#2a2a30", laces: ["#ff5a7a", "#ffd25e", "#5aa8ff"] },
-  { name: "Rob", fam: "Woods", size: 1.05, hair: "bald", hairCol: "#c9a77a", stubble: true,
+  { name: "Rob", voice: "m", fam: "Woods", size: 1.05, hair: "bald", hairCol: "#c9a77a", stubble: true,
     coat: "jacket", coatCol: "#2e3338", pants: "#3d5a86" },
-  { name: "Anna", fam: "Woods", size: .94, hair: "curly", hairCol: "#d9a35a",
+  { name: "Anna", voice: "f", fam: "Woods", size: .94, hair: "curly", hairCol: "#d9a35a",
     coat: "long", coatCol: "#2f7a4a", pants: "#3a2a2e", scarf: ["#d9782e", "#6a8a3a", "#b8303a", "#e8b44a"] },
-  { name: "Finn", fam: "Woods", size: .92, hair: "short", hairCol: "#e2c27a", glasses: "round",
+  { name: "Finn", voice: "m", fam: "Woods", size: .92, hair: "short", hairCol: "#e2c27a", glasses: "round",
     coat: "puffer", coatCol: "#8a8448", pants: "#2c2f36" },
-  { name: "Tom", fam: "Woods", size: .76, kid: true, hair: "short", hairCol: "#e6c784", glasses: "thick",
+  { name: "Tom", voice: "m", fam: "Woods", size: .76, kid: true, hair: "short", hairCol: "#e6c784", glasses: "thick",
     coat: "puffer", coatCol: "#2c3a30", pants: "#2c2f36", beanie: "#5a6068" },
-  { name: "Max", fam: "Woods", size: .68, kid: true, hair: "short", hairCol: "#efd28e",
+  { name: "Max", voice: "m", fam: "Woods", size: .68, kid: true, hair: "short", hairCol: "#efd28e",
     coat: "jacket", coatCol: "#b8652a", pants: "#56603d" }
 ];
 
