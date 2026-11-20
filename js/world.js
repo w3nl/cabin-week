@@ -882,6 +882,11 @@ function getSceneLayers(scene) {
       const a = [[16, 3, 1], [8, 8, 2]];
       fillRidge(330, a, "#5a9a4a", "#7ab85a");
       for (let x = 0; x < LW; x += 12 + R() * 22) { const y = ridge(330, a, x) + 6; pineShape(x, y, 34 + R() * 28, "#3a6a3a", "#2e5a30", null, "#1e3a20"); }
+      // an alpine meadow in front of the forest: the cows graze here (it is this layer's ground for them)
+      const m = [[5, 3, 1], [3, 8, 2]];
+      fillRidge(354, m, "#78b456", "#94cc6a");
+      LAYER_GROUND = { base: 354, amps: m };
+      for (let x = 0; x < LW; x += 9) { const y = ridge(354, m, x) + 5 + R() * 10; if (R() < .25) { g.fillStyle = ["#f4f4f0", "#f5d23a", "#9a5ad8"][Math.floor(R() * 3)]; g.fillRect(x, y, 2, 2); } }
     });
     out.near = layerCanvas(() => {
       const a = [[10, 4, 2], [6, 9, 1]];
@@ -2804,8 +2809,10 @@ function bgAnimalAt(x, cx, layer, which) {
   const par = BG_PAR[which], gr = layer._ground || { base: which === "mid" ? 342 : 382, amps: [] };
   // its spot in the layer, chosen so it is on screen when you are at its place in the level
   const lx = x * TS * par + viewW * (1 - par) / 2, sx = lx - cx * par;
-  const col = Math.floor((sx + cx) / TS), path = Math.min(...[-1, 0, 1].map(d => groundTop(Math.max(0, Math.min(L.w - 1, col + d))) * TS));
-  return [sx, Math.min(ridge(gr.base, gr.amps, ((lx % LW) + LW) % LW) + 6, Math.min(path, 12 * TS) - BG_CLEAR)];
+  // Its feet stay on the ground of its layer. Only where that ground runs below the normal path (the near layers) are
+  // they lifted to just above the path line, so they never sink behind it. Where the path is higher (hills), the path
+  // simply covers them, like everything else behind it: they are never pushed up into the air.
+  return [sx, Math.min(ridge(gr.base, gr.amps, ((lx % LW) + LW) % LW) + 6, 12 * TS - BG_CLEAR)];
 }
 function drawBgAnimals(cx, layer, which) {
   if (!L || !L.d || !layer || which !== bgAnimalLayer() || state === "title" || state === "map" || state === "hero") return;
