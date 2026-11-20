@@ -103,8 +103,8 @@ test("day 4 is Paul's birthday: he wears a party hat", async ({ page }) => {
 test('the menu links to the source code and the licence, like the escape rooms', async ({ page }) => {
   await seed(page);
   const src = page.locator('#credits a', { hasText: 'Source code' }), lic = page.locator('#credits a', { hasText: 'Licence (GPL-3.0)' });
-  await expect(src).toHaveAttribute('href', 'https://github.com/w3nl/cabin-week');
-  await expect(lic).toHaveAttribute('href', 'https://github.com/w3nl/cabin-week/blob/main/LICENSE');
+  await expect(src).toHaveAttribute('href', 'https://github.com/w3nl/tripscouts');
+  await expect(lic).toHaveAttribute('href', 'https://github.com/w3nl/tripscouts/blob/main/LICENSE');
   await expect(src).toBeVisible();
   await seed(page, { lang: 'nl' });
   await expect(page.locator('#credits')).toContainText('Broncode');

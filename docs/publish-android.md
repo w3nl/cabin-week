@@ -36,10 +36,10 @@ Full explanation: [android-key.md](android-key.md). In short:
    gh auth login
    ```
    ```bash
-   base64 -w0 ~/cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+   base64 -w0 ~/cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/tripscouts
    ```
    ```bash
-   gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/cabin-week
+   gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/tripscouts
    ```
 
 ---
@@ -54,7 +54,7 @@ Full explanation: [android-key.md](android-key.md). In short:
    - Tick the declarations → **Create app**.
 3. **Form factors:** the app is one Android app for phone, tablet and TV. Phone and tablet need nothing extra. For the TV: **Test and release → Advanced settings → Form factors → Add form factor → Android TV**. Tick that you follow the TV guidelines and save. Without this the app does not appear on the Google TV. *Optional:* the same page also offers **Google Play Games on PC** (Windows). Check Google's requirements first; it is not turned on for TripScouts yet.
 4. **App content** (left menu **Policy → App content**). Fill in every item with the answers in [play-store/README.md](play-store/README.md#app-content-the-questionnaires):
-   - Privacy policy: `https://tripscouts.online/privacy.html` (until the domain works: `https://w3nl.github.io/cabin-week/privacy.html`)
+   - Privacy policy: `https://tripscouts.online/privacy.html` (until the domain works: `https://w3nl.github.io/tripscouts/privacy.html`)
    - App access, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health.
 5. **Store listing:** **Grow users → Store presence → Main store listing**:
    - Name, short description and full description: copy from [play-store/README.md](play-store/README.md).

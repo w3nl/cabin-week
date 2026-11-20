@@ -69,27 +69,27 @@ Then, in the folder with `cabinweek.jks`:
 
 - **Linux:**
   ```bash
-  base64 -w0 cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+  base64 -w0 cabinweek.jks | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/tripscouts
   ```
 - **Mac:**
   ```bash
-  base64 -i cabinweek.jks | tr -d '\n' | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+  base64 -i cabinweek.jks | tr -d '\n' | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/tripscouts
   ```
 - **Windows (PowerShell):**
   ```powershell
-  [Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/cabin-week
+  [Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | gh secret set ANDROID_KEYSTORE_BASE64 --repo w3nl/tripscouts
   ```
 
 And the password (`gh` asks for it, so it does not end up in your shell history):
 ```bash
-gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/cabin-week
+gh secret set ANDROID_KEYSTORE_PASSWORD --repo w3nl/tripscouts
 ```
 
-**Or on the website:** turn the key into one line of text and copy it (Linux: `base64 -w0 cabinweek.jks`; Mac: `base64 -i cabinweek.jks | tr -d '\n' | pbcopy`; Windows: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | Set-Clipboard`). Then go to [github.com/w3nl/cabin-week/settings/secrets/actions](https://github.com/w3nl/cabin-week/settings/secrets/actions) → **New repository secret**:
+**Or on the website:** turn the key into one line of text and copy it (Linux: `base64 -w0 cabinweek.jks`; Mac: `base64 -i cabinweek.jks | tr -d '\n' | pbcopy`; Windows: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("cabinweek.jks")) | Set-Clipboard`). Then go to [github.com/w3nl/tripscouts/settings/secrets/actions](https://github.com/w3nl/tripscouts/settings/secrets/actions) → **New repository secret**:
 - Name `ANDROID_KEYSTORE_BASE64`, value: the long line of text (2500 to 4000 characters, nothing else).
 - Name `ANDROID_KEYSTORE_PASSWORD`, value: the password.
 
-Check: the page [Settings → Secrets and variables → Actions](https://github.com/w3nl/cabin-week/settings/secrets/actions) lists both names.
+Check: the page [Settings → Secrets and variables → Actions](https://github.com/w3nl/tripscouts/settings/secrets/actions) lists both names.
 
 ### 6. Build
 
@@ -120,9 +120,9 @@ Possible: Google accepts the same upload key for several apps. You need the **fi
 1. Do step 5 above with `ardennen.jks` in place of `cabinweek.jks`, and its password.
 2. Tell the workflow the alias is `ardennen`, with a **variable** (not a secret):
    ```bash
-   gh variable set ANDROID_KEY_ALIAS --body ardennen --repo w3nl/cabin-week
+   gh variable set ANDROID_KEY_ALIAS --body ardennen --repo w3nl/tripscouts
    ```
-   Or on the website: [Settings → Secrets and variables → Actions](https://github.com/w3nl/cabin-week/settings/variables/actions) → tab **Variables** → **New repository variable**: name `ANDROID_KEY_ALIAS`, value `ardennen`.
+   Or on the website: [Settings → Secrets and variables → Actions](https://github.com/w3nl/tripscouts/settings/variables/actions) → tab **Variables** → **New repository variable**: name `ANDROID_KEY_ALIAS`, value `ardennen`.
 3. Continue with steps 6 and 7.
 
 A separate key per app is tidier: if one key leaks, only one app is affected.

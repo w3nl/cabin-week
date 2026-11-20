@@ -1,6 +1,6 @@
 # TripScouts
 
-The repository, the Android package (`nl.w3nl.cabinweek`) and the save data keep an older internal name (`cabin-week`), so nothing breaks for players.
+The Android package (`nl.w3nl.cabinweek`) and the save data keep an older internal name (`cabin-week`), so nothing breaks for players. The repository was called `w3nl/cabin-week` until November 2026; GitHub forwards the old address.
 
 A platform game in the browser about two families, **the Hills and the Woods**, nine people in all. They want to go on holiday together, but they can't agree where. So you go ahead as their **trip scout**: try out every trip and tell them what you think. Choose a trip on the map of Europe (the Ardennes, the North Pole, Tirol, Norway, the Netherlands, Dalmatia, Småland, Scotland, the Ardèche or the Veneto) and play its week: eight days, **one level a day**.
 
