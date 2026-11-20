@@ -301,3 +301,49 @@ test('a ladder: hold ↑ to climb up onto the loft, hold ↓ to climb back down'
   await expect.poll(() => page.evaluate(l => P.y + P.h >= (l.bottom + 1) * 32 - 1, lad), { timeout: 5000 }).toBe(true);
   await page.keyboard.up('ArrowDown');
 });
+
+/* ---------- Rides: skis, a sledge, skates and a bike (genLevel(): `ride`, RIDE_FEEL in game.js) ---------- */
+const RIDES = [['tirol', 1, 'ski'], ['tirol', 4, 'sled'], ['netherlands', 4, 'skates'], ['netherlands', 5, 'bike']];
+for (const [region, day, kind] of RIDES) {
+  test(`een stuk ${kind} in ${region} dag ${day + 1}: je loopt daar niet, je rijdt`, async ({ page }) => {
+    const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await seed(page, { region, unlocked: 8 });
+    await startDay(page, day);
+    const r = await page.evaluate(() => L.d.ride);
+    expect(r.kind).toBe(kind);
+    expect(r.x1 - r.x0).toBeGreaterThan(40);
+    // a sign at the start says how it works
+    expect(await page.evaluate(r => L.signs.some(s => s.x / TS < r.x0 && s.x / TS >= r.x0 - 10), r)).toBe(true);
+    // put the player at the start of the ride (no animals around)
+    await page.evaluate(r => { L.enemies = []; P.x = (r.x0 + 1) * TS; P.y = 0; P.vx = 0; }, r);
+    await page.waitForFunction(() => P.onGround && P.ride);
+    // → speeds you up past walking speed (4.4)
+    await page.keyboard.down('ArrowRight');
+    await page.waitForFunction(() => P.vx > 5, null, { timeout: 4000 });
+    await page.keyboard.up('ArrowRight');
+    // let go: skis and a sledge keep going downhill, skates glide on, a bike rolls out
+    await page.evaluate(r => { P.x = (r.x0 + 1) * TS; P.vx = 0; P.bonk = undefined; }, r);
+    await page.waitForTimeout(150);
+    const x0 = await page.evaluate(() => P.x);
+    await page.waitForTimeout(600);
+    const moved = await page.evaluate(x0 => P.x - x0, x0);
+    if (kind === 'ski' || kind === 'sled') expect(moved).toBeGreaterThan(60);
+    else expect(moved).toBeLessThan(5);
+    // after the ride you walk again
+    await page.evaluate(r => { P.x = (r.x1 + 3) * TS; P.y = 0; P.vx = 0; }, r);
+    await page.waitForFunction(() => P.onGround);
+    expect(await page.evaluate(() => P.ride)).toBeNull();
+    expect(errors).toEqual([]);
+  });
+}
+
+test('glijden op schaatsen: loslaten en je glijdt nog een heel eind door', async ({ page }) => {
+  await seed(page, { region: 'netherlands', unlocked: 8 });
+  await startDay(page, 4);
+  await page.evaluate(() => { const r = L.d.ride; L.enemies = []; P.x = (r.x0 + 1) * TS; P.y = 0; });
+  await page.waitForFunction(() => P.onGround);
+  await page.evaluate(() => { P.vx = 6; });
+  const x0 = await page.evaluate(() => P.x);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(x0 => P.x - x0, x0)).toBeGreaterThan(100);
+});

@@ -64,6 +64,16 @@ function isSolid(tx, ty) {
   const c = L.grid[ty][tx];
   return c === "#" || c === "S" || c === "R" || (c === "G" && !L.gateOpen) || (c === "H" && !L.codeOpen);
 }
+/** A ride (genLevel(): `ride`): on skis, a sledge, skates or a bike you don't walk. Per kind: the top speed with →,
+    how fast you can go back with ←, how fast it rolls by itself without a key (downhill), how quickly you speed up,
+    and how quickly you slow down. Skates glide a long way; a bike stops sooner; skis and a sledge keep going downhill. */
+const RIDE_FEEL = {
+  ski: { top: 7, back: 1.6, coast: 4.2, acc: .12, brake: .22 },
+  sled: { top: 7.4, back: 1.3, coast: 5.2, acc: .14, brake: .18 },
+  skates: { top: 6.6, back: 4, coast: 0, acc: .14, brake: .02 },
+  bike: { top: 6.8, back: 2.2, coast: 0, acc: .3, brake: .08 }
+};
+function rideAt(col) { const r = L.d.ride; return r && col >= r.x0 && col <= r.x1 ? r.kind : null; }
 /** The river you canoe down (the Ardèche): is this column part of it, and where is the water there? */
 function inRiver(col) { const r = L.d.river; return !!r && col >= r.x0 && col <= r.x1; }
 function waterTop(col) { return inRiver(col) ? L.d.river.surf[col - L.d.river.x0] * TS + 14 : SWIM_Y; }
@@ -323,7 +333,7 @@ function step() {
     interact();
     if (dialog || state !== "play") return;
     // Niets om mee te praten of te gebruiken, en je loopt? Dan ga je op je buik glijden (↓, E, □/○ of 💬).
-    if (P.onGround && !P.slide && Math.abs(P.vx) > 2) {
+    if (P.onGround && !P.slide && !P.ride && Math.abs(P.vx) > 2) {
       P.face = Math.sign(P.vx); P.vx = P.face * Math.max(6.5, Math.abs(P.vx) + .8); P.slide = L.d.theme === "sneeuw" ? 60 : 50; SFX.slide();
     } else if (P.onGround && !P.slide && onPlank()) {
       // standing still on a plank (not on the ground): ↓ drops you through it
@@ -348,7 +358,15 @@ function step() {
   // Buikglijden: even sneller dan lopen, en langzaam uitglijden (in de sneeuw het verst). Springen stopt het glijden;
   // daarna geldt weer de gewone snelheid, dus je springt niet verder dan normaal.
   if (P.slide && wantJump) P.slide = 0;
-  if (P.slide) {
+  // On a ride (skis, a sledge, skates, a bike) you move the way that thing moves (RIDE_FEEL).
+  P.ride = rideAt(Math.floor((P.x + P.w / 2) / TS));
+  if (P.ride) {
+    const r = RIDE_FEEL[P.ride], want = ax > 0 ? r.top : ax < 0 ? -r.back : r.coast, d = want - P.vx;
+    if (P.onGround) P.vx += Math.sign(d) * Math.min(Math.abs(d), d * (P.vx || d) > 0 ? r.acc : r.brake);
+    else if (ax) P.vx = Math.max(-r.back, Math.min(r.top, P.vx + ax * .2));
+    if (ax) P.face = ax;
+    P.slide = 0; P.run = 0;
+  } else if (P.slide) {
     P.vx *= !P.onGround ? .99 : L.d.theme === "sneeuw" ? .985 : .97;
     P.slide--;
     if (Math.abs(P.vx) < 1.2) P.slide = 0;
@@ -420,6 +438,7 @@ function step() {
     if (dxMove > 0) { const tx = Math.floor((P.x + P.w - .01) / TS); for (let ty = y0; ty <= y1; ty++) if (isSolid(tx, ty)) { P.x = tx * TS - P.w; P.vx = 0; hit = cell(tx, ty); break; } }
     else if (dxMove < 0) { const tx = Math.floor(P.x / TS); for (let ty = y0; ty <= y1; ty++) if (isSolid(tx, ty)) { P.x = (tx + 1) * TS; P.vx = 0; hit = cell(tx, ty); break; } }
     // bumping into a rock in the canoe: a bonk, no harm done
+    if (hit === "S" && P.ride && L.time - (P.bonk || -99) > 45) { P.bonk = L.time; pop(P.x + P.w / 2, P.y - 8, T("Oops!", "Oeps!"), "#fff"); tone(160, .12, "triangle", .05); }
     if (hit === "R" && P.canoe && L.time - (P.bonk || -99) > 45) { P.bonk = L.time; pop(P.x + P.w / 2, P.y - 8, T("Bonk!", "Bonk!"), "#fff"); tone(140, .12, "triangle", .05); }
     // You can't paddle up a waterfall: the water upstream is higher than you.
     if (P.canoe && P.swim && dxMove < 0) { const nc = Math.floor((P.x + P.w / 2) / TS); if (inRiver(nc) && waterTop(nc) < waterTop(pcol) - 8) P.x = prevX; }

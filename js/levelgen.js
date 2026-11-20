@@ -3,6 +3,17 @@
 /* =====================================================================
    LEVEL GENERATOR (for the days that are not built by hand)
    ===================================================================== */
+/** What the sign at the start of a ride says (genLevel(): `ride`). */
+const RIDE_SIGNS = {
+  ski: [T("Skis on! The slope takes you down by itself. → goes faster, ← slows you down, and jump over the logs.", "Ski's aan! De helling neemt je vanzelf mee naar beneden. → gaat sneller, ← remt af, en spring over de boomstammen."),
+    T("Bend your knees at the bumps. And don't look at the goats.", "Door je knieën bij de bulten. En niet naar de geiten kijken.")],
+  sled: [T("Onto the sledge! Down the run you go, faster and faster. ← brakes, and jump over the snow banks.", "Op de slee! Je gaat de baan af, steeds sneller. ← remt, en spring over de sneeuwwallen."),
+    T("Steering a sledge is mostly hoping for the best.", "Een slee sturen is vooral hopen op het beste.")],
+  skates: [T("Skates on! On the ice you glide a long way. It takes a while to get going, and a while to stop.", "Schaatsen aan! Op het ijs glij je een heel eind. Op gang komen duurt even, en stoppen ook."),
+    T("Jump over the snow banks. Arms on your back, like a real Dutch skater.", "Spring over de sneeuwhopen. Handen op je rug, als een echte schaatser.")],
+  bike: [T("A white bike! Free to ride in the park. Pedal with → and jump over what lies on the path.", "Een witte fiets! Gratis te gebruiken in het park. Trap met → en spring over wat er op het pad ligt."),
+    T("Leave it at the rack at the end, for the next one.", "Zet hem aan het eind terug in het rek, voor de volgende.")]
+};
 function genLevel(o) {
   // Options that make a region play differently (see AGENTS.md, "Region gameplay"):
   //   hills: [low, high] – the ground goes up and down between those rows (12 = normal ground, 9 = high), like a mountain.
@@ -12,6 +23,10 @@ function genLevel(o) {
   //   river: { len } – a stretch of river to canoe down, near the start (the Ardèche): you sit in a canoe, the current
   //     carries you, rocks stick out of the water to jump over, and the river drops down two small waterfalls,
   //     each followed by rapids. Gives the level a `river` ({ x0, x1, surf, rapids }) and `rocks`.
+  //   ride: { kind, len } – a stretch near the start where you don't walk but ride: "ski" or "sled" down a slope (the
+  //     ground starts at row 9 and drops a row three times), "skates" on a frozen canal or a "bike" on a path (flat).
+  //     Logs or snow banks (blocks of 1) to jump over, with coins above them; one of the three things hangs above it.
+  //     Gives the level a `ride` ({ kind, x0, x1 }); game.js changes how you move there, world.js draws what you ride.
   //   ice, dark, water, interior – used by the game and the drawing code, not by the generator.
   // The gate halfway (see AGENTS.md, "Gates and locks"): quest (bring something), or task: { kind: "levers" | "lights" |
   //   "timer" | "follow", ... }, or neither (no gate). The lock at the end: code.kind "symbols" (default), "count",
@@ -20,7 +35,7 @@ function genLevel(o) {
   const gated = !!(o.quest || o.task), gateX = gated ? Math.round(w * .6) : -99, codeX = o.code ? w - 14 : -99;
   const ground = [], plats = [], blocks = [], spikes = [], ents = [], slots = [], bad = new Set(), used = new Set();
   const coin = (x, y) => { if (o.coins !== false) ents.push(["coin", x, y]); };
-  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferries = o.movers ? (o.islands || 1) : 0, fi = 0, lofts = 0, riverDone = !o.river, river = null;
+  let cur = 0, x = 12, towerDone = !o.quest, gy = 12, ferries = o.movers ? (o.islands || 1) : 0, fi = 0, lofts = 0, riverDone = !o.river, river = null, rideDone = !o.ride, ride = null;
   const rocks = [], riverDeco = [];
   const ladderCols = [], ladderSigns = [];
   const [hLow, hHigh] = o.hills || [12, 12];
@@ -29,16 +44,17 @@ function genLevel(o) {
     if (gated && x > gateX - 9 && x < gateX + 5) { x = gateX + 5; continue; }
     let type;
     if (!riverDone) type = "river";
+    else if (!rideDone) type = "ride";
     else if (!towerDone && x > w * .3) type = "tower";
     // islands (Venice): several boat crossings spread over the level, so you hop from island to island
     else if (fi < ferries && x > w * (o.islands ? .1 + .8 * fi / ferries : .12)) type = "ferry";
     // ladders: a loft too high to jump onto, with a ladder up (twice per level: before and after the gate)
     else if (o.ladders && lofts < 2 && x > w * (lofts ? .66 : .2)) type = "loft";
     else { const r = R(); type = r < .22 && o.pits ? "pit" : r < .3 && o.movers ? "ferry" : r < .45 ? "plat2" : r < .6 ? "steps" : r < .72 ? "tower" : "run"; }
-    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11, loft: 10, river: o.river ? o.river.len + 6 : 0 }[type];
+    const width = { pit: 8, plat2: 10, steps: 9, tower: 10, run: 11, ferry: 11, loft: 10, river: o.river ? o.river.len + 6 : 0, ride: o.ride ? o.ride.len + 12 : 0 }[type];
     if (x + width > limit || (gated && x <= gateX - 9 && x + width > gateX - 9)) { x += 3; continue; }
     // Hills: before a piece the ground may go up (at most 2 rows, so you can always jump it) or down.
-    if (o.hills && type !== "ferry" && type !== "river") {
+    if (o.hills && type !== "ferry" && type !== "river" && type !== "ride") {
       let ny = gy + [-2, -1, 0, 1, 2][Math.floor(R() * 5)];
       ny = Math.max(hHigh, Math.min(hLow, ny));
       if (ny !== gy) { ground.push([cur, x, gy]); cur = x + 1; gy = ny; bad.add(x); bad.add(x + 1); }
@@ -67,6 +83,31 @@ function genLevel(o) {
       // the far bank, at the level of the lowest stretch
       gy = surf[len - 1]; cur = x1 + 1; bad.add(x1 + 1); bad.add(x1 + 2); riverDeco.push(x1 + 2);
       riverDone = true;
+    } else if (type === "ride") {
+      // Down a slope (skis, a sledge): first up to row 9, at most 2 rows a step, then down a row three times to 12.
+      const kind = o.ride.kind, len = o.ride.len, down = kind === "ski" || kind === "sled";
+      let sx = x;
+      if (down) while (gy > 9) { ground.push([cur, sx, gy]); cur = sx + 1; bad.add(sx); bad.add(sx + 1); gy = Math.max(9, gy - 2); sx += 2; }
+      const x0 = sx + 3, x1 = x0 + len - 1, drops = down ? 12 - gy : 0, top = gy;
+      ground.push([cur, x0 - 1, gy]);
+      const rowAt = i => top + Math.min(drops, Math.floor(i * (drops + 1) / len));
+      // the stretch itself, a piece of ground per row
+      for (let i = 0, a = 0; i <= len; i++) if (i === len || rowAt(i) !== rowAt(a)) { ground.push([x0 + a, x0 + i - 1, rowAt(a)]); a = i; }
+      for (let i = 0; i < len; i++) bad.add(x0 + i);
+      // logs (or snow banks) to jump over, about every 7 to 10 tiles, never right at a drop or at either end
+      const isDrop = i => i > 0 && rowAt(i) !== rowAt(i - 1);
+      for (let i = 7; i < len - 5; i += 7 + Math.floor(R() * 4)) {
+        if ([-2, -1, 0, 1, 2].some(dd => isDrop(i + dd))) continue;
+        const r = rowAt(i); blocks.push([x0 + i, r - 1, 1]);
+        [-1, 0, 1].forEach(dd => coin(x0 + i + dd, r - 3 - (dd ? 0 : 1)));
+      }
+      // one of the things to find hangs above the ride, halfway (marked like the river: placed first, always one)
+      const mid = Math.floor(len / 2) + 4;
+      slots.push([x0 + mid, rowAt(mid) - 3, "river"]);
+      ride = { kind, x0, x1 };
+      gy = rowAt(len - 1); cur = x1 + 1; bad.add(x1 + 1); bad.add(x1 + 2);
+      rideDone = true;
+      x = x1 + 3; continue;
     } else if (type === "pit") {
       const gw = R() < .5 ? 2 : 3;
       ground.push([cur, x + 1, gy]);
@@ -140,7 +181,7 @@ function genLevel(o) {
       // hurry: walking there takes about three quarters of the time (running gives some room). Never with a boat,
       // a floe or a gondola in between (you can't hurry a boat), nor the river.
       const secs = o.task.secs || 5, far = Math.round(secs * 60 * 4.4 / TS_GEN * .72);
-      const after = Math.max(6, ...ents.filter(e => e[0] === "mover" && e[1] < gateX).map(e => e[1] + 9), river ? river.x1 + 3 : 0);
+      const after = Math.max(6, ...ents.filter(e => e[0] === "mover" && e[1] < gateX).map(e => e[1] + 9), river ? river.x1 + 3 : 0, ride ? ride.x1 + 3 : 0);
       const c = free(Math.max(after + 2, gateX - far), after + 2, gateX - 6); ents.push(["bell", room(c), yAt(c)]);
     } else if (k === "follow") {
       const c = free(gateX * .35, 6, gateX - 8); ents.push(["animal", room(c), yAt(c)]);
@@ -162,6 +203,11 @@ function genLevel(o) {
     ents.push(["sign", c, yAt(c), [T("Into the canoe! The river carries you along. Paddle with ← and →, and jump over the rocks.", "In de kano! De rivier neemt je mee. Peddel met ← en →, en spring over de rotsen."),
       T("Two small waterfalls and some rapids on the way. Hold on to your hat!", "Onderweg twee kleine watervallen en een paar stroomversnellingen. Houd je hoed vast!")]]);
     const f = free(river.x1 + 5, river.x1 + 3); ents.push(["check", f, yAt(f)]);
+  } else if (ride) {
+    // a ride gets a sign at the start that says how it works, and a flag where you get off again
+    const c = free(ride.x0 - 6, 3, ride.x0 - 2);
+    ents.push(["sign", c, yAt(c), RIDE_SIGNS[ride.kind]]);
+    const f = free(ride.x1 + 5, ride.x1 + 3); ents.push(["check", f, yAt(f)]);
   } else { const c = free(w * .3); ents.push(["check", c, yAt(c)]); }
   if (!gated) { const c = free(w * .62); ents.push(["check", c, yAt(c)]); } // a gate already has a flag right behind it
   (o.npcs || []).forEach((lines, i) => { const c = free(w * [.2, .46, .8][i]); ents.push(["npc", c, yAt(c), { lines }]); });
@@ -235,7 +281,7 @@ function genLevel(o) {
   if (o.lantern) { const l = ents.find(e => e[0] === "lantern"); deco.push(o.lanternDeco === "church" ? ["church", l[1] - 3] : ["bench", l[1] + 1]); }
   (o.decoExtra || []).filter(([k]) => !counted.includes(k)).forEach(([k, f]) => { const c = Math.round(w * f); deco.push([k, fitNear(k, c, 8) ?? c]); });
   riverDeco.forEach(c => deco.push(["canoe", fitNear("canoe", c, 4) ?? c]));
-  return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded, ladderCols, river, rocks });
+  return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded, ladderCols, river, rocks, ride });
 }
 /** The keys on the lock for each kind of lock: digits, notes, colours, arrows or letters. */
 const NOTES = [["1", "do", 523, "#e8423a"], ["2", "re", 587, "#f2a03a"], ["3", "mi", 659, "#f5d23a"], ["4", "sol", 784, "#4cb860"], ["5", "la", 880, "#4a8ae8"]];
