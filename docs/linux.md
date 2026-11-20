@@ -12,7 +12,7 @@ TripScouts for Linux is a **snap**: the package format of the Snap Store, where 
 The workflow **Build the Linux app** (`.github/workflows/linux.yml`) builds the snap on every pull request that changes the game or `linux/`, and on `main`:
 
 - The workflow keeps the snap as an artifact named `tripscouts-linux`, for 30 days.
-- On `main` it also attaches the snap to the release **linux**: `https://github.com/w3nl/tripscouts/releases/download/linux/tripscouts.snap`.
+- On `main` every new version gets its own release, `linux-v1.<GAME_VERSION>.0`, with the snap attached, and it is marked as the latest release. The newest snap is always at `https://github.com/w3nl/tripscouts/releases/latest/download/tripscouts.snap`. Releases in this repository are **immutable** (nothing can be added once published), so the workflow creates each release with the snap in one go. Building the same game version again leaves its release as it is.
 - With the secret `SNAPCRAFT_STORE_CREDENTIALS`, the workflow uploads every new version on `main` to the Snap Store, in the channel **edge**. Set the repository variable `SNAP_CHANNEL` to `stable` to publish straight to everyone.
 
 The snap's version follows the game: `GAME_VERSION` 33 becomes `1.33.0`. A new game version is therefore always a newer snap.

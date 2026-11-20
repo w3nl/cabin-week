@@ -13,7 +13,7 @@ Play as one of the nine, or **make your own hero** (name, height, skin, hair, co
 - **Online:** [tripscouts.online](https://tripscouts.online/) (GitHub Pages).
 - **Android app (test):** one app for **phones, tablets and Google TV** (touch, controller or TV remote). It is in a test on Google Play. Testers join once at [play.google.com/apps/testing/nl.w3nl.cabinweek](https://play.google.com/apps/testing/nl.w3nl.cabinweek) (with the Google account that is on the tester list), then install it from [TripScouts on Google Play](https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek). Publishing it: [docs/publish-android.md](docs/publish-android.md).
 - **On your phone or tablet:** open the site and choose "Add to Home screen" (or the Android app, offered in the game). After that the game also works offline. iPhone and iPad: see [docs/iphone-ipad.md](docs/iphone-ipad.md).
-- **On Linux (Ubuntu):** a snap, for the Snap Store and Ubuntu's App Center. Until it is in the store, install it from the release [linux](https://github.com/w3nl/tripscouts/releases/tag/linux): `sudo snap install --dangerous ./tripscouts.snap`. See [docs/linux.md](docs/linux.md).
+- **On Linux (Ubuntu):** a snap, for the Snap Store and Ubuntu's App Center. Until it is in the store, install it from the [latest release](https://github.com/w3nl/tripscouts/releases/latest/download/tripscouts.snap): `sudo snap install --dangerous ./tripscouts.snap`. See [docs/linux.md](docs/linux.md).
 - **On the TV (Google TV):** the Android app above, or a browser app, or casting. See [docs/google-tv.md](docs/google-tv.md).
 - **Locally:**
 
