@@ -144,3 +144,30 @@ test('animals make sounds: every enemy and every lost animal has one, and an ani
   });
   expect(heard).toEqual(['zwijn']);
 });
+
+test('an animal close by comes walking towards you and calls; knocked over, it makes its sound', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  await startDay(page, 1);
+  const r = await page.evaluate(() => {
+    const got = [], real = animalSound; window.animalSound = k => got.push(k);
+    window.hurt = () => {};
+    const e = L.enemies[0];
+    // stand 4 tiles to the left of it, on its ground, while it walks away from you
+    P.x = e.x - 4 * TS; P.y = e.y + e.h - P.h; P.vx = P.vy = 0; P.inv = 0; e.vx = Math.abs(e.vx);
+    const x0 = e.x; L.calls = undefined;
+    for (let i = 0; i < 20; i++) step();
+    const towards = e.vx < 0 && e.x < x0, called = got.includes(e.kind);
+    // far away: it wanders on at its own pace
+    P.x = e.x + 20 * TS; step();
+    const calm = !e.chase;
+    window.animalSound = real;
+    return { towards, called, calm, kind: e.kind, spd: Math.abs(e.vx) === e.spd };
+  });
+  expect(r).toMatchObject({ towards: true, called: true, calm: true, spd: true });
+  // knocked over: its own sound comes right after the stomp
+  const after = await page.evaluate(k => new Promise(res => {
+    const got = [], real = animalSound; window.animalSound = kk => got.push(kk);
+    animalDefeat(k); setTimeout(() => { window.animalSound = real; res(got); }, 300);
+  }), r.kind);
+  expect(after).toEqual([r.kind]);
+});

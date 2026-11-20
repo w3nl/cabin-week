@@ -106,4 +106,9 @@ const ANIMAL_SFX = {
   "🦔": l => [0, .07, .14].forEach(t => hiss(.04, .04 * l, 2200, t, 3)),
   "🐢": l => call(200, 150, .12, "sine", .03 * l)
 };
+/** Knocked over: a cartoon "whee" going down, and right after the stomp the animal's own sound, loud and clear. */
+function animalDefeat(kind) {
+  call(760, 240, .28, "triangle", .035, .05);
+  setTimeout(() => animalSound(kind, 1), 110);
+}
 function animalSound(kind, l = 1) { const f = ANIMAL_SFX[kind]; if (f && l > .05) f(Math.min(1, l)); }

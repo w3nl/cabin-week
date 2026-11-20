@@ -221,6 +221,19 @@ function interact() {
 }
 
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+/** An animal that sees you close by (about 6 tiles, on about the same height) comes walking towards you, a bit faster
+    than it wanders, and calls once when it spots you. Further away it wanders again. Not the moose: it is friendly. */
+function animalChase(e) {
+  if (e.kind === "alg") return;
+  if (e.spd === undefined) e.spd = Math.abs(e.vx) || 1;
+  const dx = P.x + P.w / 2 - (e.x + e.w / 2), dy = P.y + P.h - (e.y + e.h);
+  const near = Math.abs(dx) < 6 * TS && Math.abs(dy) < 1.5 * TS && P.inv <= 0;
+  if (near) {
+    // it spotted you: one call (not again for a few seconds, and never two animals at once)
+    if (!e.chase && L.time - (e.spotted ?? -999) > 300 && L.time - (L.calls ?? -999) > 60) { e.spotted = L.calls = L.time; animalSound(e.kind, .8); e.call = 240 + Math.floor(Math.random() * 300); }
+    e.chase = true; e.vx = (Math.sign(dx) || 1) * e.spd * 1.4;
+  } else if (e.chase) { e.chase = false; e.vx = Math.sign(e.vx || 1) * e.spd; } // out of sight: back to wandering
+}
 /** Now and then an animal near you makes its sound: louder close by, never two at once (L.calls), and not while
     you are talking to someone (step() does not run then). */
 function animalCall(e, kind = e.kind) {
@@ -466,10 +479,12 @@ function step() {
   for (const e of L.enemies) {
     if (e.dead) { e.dead++; continue; }
     animalCall(e);
+    animalChase(e);
     const nx = e.x + e.vx, front = e.vx > 0 ? nx + e.w : nx;
     const ftx = Math.floor(front / TS), fty = Math.floor((e.y + e.h - 1) / TS);
     const below = cell(ftx, fty + 1);
-    if (isSolid(ftx, fty) || !(isSolid(ftx, fty + 1) || below === "=")) e.vx = -e.vx; else e.x = nx;
+    // at a wall or an edge it turns around; an animal coming for you waits there instead (it won't jump after you)
+    if (isSolid(ftx, fty) || !(isSolid(ftx, fty + 1) || below === "=")) { if (!e.chase) e.vx = -e.vx; } else e.x = nx;
     if (overlap(P, e) && e.kind === "alg") {
       // the moose: land on its back and you fly up high; bump into it and it gently pushes you away
       if (P.vy > 0 && prevBottom <= e.y + 16) { P.y = e.y - P.h; P.vy = -15.5; P.slide = 0; tone(220, .18, "triangle", .06); tone(330, .2, "triangle", .04); animalSound("alg", .6); pop(e.x + e.w / 2, e.y - 14, T("Boing!", "Boing!"), "#fff"); }
@@ -480,10 +495,10 @@ function step() {
     if (overlap(P, e)) {
       // Glijdend gaan beesten omver (je raakt zelf niets kwijt); stekels en ravijnen blijven gevaarlijk.
       if (P.slide) {
-        e.dead = 1; SFX.stomp(); animalSound(e.kind, .8); burst(e.x + 15, e.y + 10, "#ffffff", 14);
+        e.dead = 1; SFX.stomp(); animalDefeat(e.kind); burst(e.x + 15, e.y + 10, "#ffffff", 14);
         pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), wesp: T("Bzz... pop!", "Bzz... plop!"), duif: T("Coo... flap!", "Roekoe... fladder!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
       } else if (P.vy > 0 && prevBottom <= e.y + 12) {
-        e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); animalSound(e.kind, .8); burst(e.x + 15, e.y + 10, "#ffffff", 14);
+        e.dead = 1; P.vy = jumpHeld ? -11 : -8; SFX.stomp(); animalDefeat(e.kind); burst(e.x + 15, e.y + 10, "#ffffff", 14);
         pop(e.x + 15, e.y - 10, { zwijn: T("Pfff!", "Pfff!"), robot: "Bzzt...", sneeuwpop: T("Poof!", "Plof!"), pinguin: T("Wrong pole!", "Verkeerde pool!"), geit: T("Meh!", "Mèèh!"), troll: T("Hmpf!", "Hmpf!"), gans: T("Honk!", "Gak!"), meeuw: T("My chips!", "Mijn patat!"), krab: T("Click clack!", "Knip knap!"), marmot: T("Eeek!", "Piep!"), speelgoed: T("Clank!", "Klonk!"), pakje: T("Return to sender!", "Retour afzender!"), poolvos: T("Yip!", "Kef!"), lemming: T("Squeak!", "Piep!"), mygga: T("Bzz... splat!", "Bzz... pats!"), wesp: T("Bzz... pop!", "Bzz... plop!"), duif: T("Coo... flap!", "Roekoe... fladder!"), bever: T("Slap!", "Klets!") }[e.kind], "#fff");
       } else animalSound(e.kind), hurt({ zwijn: "Oink!", robot: T("Bleep!", "Bliep!"), sneeuwpop: "Brrr!", pinguin: T("Squawk!", "Kwaak!"), geit: T("Baa!", "Bèèh!"), troll: T("Grr!", "Grr!"), gans: T("Hiss!", "Sssss!"), meeuw: T("Squawk!", "Krijs!"), krab: T("Pinch!", "Knijp!"), marmot: T("Whistle!", "Fluit!"), speelgoed: T("Tick tick!", "Tik tik!"), pakje: T("Bump!", "Bonk!"), poolvos: T("Snap!", "Hap!"), lemming: T("Nibble!", "Knabbel!"), mygga: T("Itchy!", "Jeuk!"), wesp: T("Sting!", "Steek!"), duif: T("Peck!", "Pik!"), bever: T("Gnaw!", "Knaag!") }[e.kind]);
     }
