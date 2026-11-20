@@ -1708,15 +1708,37 @@ function drawDeco(kind, x, theme, far) {
     g.fillStyle = "#2a3a2a"; g.fillRect(px + 18, by - 26, 16, 26); g.strokeRect(px + 18, by - 26, 16, 26);
     g.fillStyle = "#f4f8ff"; g.fillRect(px - 2, by - h - 2, w + 4, 3);
   } else if (kind === "polarbear") {
-    // a polar bear standing on the ice (scenery: it minds its own business, so its legs stay still)
-    const st = 0;
-    shadowAt(px + 30, by, 34);
-    g.fillStyle = "#e8eef2"; [[8, st], [18, -st], [40, st], [50, -st]].forEach(([dx, d]) => { g.beginPath(); rp(px + dx, by - 18 + d * .3, 9, 18 - d * .3, 3); g.fill(); g.stroke(); });
-    g.beginPath(); g.ellipse(px + 30, by - 28, 30, 16, 0, 0, 7); g.fill(); g.stroke();
-    g.fillStyle = "#d4dde4"; g.beginPath(); g.ellipse(px + 26, by - 20, 24, 6, 0, 0, 7); g.fill();
-    g.fillStyle = "#f4f8fb"; g.beginPath(); g.ellipse(px + 62, by - 30, 12, 9, .2, 0, 7); g.fill(); g.stroke();
-    g.beginPath(); g.arc(px + 58, by - 39, 3.5, 0, 7); g.fill(); g.stroke();
-    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(px + 73, by - 28, 2.2, 0, 7); g.fill(); g.fillRect(px + 64, by - 34, 2, 2);
+    // A polar bear standing on the ice, facing right (scenery: it minds its own business, so its legs stay still).
+    // The rump is higher than the shoulders, a long neck, a narrow head with a Roman nose, big paws, a cream-white coat.
+    const fur = "#f3f0e4", shadow = "#d9d6c6", far = "#e2dfd0", sx = px - 2;
+    shadowAt(sx + 36, by, 38);
+    const leg = (x, top, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(x - 6, top); g.lineTo(x + 6, top); g.quadraticCurveTo(x + 7, by - 10, x + 6, by - 4);
+      g.quadraticCurveTo(x + 9, by, x + 4, by); g.lineTo(x - 6, by); g.quadraticCurveTo(x - 7, by - 4, x - 6, top); g.closePath(); g.fill(); g.stroke();
+      g.strokeStyle = shadow; g.lineWidth = 1; [-2, 1, 4].forEach(d => { g.beginPath(); g.moveTo(x + d, by - 2.5); g.lineTo(x + d, by); g.stroke(); }); g.strokeStyle = OUT; g.lineWidth = 2; };
+    // far legs first, a little darker
+    leg(sx + 18, by - 24, far); leg(sx + 50, by - 22, far);
+    // the body: high rump at the back, the back slopes down to the shoulders, a heavy belly
+    const body = () => { g.beginPath(); g.moveTo(sx + 6, by - 30); g.quadraticCurveTo(sx + 6, by - 46, sx + 22, by - 46); g.quadraticCurveTo(sx + 40, by - 45, sx + 52, by - 40);
+      g.quadraticCurveTo(sx + 60, by - 37, sx + 60, by - 28); g.quadraticCurveTo(sx + 58, by - 18, sx + 46, by - 18); g.quadraticCurveTo(sx + 30, by - 15, sx + 14, by - 19);
+      g.quadraticCurveTo(sx + 6, by - 21, sx + 6, by - 30); g.closePath(); };
+    g.fillStyle = fur; body(); g.fill();
+    g.save(); body(); g.clip(); g.fillStyle = shadow; g.beginPath(); g.ellipse(sx + 32, by - 16, 30, 7, 0, 0, 7); g.fill(); g.restore();
+    body(); g.stroke();
+    // a little tail
+    g.fillStyle = fur; g.beginPath(); g.ellipse(sx + 6, by - 36, 3, 2.5, 0, 0, 7); g.fill(); g.stroke();
+    // near legs
+    leg(sx + 13, by - 26, fur); leg(sx + 45, by - 26, fur);
+    // the long neck and the head, held a little low and forward
+    g.fillStyle = fur; g.beginPath(); g.moveTo(sx + 50, by - 41); g.quadraticCurveTo(sx + 62, by - 44, sx + 70, by - 38); g.lineTo(sx + 70, by - 28); g.quadraticCurveTo(sx + 62, by - 26, sx + 56, by - 26); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(sx + 52, by - 41); g.quadraticCurveTo(sx + 62, by - 44, sx + 68, by - 40); g.stroke();
+    g.beginPath(); g.moveTo(sx + 66, by - 40); g.quadraticCurveTo(sx + 72, by - 44, sx + 78, by - 40); g.quadraticCurveTo(sx + 86, by - 36, sx + 88, by - 33);
+    g.quadraticCurveTo(sx + 89, by - 29, sx + 85, by - 28); g.quadraticCurveTo(sx + 76, by - 26, sx + 68, by - 28); g.quadraticCurveTo(sx + 64, by - 33, sx + 66, by - 40); g.closePath(); g.fill(); g.stroke();
+    // ear, eye, nose, mouth
+    g.beginPath(); g.arc(sx + 70, by - 42, 3, Math.PI * .9, Math.PI * 2.1); g.fill(); g.stroke();
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(sx + 77, by - 36.5, 1.5, 0, 7); g.fill();
+    g.beginPath(); g.ellipse(sx + 87, by - 32, 2.6, 2, 0, 0, 7); g.fill();
+    g.strokeStyle = "#1d1d26"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(sx + 86, by - 29); g.quadraticCurveTo(sx + 82, by - 28, sx + 79, by - 29); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
   } else if (kind === "walrus") {
     // a walrus resting on the ice, with long tusks and a moustache
     shadowAt(px + 26, by, 30);
@@ -1739,17 +1761,48 @@ function drawDeco(kind, x, theme, far) {
     g.strokeStyle = OUT; g.lineWidth = 2;
     g.fillStyle = "#1d1d26"; g.fillRect(px + 48, by - 24, 2, 2); g.fillRect(px + 53, by - 24, 2, 2);
   } else if (kind === "cow") {
-    // a black-and-white Dutch cow in a winter blanket
-    shadowAt(px + 22, by, 24);
-    g.fillStyle = "#f6f4ee"; [[6], [12], [30], [36]].forEach(([dx]) => { g.fillRect(px + dx, by - 16, 4, 16); });
-    g.beginPath(); rp(px, by - 36, 46, 22, 9); g.fill(); g.stroke();
-    g.fillStyle = "#1d1d26"; [[8, -32, 7, 5], [24, -30, 9, 6], [36, -24, 5, 4]].forEach(([dx, dy, rx, ry]) => { g.beginPath(); g.ellipse(px + dx, by + dy, rx, ry, .3, 0, 7); g.fill(); });
-    g.fillStyle = "#c43a3a"; g.fillRect(px + 12, by - 36, 22, 12); g.fillStyle = "#e8c45a"; g.fillRect(px + 12, by - 30, 22, 2);
-    g.fillStyle = "#f6f4ee"; g.beginPath(); rp(px + 40, by - 42, 16, 15, 5); g.fill(); g.stroke();
-    g.fillStyle = "#f0b8b0"; g.beginPath(); rp(px + 47, by - 33, 10, 7, 3); g.fill();
-    g.fillStyle = "#1d1d26"; g.fillRect(px + 46, by - 38, 2, 2);
-    g.strokeStyle = "#d8cfb8"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 43, by - 42); g.lineTo(px + 40, by - 47); g.moveTo(px + 52, by - 42); g.lineTo(px + 55, by - 47); g.stroke();
+    // A cow in the field, facing right. In the Netherlands mostly a black-and-white Holstein, now and then a red-and-white
+    // one; in the Dolomites a brown Alpine cow with a bell. The patches are clipped to the body, so they follow its shape.
+    const alp = L && L.d && L.d.scene === "dolomiti", red = !alp && H > .72;
+    const hide = alp ? "#9a6a44" : "#f7f5ef", spot = red ? "#9a3f26" : "#22222a", hoof = "#3a3036", sx = px - 4;
+    shadowAt(sx + 30, by, 30);
+    // legs (far pair a little darker), with knees and hooves
+    const leg = (x, far, k) => { g.lineWidth = 1.4; g.fillStyle = far ? shade(hide, -.14) : hide; g.beginPath(); g.moveTo(x - 4, by - 21); g.lineTo(x + 4, by - 21); g.lineTo(x + 3.5 + k, by - 10); g.lineTo(x + 3, by - 3); g.lineTo(x - 3, by - 3); g.lineTo(x - 3.5 + k, by - 10); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = hoof; g.beginPath(); rp(x - 3.5, by - 4.5, 7, 4.5, 1.5); g.fill(); g.lineWidth = 2; };
+    leg(sx + 14, true, -1); leg(sx + 40, true, 1);
+    // tail with a tuft
+    g.strokeStyle = shade(hide, -.25); g.lineWidth = 2; g.beginPath(); g.moveTo(sx + 5, by - 33); g.quadraticCurveTo(sx - 2, by - 26, sx + 1, by - 13); g.stroke();
+    g.fillStyle = alp ? "#5a3a22" : spot; g.beginPath(); g.ellipse(sx + 1, by - 11, 2.5, 4, 0, 0, 7); g.fill();
     g.strokeStyle = OUT; g.lineWidth = 2;
+    // the body: a straight back with hip bones, a round belly
+    const body = () => { g.beginPath(); g.moveTo(sx + 6, by - 34); g.quadraticCurveTo(sx + 9, by - 39, sx + 14, by - 37); g.quadraticCurveTo(sx + 30, by - 35, sx + 46, by - 38);
+      g.quadraticCurveTo(sx + 52, by - 37, sx + 52, by - 30); g.quadraticCurveTo(sx + 52, by - 20, sx + 44, by - 19); g.quadraticCurveTo(sx + 28, by - 15, sx + 12, by - 19);
+      g.quadraticCurveTo(sx + 3, by - 21, sx + 4, by - 28); g.closePath(); };
+    g.fillStyle = hide; body(); g.fill();
+    if (!alp) { g.save(); body(); g.clip(); g.fillStyle = spot;
+      [[14, -32, 9, 7, .4], [33, -33, 8, 5, -.3], [27, -21, 7, 4, .2], [47, -27, 5, 6, 0], [6, -24, 4, 5, .5]].forEach(([dx, dy, rx, ry, a], i) => {
+        if (red && i === 4) return; g.beginPath(); g.ellipse(sx + dx + (H - .5) * 4, by + dy, rx, ry, a, 0, 7); g.fill(); });
+      g.restore(); }
+    else { g.fillStyle = "#c79a70"; g.beginPath(); g.ellipse(sx + 28, by - 20, 14, 3, 0, 0, 7); g.fill(); }
+    g.strokeStyle = OUT; body(); g.stroke();
+    // udder
+    g.lineWidth = 1.4; g.fillStyle = "#f2b6b0"; g.beginPath(); g.ellipse(sx + 18, by - 17.5, 3.6, 2.4, 0, 0, 7); g.fill(); g.stroke(); g.lineWidth = 2;
+    // near legs, in front of the body
+    leg(sx + 10, false, -1); leg(sx + 44, false, 1);
+    // the head: neck, a long face, ears, short horns, a pink muzzle
+    g.fillStyle = hide; g.beginPath(); g.moveTo(sx + 46, by - 37); g.quadraticCurveTo(sx + 54, by - 42, sx + 58, by - 41); g.lineTo(sx + 56, by - 27); g.quadraticCurveTo(sx + 51, by - 26, sx + 48, by - 28); g.closePath(); g.fill();
+    g.strokeStyle = "#d8cfb8"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(sx + 56, by - 44); g.quadraticCurveTo(sx + 55, by - 49, sx + 52, by - 50); g.moveTo(sx + 61, by - 44); g.quadraticCurveTo(sx + 63, by - 49, sx + 66, by - 50); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = hide; g.beginPath(); g.ellipse(sx + 52, by - 41, 5, 2.6, -.3, 0, 7); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(sx + 54, by - 45); g.quadraticCurveTo(sx + 59, by - 47, sx + 64, by - 44); g.quadraticCurveTo(sx + 67, by - 36, sx + 67, by - 29); g.lineTo(sx + 57, by - 28); g.quadraticCurveTo(sx + 53, by - 37, sx + 54, by - 45); g.closePath(); g.fill(); g.stroke();
+    if (!alp && !red) { g.fillStyle = spot; g.beginPath(); g.ellipse(sx + 57.5, by - 41, 3.5, 3, .3, 0, 7); g.fill(); }
+    g.fillStyle = "#f0b4ac"; g.beginPath(); rp(sx + 56, by - 33, 12, 7, 3.5); g.fill(); g.stroke();
+    g.fillStyle = "#8a4a4a"; g.fillRect(sx + 60, by - 31, 1.6, 1.6); g.fillRect(sx + 64, by - 31, 1.6, 1.6);
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(sx + 63, by - 39, 1.6, 0, 7); g.fill();
+    g.fillStyle = "#fff"; g.fillRect(sx + 63, by - 40, .8, .8);
+    // an Alpine cow wears a bell
+    if (alp) { g.strokeStyle = "#7a3a2a"; g.lineWidth = 3; g.beginPath(); g.moveTo(sx + 52, by - 29); g.lineTo(sx + 56, by - 27); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+      g.fillStyle = "#e0b24a"; g.beginPath(); g.moveTo(sx + 51, by - 27); g.lineTo(sx + 57, by - 27); g.lineTo(sx + 58, by - 20); g.lineTo(sx + 50, by - 20); g.closePath(); g.fill(); g.stroke(); }
   } else if (kind === "clogs") {
     // a giant pair of wooden clogs: a classic photo spot
     shadowAt(px + 30, by, 34);
