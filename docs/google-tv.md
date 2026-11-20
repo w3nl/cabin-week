@@ -32,7 +32,7 @@ In every menu the gold outline is on a button right away, so you always see wher
 
 ## 1. In a browser app
 
-1. Put the game online: see [domain.md](domain.md). It is at `https://tripscouts.online/` (or `https://w3nl.github.io/tripscouts/`).
+1. Put the game online: see [domain.md](domain.md). It is at `https://tripscouts.online/`.
 2. Install a browser from the Play Store on the Google TV, for example **TV Bro**.
 3. Open `tripscouts.online` and play with the remote or a controller.
 
