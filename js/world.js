@@ -241,7 +241,10 @@ function getTex(theme, spikeKind) {
 const LW = 1536;
 const per = (x, k, ph) => Math.sin(x / LW * Math.PI * 2 * k + ph);
 const ridge = (base, amps, x) => base - amps.reduce((s, [a, k, p]) => s + a * per(x, k, p), 0);
-function layerCanvas(fn) { const c = mk(LW, VIEW_H); withCtx(c.getContext("2d"), fn); return c; }
+/** A background layer. It remembers its ground line (the first ridge drawn on it, `_ground`), so the scenery animals can
+    stand on it (drawBgAnimals()). */
+let LAYER_GROUND = null;
+function layerCanvas(fn) { const c = mk(LW, VIEW_H); LAYER_GROUND = null; withCtx(c.getContext("2d"), fn); c._ground = LAYER_GROUND; LAYER_GROUND = null; return c; }
 /** Battlements on a wall from x0 to x1 whose top is at y: blocks of size s standing on the wall, with gaps between. */
 function battlements(x0, x1, y, s, line) {
   const n = Math.max(2, Math.round((x1 - x0) / (s * 2))), step = (x1 - x0 - s) / (n - 1);
@@ -250,6 +253,7 @@ function battlements(x0, x1, y, s, line) {
 /** The lowest ground (largest y) under something w wide at x, so a building on a slope stands on the hill instead of floating. */
 function groundUnder(top, x, w) { let y = 0; for (let d = 0; d <= w; d += 2) y = Math.max(y, top(x + d)); return y; }
 function fillRidge(base, amps, col, hi) {
+  if (!LAYER_GROUND) LAYER_GROUND = { base, amps };
   g.fillStyle = col; g.beginPath(); g.moveTo(0, VIEW_H);
   for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(base, amps, x));
   g.lineTo(LW, VIEW_H); g.fill();
@@ -1222,8 +1226,8 @@ function drawBackground(theme, camX) {
     const Ls = getSceneLayers(scene);
     drawSceneSky(scene);
     drawLayer(Ls.far, camX * .15);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
     return;
   }
   if (theme === "huis") {
@@ -1241,8 +1245,8 @@ function drawBackground(theme, camX) {
     drawLayer(Ls.clouds, camX * .08 + frame * .15);
     drawLayer(Ls.far, camX * .15);
     g.fillStyle = "rgba(220,240,250,.25)"; g.fillRect(0, 250, viewW, 120);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
     // vogeltjes
     g.strokeStyle = "#2a3a4a"; g.lineWidth = 1.5;
     for (let i = 0; i < 3; i++) { const bx = ((frame * (.6 + i * .2) + i * 400) % (viewW + 200)) - 100, by = 70 + i * 26 + Math.sin(frame / 40 + i) * 6, w = Math.sin(frame / 6 + i) * 3;
@@ -1252,8 +1256,8 @@ function drawBackground(theme, camX) {
     g.fillStyle = "#fff"; for (let i = 0; i < 40; i++) { g.globalAlpha = .3 + .5 * Math.abs(Math.sin(frame / 40 + i)); g.fillRect(((hash(i * 3) * 3000 - camX * .04) % viewW + viewW) % viewW, hash(i * 7) * 160, 2, 2); } g.globalAlpha = 1;
     drawLayer(Ls.far, camX * .15);
     g.fillStyle = "rgba(230,170,150,.18)"; g.fillRect(0, 250, viewW, 120);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
   } else {
     g.fillStyle = grad("sky-sneeuw", () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, "#081230"); gr.addColorStop(.7, "#2a4a82"); gr.addColorStop(1, "#4a6fa8"); return gr; }); g.fillRect(0, 0, viewW, VIEW_H);
     g.fillStyle = "#fff";
@@ -1270,8 +1274,8 @@ function drawBackground(theme, camX) {
     g.fillStyle = "#e3dcc0"; [[-8, -6, 6], [9, 7, 4], [4, -12, 3]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(mx + dx, 90 + dy, r, 0, 7); g.fill(); });
     drawLayer(Ls.far, camX * .15);
     g.fillStyle = "rgba(160,190,230,.18)"; g.fillRect(0, 260, viewW, 120);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
   }
 }
 
@@ -1364,7 +1368,7 @@ function sign2(x, y, w, h, bg, text, fg) {
 /* ---------- Decoratie ---------- */
 /** Animals in the scenery that stand still: drawn in the background by drawBgAnimals() (behind the path, smaller,
  *  hazy, with parallax), so you can see at once that they are not something to bump into or stand on. */
-const BG_ANIMALS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow", "flamingo"]);
+const BG_ANIMALS = BG_KINDS; // levelgen.js
 function drawDeco(kind, x, theme, far) {
   if (!far && BG_ANIMALS.has(kind)) return; // drawn in the background by drawBgAnimals()
   const by = groundTop(x) * TS, px = x * TS;
@@ -2774,19 +2778,35 @@ function drawDark(cx) {
   g.globalCompositeOperation = m0;
 }
 
-/** The scenery animals (cows, polar bears, deer, flamingos...) stand in the background: on the field behind the path,
-    smaller, a little hazy, and drawn before the path, the trees and the houses, which cover them. They also move a bit
-    slower than the path when you walk (parallax), so they clearly belong to the landscape, not to the path you walk
-    on. Animals you can bump into (the enemies, the penguin, the moose) stay on the path. */
-const BG_PARALLAX = .86, BG_SCALE = .52;
-function drawBgAnimals(cx, theme) {
+/** The scenery animals (cows, polar bears, deer, flamingos...) are part of the landscape: they stand on the ground of a
+    background layer and move exactly with it, so they never slide against the houses and trees behind them.
+    Usually that is the middle layer, with the villages (a layer without a ridge, like the lagoon, gets a flat ground). Where the near layer is a dense forest that would hide them
+    (snow, the Alps, the fjord), they stand on the near layer instead: on the strip of snow between its trees and the
+    path, in front of the trees. drawBackground() calls this right after that layer. The generator only puts them
+    where the path is at its normal height (BG_KINDS in levelgen.js), so the ground behind the path is in view; their
+    feet are never lower than BG_CLEAR above the path. They are never left out: some locks count them. Animals you
+    can bump into (the enemies, the penguin, the moose) stay on the path. */
+const BG_NEAR = new Set(["sneeuw", "bos", "alps", "fjord"]);
+const BG_PAR = { mid: .3, near: .5 }, BG_SIZE = { mid: .42, near: .5 }, BG_CLEAR = 12;
+function bgAnimalLayer() { return L && L.d && BG_NEAR.has(L.d.scene || L.d.theme) ? "near" : "mid"; }
+/** Where a scenery animal is drawn: its x on screen and the y of its feet. */
+function bgAnimalAt(x, cx, layer, which) {
+  // a layer without a ridge (the lagoon is only water) gets a flat ground at the usual height
+  const par = BG_PAR[which], gr = layer._ground || { base: which === "mid" ? 342 : 382, amps: [] };
+  // its spot in the layer, chosen so it is on screen when you are at its place in the level
+  const lx = x * TS * par + viewW * (1 - par) / 2, sx = lx - cx * par;
+  const col = Math.floor((sx + cx) / TS), path = Math.min(...[-1, 0, 1].map(d => groundTop(Math.max(0, Math.min(L.w - 1, col + d))) * TS));
+  return [sx, Math.min(ridge(gr.base, gr.amps, ((lx % LW) + LW) % LW) + 6, Math.min(path, 12 * TS) - BG_CLEAR)];
+}
+function drawBgAnimals(cx, layer, which) {
+  if (!L || !L.d || !layer || which !== bgAnimalLayer() || state === "title" || state === "map" || state === "hero") return;
+  const size = BG_SIZE[which], theme = L.d.theme;
   for (const [k, x] of L.d.deco) {
     if (!BG_ANIMALS.has(k)) continue;
+    const [sx, feet] = bgAnimalAt(x, cx, layer, which);
+    if (sx < -60 || sx > viewW + 60) continue;
     const bx = x * TS + 32, gy = groundTop(x) * TS;
-    // where it stands on screen: further away, so it moves at BG_PARALLAX of the camera speed
-    const sx = (bx - cx) + (cx - bx + viewW / 2) * (1 - BG_PARALLAX), fy = gy - 30;
-    if (sx < -80 || sx > viewW + 80) continue;
-    g.save(); g.translate(sx, fy); g.scale(BG_SCALE, BG_SCALE); g.translate(-bx, -gy); g.globalAlpha = .82;
+    g.save(); g.translate(sx, feet); g.scale(size, size); g.translate(-bx, -gy); g.globalAlpha = .92;
     drawDeco(k, x, theme, true); g.restore();
   }
 }
@@ -2805,7 +2825,6 @@ function render() {
   }
   const theme = L.d.theme, cx = Math.round(cam);
   drawBackground(theme, cx);
-  drawBgAnimals(cx, theme);
   g.save(); g.translate(-cx, 0);
 
   for (const [k, x] of L.d.deco) drawDeco(k, x, theme);

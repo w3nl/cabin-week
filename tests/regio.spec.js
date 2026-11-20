@@ -515,7 +515,7 @@ test('in the dark, a lamp you light keeps its surroundings lit, also when you wa
   expect(r).toEqual({ before: 1, after: 2, away: true, radius: true });
 });
 
-test('scenery animals stand in the background, behind the path, and move slower than the path', async ({ page }) => {
+test('scenery animals stand in the background, on a layer of the landscape, never on the path', async ({ page }) => {
   await seed(page, { region: 'pole', unlocked: 8 });
   await startDay(page, 0);
   const r = await page.evaluate(() => {
@@ -524,13 +524,25 @@ test('scenery animals stand in the background, behind the path, and move slower 
     const empty = far => { const c = document.createElement('canvas'); c.width = 400; c.height = 300; const x = c.getContext('2d');
       withCtx(x, () => { g.setTransform(1, 0, 0, 1, 0, 0); g.translate(-bear[1] * TS + 100, -groundTop(bear[1]) * TS + 200); drawDeco('polarbear', bear[1], 'sneeuw', far); });
       return !x.getImageData(0, 0, 400, 300).data.some((v, i) => i % 4 === 3 && v > 0); };
-    const calls = [empty(false), !empty(true)];
-    // where it is drawn on screen at two camera positions: it moves less than the camera
-    const at = c => { const bx = bear[1] * TS + 32; return (bx - c) + (c - bx + viewW / 2) * (1 - BG_PARALLAX); };
-    const moved = at(cam) - at(cam + 100);
-    return { onlyFar: calls.every(Boolean), moved };
+    // it moves exactly like the layer it stands on (the village layer at the North Pole moves at .3 of the camera)
+    const which = bgAnimalLayer(), layer = getSceneLayers('pole')[which];
+    const moved = bgAnimalAt(bear[1], 1000, layer, which)[0] - bgAnimalAt(bear[1], 1100, layer, which)[0];
+    return { onPath: empty(false), inBackground: !empty(true), which, moved: Math.round(moved) };
   });
-  expect(r.onlyFar).toBe(true);               // only drawn as background, never on the path
-  expect(r.moved).toBeLessThan(100);           // parallax: slower than the path
-  expect(r.moved).toBeGreaterThan(70);
+  expect(r).toEqual({ onPath: true, inBackground: true, which: 'mid', moved: 30 });
+  // every scenery animal in every region: where the path is at its normal height, and its feet clearly above the path
+  const bad = await page.evaluate(() => {
+    const out = [];
+    for (const reg of REGIONS) {
+      setRegion(reg.id);
+      LEVELS.forEach((d, i) => d.deco.forEach(([k, x]) => {
+        if (!BG_ANIMALS.has(k) || !d.seed) return;
+        const top = d.ground.filter(([a, b]) => x >= a && x <= b).reduce((m, [, , t]) => Math.min(m, t), 99);
+        if (top !== 12) out.push(`${reg.id} ${i + 1}: ${k} at ${x} on row ${top}`);
+      }));
+    }
+    setRegion('pole');
+    return out;
+  });
+  expect(bad).toEqual([]);
 });
