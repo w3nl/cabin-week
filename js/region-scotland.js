@@ -3,7 +3,7 @@
 // music and island-hopping; changeable weather under long summer daylight.
 const SCOTLAND_LEVELS = [
   genLevel({
-    seed: 9101, w: 150, day: dayLabel(0), name: T("Arrival in Glen Rowan", "Aankomst in Glen Rowan"),
+    seed: 9101, w: 200, day: dayLabel(0), name: T("Arrival in Glen Rowan", "Aankomst in Glen Rowan"),
     theme: "bos", summer: true, scene: "highlands", weather: true, hills: [12, 10],
     sub: T("The cottage is tucked between the hills. Find the keys before the clouds roll over Glen Coe.",
       "Het huisje ligt tussen de heuvels. Vind de sleutels voordat de wolken over Glen Coe trekken."),
@@ -29,7 +29,7 @@ const SCOTLAND_LEVELS = [
       "Het huisje is open, de thee trekt en de wolken zijn alweer van gedachten veranderd.")
   }),
   genLevel({
-    seed: 9202, w: 150, day: dayLabel(1), name: T("Loch Ness", "Loch Ness"),
+    seed: 9202, w: 200, day: dayLabel(1), name: T("Loch Ness", "Loch Ness"),
     theme: "bos", summer: true, scene: "highlands", weather: true, water: true, swim: true, movers: "boat",
     sub: T("A boat trip on Loch Ness. Find three field glasses, and keep an eye on the ripples.",
       "Een boottocht op Loch Ness. Vind drie verrekijkers en houd de rimpels in het water in de gaten."),
@@ -49,7 +49,7 @@ const SCOTLAND_LEVELS = [
       "Drie verrekijkers gevonden. Nessie blijft een bijzonder overtuigende rimpel.")
   }),
   genLevel({
-    seed: 9303, w: 155, day: dayLabel(2), name: T("The Castle in the Glen", "Het kasteel in het dal"),
+    seed: 9303, w: 210, day: dayLabel(2), name: T("The Castle in the Glen", "Het kasteel in het dal"),
     theme: "bos", summer: true, scene: "highlands", weather: true, hills: [12, 10],
     sub: T("Explore the old stone castle and find three tartan sashes for the guide's display.",
       "Verken het oude stenen kasteel en vind drie tartan sjerpen voor de gids."),
@@ -72,7 +72,7 @@ const SCOTLAND_LEVELS = [
       "De torensleutel is terug en de kasteelgids heeft een nieuwe favoriete bezoeker.")
   }),
   genLevel({
-    seed: 9404, w: 145, day: dayLabel(3), name: T("A Highland Ceilidh", "Een Highland-ceilidh"),
+    seed: 9404, w: 195, day: dayLabel(3), name: T("A Highland Ceilidh", "Een Highland-ceilidh"),
     theme: "bos", summer: true, scene: "highlands", weather: true,
     sub: T("Tonight is a ceilidh: folk music, lively group dancing and a lot of laughing. Find three music sheets.",
       "Vanavond is er een ceilidh: folkmuziek, vrolijke groepsdansen en veel gelach. Zoek drie muziekbladen."),
@@ -98,7 +98,7 @@ const SCOTLAND_LEVELS = [
       "De muziek klonk, de lantaarns brandden en bijna iedereen deed de passen goed.")
   }),
   genLevel({
-    seed: 9505, w: 155, day: dayLabel(4), name: T("Across the Isles", "Langs de eilanden"),
+    seed: 9505, w: 210, day: dayLabel(4), name: T("Across the Isles", "Langs de eilanden"),
     theme: "bos", summer: true, scene: "highlands", weather: true, water: true, swim: true, movers: "boat",
     sub: T("Scotland has more than 700 islands. Today we cross a few by ferry. Find three ferry tickets.",
       "Schotland heeft meer dan 700 eilanden. Vandaag steken we er een paar over met de veerboot. Zoek drie kaartjes."),
@@ -122,7 +122,7 @@ const SCOTLAND_LEVELS = [
       "Drie kaartjes gevonden, de kaart is terug en de veerboot voer tussen de buien door.")
   }),
   genLevel({
-    seed: 9606, w: 150, day: dayLabel(5), name: T("Edinburgh's Old Town", "De oude stad van Edinburgh"),
+    seed: 9606, w: 200, day: dayLabel(5), name: T("Edinburgh's Old Town", "De oude stad van Edinburgh"),
     theme: "straat", summer: true, scene: "highlands", weather: true, hills: [12, 11],
     sub: T("Narrow closes, steep streets and a castle high above the city. Find three sketchbooks for the walking tour.",
       "Smalle steegjes, steile straten en een kasteel hoog boven de stad. Zoek drie schetsboeken voor de wandeling."),
@@ -147,7 +147,7 @@ const SCOTLAND_LEVELS = [
       "Schetsboeken verzameld, oude stenen bewonderd en geen straatje twee keer gelopen. Bijna.")
   }),
   genLevel({
-    seed: 9707, w: 155, day: dayLabel(6), name: T("Music in Glasgow", "Muziek in Glasgow"),
+    seed: 9707, w: 210, day: dayLabel(6), name: T("Music in Glasgow", "Muziek in Glasgow"),
     theme: "straat", summer: true, scene: "highlands", weather: true,
     sub: T("A folk-music festival is filling the square. Find three songbooks and bring back the fiddler's bow.",
       "Een folkmuziekfestival vult het plein. Zoek drie liedboeken en breng de strijkstok van de violist terug."),
@@ -171,7 +171,7 @@ const SCOTLAND_LEVELS = [
       "De band speelde door, het plein danste door en de strijkstok zit weer in zijn kist.")
   }),
   genLevel({
-    seed: 9808, w: 155, day: dayLabel(7), name: T("Going Home", "Naar huis"),
+    seed: 9808, w: 210, day: dayLabel(7), name: T("Going Home", "Naar huis"),
     theme: "bos", summer: true, scene: "highlands", weather: true, water: true, swim: true,
     sub: T("The bags are packed, but a young Highland cow has wandered down to the loch. Find the postcards, walk the calf home, then wave goodbye.",
       "De tassen zijn gepakt, maar een jonge Schotse hooglander is naar de oever gewandeld. Zoek de ansichtkaarten, breng het kalf terug en zwaai dan gedag."),

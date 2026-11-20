@@ -5,7 +5,7 @@
 const ARD = { theme: "kust", summer: true, scene: "ardeche", spikeKind: "thistles" };
 const ARDECHE_LEVELS = [
   genLevel({ ...ARD,
-    seed: 10101, w: 150, day: dayLabel(0), name: T("Arrival at Les Cigales", "Aankomst op Les Cigales"),
+    seed: 10101, w: 200, day: dayLabel(0), name: T("Arrival at Les Cigales", "Aankomst op Les Cigales"),
     water: true, swim: true,
     sub: T("A campsite by the river, cicadas in the trees and a caravan with the door still locked. The keys are somewhere between the tents.",
       "Een camping aan de rivier, krekels in de bomen en een caravan met de deur nog op slot. De sleutels liggen ergens tussen de tenten."),
@@ -30,7 +30,7 @@ const ARDECHE_LEVELS = [
     doneMsg: T("Awning out, fridge on, feet in the river. The summer holiday has started.", "Luifel uit, koelkast aan, voeten in de rivier. De zomervakantie is begonnen.")
   }),
   genLevel({ ...ARD,
-    seed: 10202, w: 230, day: dayLabel(1), name: T("Canoeing to the Pont d'Arc", "Kanoën naar de Pont d'Arc"),
+    seed: 10202, w: 285, day: dayLabel(1), name: T("Canoeing to the Pont d'Arc", "Kanoën naar de Pont d'Arc"),
     hills: [12, 10], water: true, swim: true, movers: "boat", river: { len: 60 },
     sub: T("Paddle down the gorge in a canoe: jump over the rocks, ride down two small waterfalls and through the rapids. Three sun hats blew into the water on the way.",
       "Peddel in een kano door de kloof: spring over de rotsen, glijd twee kleine watervallen af en vaar door de stroomversnellingen. Onderweg zijn drie zonnehoedjes in het water gewaaid."),
@@ -48,7 +48,7 @@ const ARDECHE_LEVELS = [
     doneMsg: T("Three hats, two waterfalls, one stone arch and only a few bonks on the rocks. A good day on the river.", "Drie hoedjes, twee watervallen, één stenen boog en maar een paar keer bonk tegen de rotsen. Een goede dag op de rivier.")
   }),
   genLevel({ ...ARD,
-    seed: 10303, w: 150, day: dayLabel(2), name: T("Market Day", "Marktdag"), theme: "straat",
+    seed: 10303, w: 200, day: dayLabel(2), name: T("Market Day", "Marktdag"), theme: "straat",
     sub: T("The market fills the square: nougat, lavender soap, goat's cheese and peaches. Find three baguettes for the picnic.",
       "De markt vult het plein: nougat, lavendelzeep, geitenkaas en perziken. Zoek drie stokbroden voor de picknick."),
     keyType: "🥖", keyHud: "🥖", keyName: T("baguettes", "stokbroden"),
@@ -72,7 +72,7 @@ const ARDECHE_LEVELS = [
     doneMsg: T("Baguettes in the bag, nougat in our pockets, and Josette back on her nest.", "Stokbroden in de tas, nougat in onze zakken en Josette terug op haar nest.")
   }),
   genLevel({ ...ARD,
-    seed: 10404, w: 150, day: dayLabel(3), name: T("The Chauvet Cave", "De grot van Chauvet"), theme: "grot", scene: "grotte", spikeKind: undefined,
+    seed: 10404, w: 200, day: dayLabel(3), name: T("The Chauvet Cave", "De grot van Chauvet"), theme: "grot", scene: "grotte", spikeKind: undefined,
     hills: [12, 10], dark: { r: 170, key: 25, lamp: 40 },
     sub: T("Near Vallon-Pont-d'Arc is a cave with the oldest paintings in the world: horses, lions, rhinos and mammoths. Find three headlamps, and light the cave lamps along the way.",
       "Bij Vallon-Pont-d'Arc ligt een grot met de oudste schilderingen ter wereld: paarden, leeuwen, neushoorns en mammoeten. Zoek drie hoofdlampjes, en steek onderweg de grotlampen aan."),
@@ -100,7 +100,7 @@ const ARDECHE_LEVELS = [
       "Drie hoofdlampjes, drie lampen en vier noten die nog lang nagalmden. Knipperend lopen we de zon weer in.")
   }),
   genLevel({ ...ARD,
-    seed: 10505, w: 155, day: dayLabel(4), name: T("Lavender and Sunflowers", "Lavendel en zonnebloemen"),
+    seed: 10505, w: 210, day: dayLabel(4), name: T("Lavender and Sunflowers", "Lavendel en zonnebloemen"),
     hills: [12, 10],
     sub: T("Purple rows of lavender, yellow fields of sunflowers and bees everywhere. Pick three lavender bouquets for the caravan.",
       "Paarse rijen lavendel, gele velden met zonnebloemen en overal bijen. Pluk drie boeketjes lavendel voor de caravan."),
@@ -123,7 +123,7 @@ const ARDECHE_LEVELS = [
     doneMsg: T("Three bouquets in the caravan. It will smell of lavender all week.", "Drie boeketjes in de caravan. Het ruikt de hele week naar lavendel.")
   }),
   genLevel({ ...ARD,
-    seed: 10606, w: 155, day: dayLabel(5), name: T("The Grape Harvest", "De druivenoogst"),
+    seed: 10606, w: 210, day: dayLabel(5), name: T("The Grape Harvest", "De druivenoogst"),
     hills: [12, 10],
     sub: T("At the vineyard everyone helps with the harvest. Find three bunches of grapes that rolled off the cart, and the farmer's secateurs.",
       "Bij de wijngaard helpt iedereen met de oogst. Zoek drie trossen druiven die van de kar zijn gerold, en de snoeischaar van de boer."),
@@ -147,7 +147,7 @@ const ARDECHE_LEVELS = [
       "De oogst is binnen, het druivensap is koud en de wilde zwijnen moesten het doen met de restjes.")
   }),
   genLevel({ ...ARD,
-    seed: 10707, w: 155, day: dayLabel(6), name: T("The Old Village by the River", "Het oude dorp aan de rivier"),
+    seed: 10707, w: 210, day: dayLabel(6), name: T("The Old Village by the River", "Het oude dorp aan de rivier"),
     hills: [12, 9], water: true, swim: true,
     sub: T("Narrow lanes, stone houses stacked against the cliff and a church tower above the river. Find three ceramic cicadas, the souvenir of the south.",
       "Smalle steegjes, stenen huizen tegen de rots en een kerktoren boven de rivier. Zoek drie keramieken cicaden, het souvenir van het zuiden."),
@@ -171,7 +171,7 @@ const ARDECHE_LEVELS = [
     doneMsg: T("Lunch on the square, a swim in the river and three cicadas for the windowsill at home.", "Lunch op het plein, zwemmen in de rivier en drie cicaden voor de vensterbank thuis.")
   }),
   genLevel({ ...ARD,
-    seed: 10808, w: 155, day: dayLabel(7), name: T("Going Home", "Naar huis"),
+    seed: 10808, w: 210, day: dayLabel(7), name: T("Going Home", "Naar huis"),
     water: true, swim: true,
     sub: T("The caravan is packed, but the chestnut cream is still in the campsite shop. Find three jars for at home, then one last swim.",
       "De caravan is ingepakt, maar de kastanjecrème staat nog in de campingwinkel. Zoek drie potjes voor thuis, en dan nog één keer zwemmen."),

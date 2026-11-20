@@ -4,7 +4,7 @@
 const DAL = { theme: "kust", summer: true };
 const DALMATIA_LEVELS = [
   genLevel({ ...DAL,
-    seed: 7101, w: 150, day: dayLabel(0), name: T("Arrival at Camp Lavanda", "Aankomst op Camping Lavanda"), scene: "adriatic",
+    seed: 7101, w: 200, day: dayLabel(0), name: T("Arrival at Camp Lavanda", "Aankomst op Camping Lavanda"), scene: "adriatic",
     water: true, swim: true,
     sub: T("Pine trees, cicadas and the sea right in front of the tent. The keys of the mobile home are somewhere on the rocks.",
       "Pijnbomen, krekels en de zee vlak voor de tent. De sleutels van de stacaravan liggen ergens op de rotsen."),
@@ -29,7 +29,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("Tent up, mobile home open, feet in the sea. The holiday has started.", "Tent staat, stacaravan open, voeten in de zee. De vakantie is begonnen.")
   }),
   genLevel({ ...DAL,
-    seed: 7202, w: 160, day: dayLabel(1), name: T("The Krka Waterfalls", "De watervallen van Krka"), scene: "falls",
+    seed: 7202, w: 215, day: dayLabel(1), name: T("The Krka Waterfalls", "De watervallen van Krka"), scene: "falls",
     hills: [12, 10], water: true, swim: true, movers: "boat",
     sub: T("Waterfalls, green lakes and wooden paths. Take three butterfly photos, and find the ticket for the boat.",
       "Watervallen, groene meren en houten paden. Maak drie vlinderfoto's, en vind het kaartje voor de boot."),
@@ -53,7 +53,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("Three butterflies, one boat trip and the big waterfall. Everyone has wet hair and big smiles.", "Drie vlinders, één boottocht en de grote waterval. Iedereen heeft natte haren en een grote glimlach.")
   }),
   genLevel({ ...DAL,
-    seed: 7303, w: 150, day: dayLabel(2), name: T("The Walls of Dubrovnik", "De stadsmuren van Dubrovnik"), scene: "oldtown",
+    seed: 7303, w: 200, day: dayLabel(2), name: T("The Walls of Dubrovnik", "De stadsmuren van Dubrovnik"), scene: "oldtown",
     hills: [12, 9],
     sub: T("Walk the old city walls, high above the red roofs. Find three kittens of the old town, and the old key to the tower.",
       "Loop over de oude stadsmuren, hoog boven de rode daken. Vind drie poesjes van de oude stad, en de oude sleutel van de toren."),
@@ -73,7 +73,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("Two kilometres of wall, three kittens and one very proud seagull. What a view.", "Twee kilometer muur, drie poesjes en één heel trotse meeuw. Wat een uitzicht.")
   }),
   genLevel({ ...DAL,
-    seed: 7404, w: 160, day: dayLabel(3), name: T("Island Hopping", "Eilandhoppen"), scene: "adriatic",
+    seed: 7404, w: 215, day: dayLabel(3), name: T("Island Hopping", "Eilandhoppen"), scene: "adriatic",
     water: true, swim: true, movers: "boat",
     sub: T("By boat from island to island, swimming in between. Find three snorkels, and the skipper's map.",
       "Met de boot van eiland naar eiland, met tussendoor zwemmen. Vind drie snorkels, en de kaart van de schipper."),
@@ -97,7 +97,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("Three islands, one blue cave, a hundred fish and very salty hair.", "Drie eilanden, één blauwe grot, honderd vissen en heel zout haar.")
   }),
   genLevel({ ...DAL,
-    seed: 7505, w: 160, day: dayLabel(4), name: T("The Plitvice Lakes", "De meren van Plitvice"), scene: "falls",
+    seed: 7505, w: 215, day: dayLabel(4), name: T("The Plitvice Lakes", "De meren van Plitvice"), scene: "falls",
     hills: [12, 10], water: true, movers: "boat",
     sub: T("Sixteen lakes, connected by waterfalls, with wooden walkways over the water. Take three photos, and open the boardwalk.",
       "Zestien meren, verbonden door watervallen, met houten paden over het water. Maak drie foto's, en zet het vlonderpad open."),
@@ -121,7 +121,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("Sixteen lakes, a silent boat and not a single bear. Probably for the best.", "Zestien meren, een stille boot en geen enkele beer. Waarschijnlijk maar goed ook.")
   }),
   genLevel({ ...DAL,
-    seed: 7606, w: 150, day: dayLabel(5), name: T("Zadar and the Sea Organ", "Zadar en het zeeorgel"), scene: "oldtown",
+    seed: 7606, w: 200, day: dayLabel(5), name: T("Zadar and the Sea Organ", "Zadar en het zeeorgel"), scene: "oldtown",
     water: true, swim: true,
     sub: T("At the water's edge in Zadar, the waves play an organ. Three notes have gone missing, and the sun wants a greeting.",
       "Aan het water in Zadar spelen de golven orgel. Er zijn drie noten zoek, en de zon wil gegroet worden."),
@@ -147,7 +147,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("The sea played its organ, the sun went down in the water and the glass circle lit up. Magic.", "De zee speelde orgel, de zon ging onder in het water en de glazen cirkel ging aan. Magisch.")
   }),
   genLevel({ ...DAL,
-    seed: 7707, w: 160, day: dayLabel(6), name: T("Šibenik and the Rocky Beach", "Šibenik en het rotsstrand"), scene: "adriatic",
+    seed: 7707, w: 215, day: dayLabel(6), name: T("Šibenik and the Rocky Beach", "Šibenik en het rotsstrand"), scene: "adriatic",
     hills: [12, 10], water: true, swim: true,
     sub: T("Morning in old Šibenik, afternoon on the rocky beach. Find three flip-flops, and the sunscreen.",
       "'s Ochtends het oude Šibenik, 's middags het rotsstrand. Vind drie slippers, en de zonnebrand."),
@@ -173,7 +173,7 @@ const DALMATIA_LEVELS = [
     doneMsg: T("A day of swimming, diving and watermelon. Everyone is salty, sandy-ish and happy.", "Een dag zwemmen, duiken en watermeloen. Iedereen is zout, een beetje zanderig en blij.")
   }),
   genLevel({ ...DAL,
-    seed: 7808, w: 160, day: dayLabel(7), name: T("Going Home", "Naar huis"), scene: "adriatic",
+    seed: 7808, w: 215, day: dayLabel(7), name: T("Going Home", "Naar huis"), scene: "adriatic",
     hills: [12, 11], water: true, swim: true,
     sub: T("Packing up the tent. Find three caps before the car leaves. One last swim?",
       "De tent inpakken. Vind drie petjes voordat de auto vertrekt. Nog één keer zwemmen?"),

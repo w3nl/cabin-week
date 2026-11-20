@@ -228,7 +228,7 @@ function animalCall(e, kind = e.kind) {
   if (dx > 9 * TS) return;
   if (e.call === undefined) e.call = 90 + Math.floor(Math.random() * 300);
   if (--e.call > 0) return;
-  e.call = 360 + Math.floor(Math.random() * 360);
+  e.call = 240 + Math.floor(Math.random() * 300);
   if (L.time - (L.calls || -999) < 100) return;
   L.calls = L.time; animalSound(kind, .75 - dx / (9 * TS) * .6);
 }
@@ -420,11 +420,12 @@ function step() {
     if (P.x + P.w > m.x + 2 && P.x < m.x + m.w - 2 && prevBottom <= m.y + 1 && P.y + P.h >= m.y) { P.y = m.y - P.h; P.vy = 0; P.onGround = true; P.mover = m; break; }
   }
   // Swimming (Dalmatia): the sea is warm, so you float in the water instead of falling. You can jump out again.
-  P.swim = false;
+  // (while you float, the gentle bobbing must not count as leaving the water, or a jump out could fail: swimPrev)
+  P.swimPrev = P.swim; P.swim = false;
   if (L.d.swim && !P.onGround) {
     const col = Math.floor((P.x + P.w / 2) / TS), surf = waterTop(col);
     // in the river you only land on the water from above (going down a waterfall); everywhere else as before
-    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55 && (!inRiver(col) || prevBottom <= surf + P.h * .55 + 14)) {
+    if (col >= 0 && col < L.w && L.grid[ROWS - 1][col] !== "#" && P.y + P.h > surf + P.h * .55 - (P.swimPrev ? 4 : 0) && (!inRiver(col) || prevBottom <= surf + P.h * .55 + 14)) {
       P.y = surf - P.h * .45 + Math.sin(L.time / 12) * 1.2; P.vy = 0; P.onGround = true; P.swim = true; P.mover = null;
       P.vx = Math.max(-2.6, Math.min(2.6, P.vx));
       if (L.time % 10 === 0) particles.push({ x: P.x + P.w / 2 + (Math.random() - .5) * 20, y: surf + 4, vx: 0, vy: -.6, life: 18, c: "#e8fbff", s: 2.5 });

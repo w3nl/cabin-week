@@ -5,7 +5,7 @@
 const VEN = { summer: true, spikeKind: "thistles" };
 const VENETO_LEVELS = [
   genLevel({ ...VEN,
-    seed: 11101, w: 150, day: dayLabel(0), name: T("Arrival at Portoverde", "Aankomst in Portoverde"), theme: "kust", scene: "laguna",
+    seed: 11101, w: 200, day: dayLabel(0), name: T("Arrival at Portoverde", "Aankomst in Portoverde"), theme: "kust", scene: "laguna",
     water: true, swim: true,
     sub: T("A campsite by the lagoon, Venice on the horizon and flamingos in the shallow water. The bungalow keys are somewhere on the beach.",
       "Een camping aan de lagune, Venetië aan de horizon en flamingo's in het ondiepe water. De sleutels van de bungalow liggen ergens op het strand."),
@@ -30,7 +30,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Bungalow open, fan on, flamingos counted. The holiday has started.", "Bungalow open, ventilator aan, flamingo's geteld. De vakantie is begonnen.")
   }),
   genLevel({ ...VEN,
-    seed: 11202, w: 210, day: dayLabel(1), name: T("Venice: St Mark's Square", "Venetië: het San Marcoplein"), theme: "straat", scene: "venezia",
+    seed: 11202, w: 285, day: dayLabel(1), name: T("Venice: St Mark's Square", "Venetië: het San Marcoplein"), theme: "straat", scene: "venezia",
     water: true, movers: "boat", boatLook: "vaporetto", islands: 3, spikes: false,
     sub: T("Venice is built on more than a hundred little islands. Hop on the vaporetto from island to island, and find three Venetian masks.",
       "Venetië is gebouwd op meer dan honderd eilandjes. Spring op de vaporetto van eiland naar eiland, en zoek drie Venetiaanse maskers."),
@@ -54,7 +54,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Three masks, three islands and one very cheeky pigeon. Venice is magic.", "Drie maskers, drie eilanden en één heel brutale duif. Venetië is magisch.")
   }),
   genLevel({ ...VEN,
-    seed: 11303, w: 200, day: dayLabel(2), name: T("Murano and Burano", "Murano en Burano"), theme: "straat", scene: "burano",
+    seed: 11303, w: 270, day: dayLabel(2), name: T("Murano and Burano", "Murano en Burano"), theme: "straat", scene: "burano",
     water: true, movers: "boat", boatLook: "vaporetto", islands: 3, spikes: false,
     sub: T("Murano is the island of glass, Burano the island of colours. Find three glass baubles, and bring the lace maker her thread.",
       "Murano is het eiland van glas, Burano het eiland van kleuren. Zoek drie glazen bollen, en breng de kantwerkster haar draad."),
@@ -77,7 +77,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Three glass baubles, one spool of thread and a camera full of colourful houses.", "Drie glazen bollen, één klosje draad en een camera vol kleurige huizen.")
   }),
   genLevel({ ...VEN,
-    seed: 11404, w: 170, day: dayLabel(3), name: T("Flamingos in the Lagoon", "Flamingo's in de lagune"), theme: "kust", scene: "laguna",
+    seed: 11404, w: 230, day: dayLabel(3), name: T("Flamingos in the Lagoon", "Flamingo's in de lagune"), theme: "kust", scene: "laguna",
     water: true, movers: "boat", islands: 2,
     sub: T("By boat through the quiet lagoon, past fishermen's huts on stilts and flocks of flamingos. Collect three pink feathers.",
       "Met de boot door de stille lagune, langs vissershuisjes op palen en groepen flamingo's. Verzamel drie roze veren."),
@@ -100,7 +100,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Three pink feathers, one happy flamingo and the sun going down over the lagoon.", "Drie roze veren, één blije flamingo en de zon die ondergaat boven de lagune.")
   }),
   genLevel({ ...VEN,
-    seed: 11505, w: 160, day: dayLabel(4), name: T("Verona and the Arena", "Verona en de Arena"), theme: "straat", scene: "verona",
+    seed: 11505, w: 215, day: dayLabel(4), name: T("Verona and the Arena", "Verona en de Arena"), theme: "straat", scene: "verona",
     hills: [12, 10], spikes: false,
     sub: T("Verona has a Roman arena almost 2,000 years old, and in summer there's opera in it. Find three opera tickets before the show starts.",
       "Verona heeft een Romeinse arena van bijna 2000 jaar oud, en in de zomer is daar opera. Zoek drie operakaartjes voordat de voorstelling begint."),
@@ -124,7 +124,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Three tickets, three candles and an opera under the stars. Bravo!", "Drie kaartjes, drie kaarsjes en een opera onder de sterren. Bravo!")
   }),
   genLevel({ ...VEN,
-    seed: 11606, w: 170, day: dayLabel(5), name: T("The Dolomites", "De Dolomieten"), theme: "bos", scene: "dolomiti", spikeKind: undefined,
+    seed: 11606, w: 230, day: dayLabel(5), name: T("The Dolomites", "De Dolomieten"), theme: "bos", scene: "dolomiti", spikeKind: undefined,
     hills: [12, 9], movers: "gondola",
     sub: T("Pale, jagged mountains, green meadows and whistling marmots. Take the cable car up, and collect three trail badges for your hiking passport.",
       "Bleke, puntige bergen, groene weiden en fluitende marmotten. Neem de kabelbaan omhoog, en verzamel drie wandelspeldjes voor je wandelpaspoort."),
@@ -148,7 +148,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Three badges, one milk churn and mountains glowing pink. What a view.", "Drie speldjes, één melkbus en roze gloeiende bergen. Wat een uitzicht.")
   }),
   genLevel({ ...VEN,
-    seed: 11707, w: 160, day: dayLabel(6), name: T("A Day at the Lido", "Een dag op het Lido"), theme: "kust", scene: "laguna",
+    seed: 11707, w: 215, day: dayLabel(6), name: T("A Day at the Lido", "Een dag op het Lido"), theme: "kust", scene: "laguna",
     water: true, swim: true,
     sub: T("The Lido is a long, thin island: the lagoon on one side, the sea on the other. Find three pairs of sunglasses on the beach.",
       "Het Lido is een lang, smal eiland: aan de ene kant de lagune, aan de andere kant de zee. Zoek drie zonnebrillen op het strand."),
@@ -166,7 +166,7 @@ const VENETO_LEVELS = [
     doneMsg: T("Three pairs of sunglasses, a sunburnt nose and sand everywhere. A perfect beach day.", "Drie zonnebrillen, een verbrande neus en overal zand. Een perfecte stranddag.")
   }),
   genLevel({ ...VEN,
-    seed: 11808, w: 155, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "kust", scene: "laguna",
+    seed: 11808, w: 210, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "kust", scene: "laguna",
     water: true, swim: true,
     sub: T("The car is packed, but three wedges of Asiago cheese, the cheese of the Veneto, are still in the campsite shop. One last look at the flamingos.",
       "De auto is ingepakt, maar drie stukken Asiago, de kaas uit Veneto, liggen nog in de campingwinkel. Nog één keer naar de flamingo's kijken."),

@@ -2,7 +2,7 @@
 // Norway: a week in a red cabin by the fjord, near the (fictional) village of Fjordvik. Eight levels made with genLevel.
 const NORWAY_LEVELS = [
   genLevel({
-    seed: 5101, water: true, movers: "boat", w: 150, day: dayLabel(0), name: T("Arrival at the Fjord", "Aankomst bij het fjord"), theme: "sneeuw", scene: "fjord",
+    seed: 5101, water: true, movers: "boat", w: 200, day: dayLabel(0), name: T("Arrival at the Fjord", "Aankomst bij het fjord"), theme: "sneeuw", scene: "fjord",
     sub: T("The red cabin is right by the water. The keys are in the snow. Somewhere. Probably.",
       "Het rode huisje staat vlak bij het water. De sleutels liggen in de sneeuw. Ergens. Waarschijnlijk."),
     keyType: "key", keyHud: "🔑", keyName: T("cabin keys", "huissleutels"),
@@ -26,7 +26,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("Keys found, stove lit, candles in every window. Very koselig.", "Sleutels gevonden, kachel aan, kaarsjes in elk raam. Heel koselig.")
   }),
   genLevel({
-    seed: 5202, ice: true, hills: [12, 11], water: true, w: 150, day: dayLabel(1), name: T("Kicksled to the Shop", "Met de schopslee naar de winkel"), theme: "sneeuw", scene: "fjord",
+    seed: 5202, ice: true, hills: [12, 11], water: true, w: 200, day: dayLabel(1), name: T("Kicksled to the Shop", "Met de schopslee naar de winkel"), theme: "sneeuw", scene: "fjord",
     sub: T("Shopping, the Norwegian way: on a kicksled. Find three blocks of brown cheese, and the kicksled itself.",
       "Boodschappen doen op z'n Noors: met een schopslee. Vind drie blokken bruine kaas, en de schopslee zelf."),
     keyType: "🧀", keyHud: "🧀", keyName: T("blocks of brown cheese", "blokken bruine kaas"),
@@ -49,7 +49,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("Shopping done, by kicksled. The brown cheese is... interesting. The kids love it.", "Boodschappen gedaan, met de schopslee. De bruine kaas is... bijzonder. De kinderen vinden het heerlijk.")
   }),
   genLevel({
-    seed: 5303, hills: [12, 9], water: true, w: 160, day: dayLabel(2), name: T("Husky Safari", "Huskysafari"), theme: "sneeuw", scene: "fjord",
+    seed: 5303, hills: [12, 9], water: true, w: 215, day: dayLabel(2), name: T("Husky Safari", "Huskysafari"), theme: "sneeuw", scene: "fjord",
     sub: T("Twelve huskies, one sledge, lots of noise. Find three bags of dog biscuits, and a puppy that ran off.",
       "Twaalf husky's, één slee, heel veel herrie. Vind drie zakken hondenkoekjes, en een pup die is weggelopen."),
     keyType: "🦴", keyHud: "🦴", keyName: T("bags of dog biscuits", "zakken hondenkoekjes"),
@@ -72,7 +72,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("Twenty kilometres by husky. Everyone is windswept, frozen and grinning.", "Twintig kilometer met de husky's. Iedereen is verwaaid, bevroren en straalt.")
   }),
   genLevel({
-    seed: 5404, w: 140, day: dayLabel(3), name: T("The Stave Church", "De staafkerk"), theme: "stad", scene: "fjord",
+    seed: 5404, w: 190, day: dayLabel(3), name: T("The Stave Church", "De staafkerk"), theme: "stad", scene: "fjord",
     sub: T("Christmas Eve in the village. Find three paper stars for the windows, and a candle for the old wooden church.",
       "Kerstavond in het dorp. Vind drie papieren sterren voor de ramen, en een kaars voor de oude houten kerk."),
     keyType: "⭐", keyHud: "⭐", keyName: T("paper stars", "papieren sterren"),
@@ -96,7 +96,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("Stars in the windows, the candle at the door, and the whole village singing. A quiet, beautiful Christmas Eve.", "Sterren in de ramen, de kaars bij de deur, en het hele dorp zingt. Een stille, mooie kerstavond.")
   }),
   genLevel({
-    seed: 5505, water: true, movers: "boat", w: 150, day: dayLabel(4), name: T("The Fishing Village", "Het vissersdorp"), theme: "sneeuw", scene: "fjord",
+    seed: 5505, water: true, movers: "boat", w: 200, day: dayLabel(4), name: T("The Fishing Village", "Het vissersdorp"), theme: "sneeuw", scene: "fjord",
     sub: T("Christmas Day by the harbour. Find three fish for dinner, and get the nets in.",
       "Eerste kerstdag bij de haven. Vind drie vissen voor het kerstdiner, en haal de netten binnen."),
     keyType: "🐟", keyHud: "🐟", keyName: T("fish", "vissen"),
@@ -120,7 +120,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("A boat trip on the fjord, fish for dinner, waffles for pudding. Merry Christmas from Fjordvik!", "Een boottocht op het fjord, vis als kerstdiner, wafels toe. Vrolijk kerstfeest uit Fjordvik!")
   }),
   genLevel({
-    seed: 5606, hills: [12, 10], water: true, dark: { r: 140, lamp: 45 }, w: 160, day: dayLabel(5), name: T("The Troll Forest", "Het trollenbos"), theme: "sneeuw", scene: "fjord",
+    seed: 5606, hills: [12, 10], water: true, dark: { r: 140, lamp: 45 }, w: 215, day: dayLabel(5), name: T("The Troll Forest", "Het trollenbos"), theme: "sneeuw", scene: "fjord",
     sub: T("Boxing Day: a walk through the troll forest. Find three bells, and light the torches in the dark part.",
       "Tweede kerstdag: een wandeling door het trollenbos. Vind drie belletjes, en steek de fakkels aan in het donkere stuk."),
     keyType: "🔔", keyHud: "🔔", keyName: T("bells", "belletjes"),
@@ -143,7 +143,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("Through the troll forest and back. Everyone has a troll story now. Some are even true.", "Door het trollenbos en terug. Iedereen heeft nu een trollenverhaal. Sommige zijn zelfs waar.")
   }),
   genLevel({
-    seed: 5707, hills: [12, 10], water: true, w: 150, day: dayLabel(6), name: T("Northern Lights", "Noorderlicht"), theme: "sneeuw", scene: "fjord",
+    seed: 5707, hills: [12, 10], water: true, w: 200, day: dayLabel(6), name: T("Northern Lights", "Noorderlicht"), theme: "sneeuw", scene: "fjord",
     sub: T("The last evening, and the sky is clear. Find three cups of hot chocolate, and wait for the right moment.",
       "De laatste avond, en de lucht is helder. Vind drie bekers warme chocolademelk, en wacht op het goede moment."),
     keyType: "☕", keyHud: "☕", keyName: T("cups of hot chocolate", "bekers warme chocolademelk"),
@@ -163,7 +163,7 @@ const NORWAY_LEVELS = [
     doneMsg: T("The sky danced for an hour. Nobody said a word. Then everyone said 'wow' at the same time.", "De lucht danste een uur lang. Niemand zei iets. Toen zei iedereen tegelijk 'wauw'.")
   }),
   genLevel({
-    seed: 5808, water: true, movers: "boat", w: 160, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "fjord",
+    seed: 5808, water: true, movers: "boat", w: 215, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "fjord",
     sub: T("Time to go home. Find three woolly socks and the backpack before the ferry leaves.",
       "Tijd om naar huis te gaan. Vind drie wollen sokken en de rugzak voordat de veerboot vertrekt."),
     keyType: "🧦", keyHud: "🧦", keyName: T("woolly socks", "wollen sokken"),

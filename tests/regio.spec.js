@@ -332,7 +332,7 @@ test('the Ardèche, day 2: in the canoe the river carries you, a rock stops you 
   });
   expect(r).toEqual({ canoe: true, swim: true, carried: true, stopped: true, over: true, down: true, notUp: true, hearts: 3 });
   // the canoe stretch makes the level longer, and the other days have no river
-  expect(await page.evaluate(() => [L.w, LEVELS.filter(l => l.river).length])).toEqual([230, 1]);
+  expect(await page.evaluate(() => [L.w, LEVELS.filter(l => l.river).length])).toEqual([285, 1]);
 });
 
 test('the Veneto: in Venice you hop from island to island on the vaporetto, and flamingos stand in the lagoon', async ({ page }) => {
@@ -414,4 +414,66 @@ test('never two checkpoint flags next to each other', async ({ page }) => {
     return xs.some((x, j) => j && x - xs[j - 1] < 10) ? `${r.id} ${i + 1}: ${xs.join(',')}` : null;
   })).filter(Boolean));
   expect(close).toEqual([]);
+});
+
+
+test('decorations stand on flat ground: no house, stall or car hangs over a cliff or a pit', async ({ page }) => {
+  await seed(page);
+  const bad = await page.evaluate(() => {
+    const out = [];
+    for (const r of REGIONS) {
+      setRegion(r.id);
+      LEVELS.forEach((d, i) => {
+        if (!d.seed) return; // the levels built by hand
+        const top = c => { for (let y = 0; y < 15; y++) if (d.ground.some(([a, b, t]) => c >= a && c <= b && t === y)) return y; return 99; };
+        for (const [k, c] of d.deco) {
+          if (BG_ANIMALS.has(k)) continue;
+          const [l, rr] = DECO_FOOT[k] || [0, 0], t = top(c);
+          for (let x = c + l; x <= c + rr; x++) if (top(x) !== t) { out.push(`${r.id} ${i + 1}: ${k} at ${c}`); break; }
+        }
+      });
+    }
+    setRegion('ardennes');
+    return out;
+  });
+  expect(bad).toEqual([]);
+});
+
+test('the bell: far enough from the gate that you have to hurry, but you make it walking', async ({ page }) => {
+  await seed(page);
+  const res = await page.evaluate(() => {
+  const out = [];
+  for (const r of REGIONS) { setRegion(r.id); LEVELS.forEach((d, i) => { if (!(d.task && d.task.kind === 'timer')) return;
+   for (const run of [false]) {
+    save.char = 0; startLevel(i); setScreen('play'); dialog = null; window.hurt = () => {}; L.enemies.length = 0;
+    P.x = L.bell.x + 4; P.y = L.bell.y + 32 - P.h; P.vx = 0; P.vy = 0;
+    for (let k = 0; k < 5; k++) step();
+    edges.push('act'); step(); if (dialog) hideDialog();
+    const gx = L.d.gate[0] * TS; let t = 0, ok = false, stuck = 0, lastX = P.x;
+    for (; t < 1200; t++) {
+      // jump when something is in the way, or there is a gap or spikes ahead
+      const fx = Math.floor((P.x + P.w + 14) / TS), fy = Math.floor((P.y + P.h - 2) / TS), feet = Math.floor((P.y + P.h + 2) / TS);
+      const block = isSolid(fx, fy) || isSolid(fx, fy - 1), gap = !isSolid(fx, feet) && cell(fx, feet) !== '=', spike = cell(fx, fy) === '^' || cell(fx + 1, fy) === '^';
+      held.right = true; held.run = run; held.jump = false;
+      if ((block || gap || spike || stuck > 10) && P.onGround) { edges.push('jump'); held.jump = true; }
+      else if (!P.onGround && P.vy < 0) held.jump = true;
+      step();
+      if (Math.abs(P.x - lastX) < .5) stuck++; else stuck = 0; lastX = P.x;
+      if (P.x > gx + TS) { ok = true; break; }
+      if (!L.gateOpen) break;
+    }
+    held.right = held.run = held.jump = false;
+    out.push([r.id, i + 1, run ? 'run' : 'walk', d.task.secs, Math.round((gx - L.bell.x) / TS) + ' tiles', ok ? (t / 60).toFixed(1) + 's' : 'FAIL at ' + Math.round(P.x / TS)]);
+   } }); }
+    setRegion('ardennes');
+    return out;
+  });
+  for (const [region, day, , secs, , got] of res) {
+    expect(got, `${region} day ${day}`).toMatch(/s$/);
+    const t = parseFloat(got);
+    // walking takes most of the time (it used to take only about a third), but it fits
+    expect(t, `${region} day ${day}`).toBeGreaterThan(secs * .6);
+    expect(t, `${region} day ${day}`).toBeLessThan(secs - .5);
+  }
+  expect(res.length).toBeGreaterThan(5);
 });

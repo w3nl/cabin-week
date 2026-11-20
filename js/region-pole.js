@@ -2,7 +2,7 @@
 // The North Pole: a week in Santa's village. Eight levels made with the level generator (genLevel in levelgen.js).
 const POLE_LEVELS = [
   genLevel({
-    seed: 3101, ice: true, movers: "floe", water: true, w: 150, day: dayLabel(0), name: T("Landing at the North Pole", "Landen op de Noordpool"), theme: "sneeuw", scene: "pole",
+    seed: 3101, ice: true, movers: "floe", water: true, w: 200, day: dayLabel(0), name: T("Landing at the North Pole", "Landen op de Noordpool"), theme: "sneeuw", scene: "pole",
     sub: T("The little plane has landed on the ice. Three backpacks slid off the sledge on the way to the village.",
       "Het vliegtuigje is op het ijs geland. Onderweg naar het dorp zijn drie rugzakken van de slee gegleden."),
     keyType: "🎒", keyHud: "🎒", keyName: T("backpacks", "rugzakken"),
@@ -21,7 +21,7 @@ const POLE_LEVELS = [
     doneMsg: T("Everyone is in Santa's village, with all the backpacks. The elves made hot chocolate.", "Iedereen is in het dorp van de Kerstman, met alle rugzakken. De elfjes hebben warme chocolademelk gemaakt.")
   }),
   genLevel({
-    seed: 3202, ice: true, hills: [12, 11], water: true, w: 150, day: dayLabel(1), name: T("The Reindeer Stables", "De rendierstallen"), theme: "sneeuw", scene: "pole",
+    seed: 3202, ice: true, hills: [12, 11], water: true, w: 200, day: dayLabel(1), name: T("The Reindeer Stables", "De rendierstallen"), theme: "sneeuw", scene: "pole",
     sub: T("The reindeer have shaken off their bells while playing. Find all three before Christmas Eve.",
       "De rendieren hebben bij het spelen hun belletjes afgeschud. Vind ze alle drie voor kerstavond."),
     keyType: "🔔", keyHud: "🔔", keyName: T("reindeer bells", "rendierbelletjes"),
@@ -45,7 +45,7 @@ const POLE_LEVELS = [
     doneMsg: T("All bells are back and the stable is spotless. The reindeer look very pleased with themselves.", "Alle belletjes zijn terug en de stal is brandschoon. De rendieren kijken erg tevreden.")
   }),
   genLevel({
-    seed: 3303, ladders: true, interior: "workshop", w: 150, day: dayLabel(2), name: T("Santa's Workshop", "De werkplaats van de Kerstman"), theme: "huis",
+    seed: 3303, ladders: true, interior: "workshop", w: 200, day: dayLabel(2), name: T("Santa's Workshop", "De werkplaats van de Kerstman"), theme: "huis",
     sub: T("Busy, busy, busy. Three teddy bears fell off the conveyor belt. And a toy robot has escaped.",
       "Druk, druk, druk. Drie teddyberen zijn van de lopende band gevallen. En er is een speelgoedrobot ontsnapt."),
     keyType: "🧸", keyHud: "🧸", keyName: T("teddy bears", "teddyberen"),
@@ -70,7 +70,7 @@ const POLE_LEVELS = [
     doneMsg: T("Three teddy bears back on the belt, the train runs and the toy robot is in its box. Back to work!", "Drie teddyberen terug op de band, de trein rijdt en de speelgoedrobot zit in zijn doos. Aan het werk!")
   }),
   genLevel({
-    seed: 3404, ice: true, movers: "floe", water: true, w: 150, day: dayLabel(3), name: T("Building an Igloo", "Een iglo bouwen"), theme: "sneeuw", scene: "pole",
+    seed: 3404, ice: true, movers: "floe", water: true, w: 200, day: dayLabel(3), name: T("Building an Igloo", "Een iglo bouwen"), theme: "sneeuw", scene: "pole",
     sub: T("Today we build an igloo. We need three ice blocks. And the camp gate has frozen shut.",
       "Vandaag bouwen we een iglo. Daarvoor zijn drie ijsblokken nodig. En het hek van het kamp is dichtgevroren."),
     keyType: "🧊", keyHud: "🧊", keyName: T("ice blocks", "ijsblokken"),
@@ -93,7 +93,7 @@ const POLE_LEVELS = [
     doneMsg: T("The igloo is finished. It's round, it's white and it's ours. No fish yet.", "De iglo is af. Hij is rond, hij is wit en hij is van ons. Nog geen vis.")
   }),
   genLevel({
-    seed: 3505, ladders: true, interior: "workshop", w: 150, day: dayLabel(4), name: T("The Post Office", "Het postkantoor"), theme: "huis",
+    seed: 3505, ladders: true, interior: "workshop", w: 200, day: dayLabel(4), name: T("The Post Office", "Het postkantoor"), theme: "huis",
     sub: T("The wish lists have blown all over the post office. Find three letters, and help Santa read them.",
       "De verlanglijstjes zijn door het hele postkantoor gewaaid. Vind drie brieven, en help de Kerstman ze te lezen."),
     keyType: "✉️", keyHud: "✉️", keyName: T("letters", "brieven"),
@@ -118,7 +118,7 @@ const POLE_LEVELS = [
     doneMsg: T("All letters read and sorted. Santa says thank you. In very large handwriting.", "Alle brieven gelezen en gesorteerd. De Kerstman zegt dankjewel. In heel grote letters.")
   }),
   genLevel({
-    seed: 3606, ice: true, water: true, dark: { r: 150, key: 50, lamp: 35 }, w: 150, day: dayLabel(5), name: T("Northern Lights Night", "Noorderlichtnacht"), theme: "sneeuw", scene: "pole",
+    seed: 3606, ice: true, water: true, dark: { r: 150, key: 50, lamp: 35 }, w: 200, day: dayLabel(5), name: T("Northern Lights Night", "Noorderlichtnacht"), theme: "sneeuw", scene: "pole",
     sub: T("Tonight the sky turns green and purple. Find three lanterns for the night walk, and light the way.",
       "Vannacht wordt de lucht groen en paars. Vind drie lantaarns voor de nachtwandeling, en maak het pad licht."),
     keyType: "🏮", keyHud: "🏮", keyName: T("lanterns", "lantaarns"),
@@ -142,7 +142,7 @@ const POLE_LEVELS = [
     doneMsg: T("The most beautiful night of the week. Even the arctic foxes stopped to look.", "De mooiste nacht van de week. Zelfs de poolvossen bleven staan om te kijken.")
   }),
   genLevel({
-    seed: 3707, ice: true, hills: [12, 10], water: true, w: 160, day: dayLabel(6), name: T("Christmas Eve", "Kerstavond"), theme: "sneeuw", scene: "pole",
+    seed: 3707, ice: true, hills: [12, 10], water: true, w: 215, day: dayLabel(6), name: T("Christmas Eve", "Kerstavond"), theme: "sneeuw", scene: "pole",
     sub: T("Tonight Santa flies! Three presents fell off the sleigh, and he can't find his route map.",
       "Vanavond vliegt de Kerstman! Er zijn drie cadeaus van de slee gevallen, en hij kan zijn routekaart niet vinden."),
     keyType: "🎁", keyHud: "🎁", keyName: T("presents", "cadeaus"),
@@ -167,7 +167,7 @@ const POLE_LEVELS = [
     doneMsg: T("The sleigh took off right on time. Somewhere a bell is ringing. Merry Christmas!", "De slee vertrok precies op tijd. Ergens klinkt een belletje. Vrolijk kerstfeest!")
   }),
   genLevel({
-    seed: 3808, ice: true, movers: "floe", water: true, w: 150, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "pole",
+    seed: 3808, ice: true, movers: "floe", water: true, w: 200, day: dayLabel(7), name: T("Going Home", "Naar huis"), theme: "sneeuw", scene: "pole",
     sub: T("Time to fly home. Find three scarves and the tickets before the little plane leaves.",
       "Tijd om naar huis te vliegen. Vind drie sjaals en de tickets voordat het vliegtuigje vertrekt."),
     keyType: "🧣", keyHud: "🧣", keyName: T("scarves", "sjaals"),

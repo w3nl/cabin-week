@@ -136,8 +136,12 @@ function genLevel(o) {
       // three levers or lamps spread over the way to the gate
       [.3, .6, .9].forEach((f, i) => { const c = free(8 + (gateX - 14) * f, 6, gateX - 5); ents.push(["switch", room(c), yAt(c), { i }]); });
     } else if (k === "timer") {
-      // a bell well before the gate: ring it, and the gate stays open for a few seconds
-      const c = free(gateX - 20, 6, gateX - 6); ents.push(["bell", room(c), yAt(c)]);
+      // A bell well before the gate: ring it, and the gate stays open for a few seconds. Far enough that you have to
+      // hurry: walking there takes about three quarters of the time (running gives some room). Never with a boat,
+      // a floe or a gondola in between (you can't hurry a boat), nor the river.
+      const secs = o.task.secs || 5, far = Math.round(secs * 60 * 4.4 / TS_GEN * .72);
+      const after = Math.max(6, ...ents.filter(e => e[0] === "mover" && e[1] < gateX).map(e => e[1] + 9), river ? river.x1 + 3 : 0);
+      const c = free(Math.max(after + 2, gateX - far), after + 2, gateX - 6); ents.push(["bell", room(c), yAt(c)]);
     } else if (k === "follow") {
       const c = free(gateX * .35, 6, gateX - 8); ents.push(["animal", room(c), yAt(c)]);
     }
@@ -190,10 +194,21 @@ function genLevel(o) {
   const counted = o.code && o.code.kind === "count" ? o.code.count.map(c => c[0]) : [];
   const kinds = o.decoKinds.filter(k => !counted.includes(k));
   const deco = [];
+  // Does a decoration fit here? All of it on the same flat ground: not over a pit, a cliff, a step of the hills, the river,
+  // steps or spikes, and not in the gate or the code door.
+  const fits = (k, c) => {
+    const [l, r] = DECO_FOOT[k] || [0, 0], t = topAt[c];
+    if (c == null || t >= ROWS_GEN) return false;
+    for (let i = c + l; i <= c + r; i++) if (i < 1 || i >= w - 1 || topAt[i] !== t || bad.has(i) || Math.abs(i - gateX) < 3 || Math.abs(i - codeX) < 4) return false;
+    return true;
+  };
+  // the nearest place where it fits (at most `reach` tiles away), or null
+  const fitNear = (k, c, reach = 3) => { for (let d = 0; d <= reach; d++) for (const t of [c + d, c - d]) if (fits(k, t)) return t; return null; };
   for (let dx = 3; dx < w - 8; dx += 5 + Math.floor(R() * 7)) {
     if (bad.has(dx) || topAt[dx] >= ROWS_GEN || Math.abs(dx - gateX) < 4 || Math.abs(dx - codeX) < 5) continue;
     if (o.lantern && o.lanternDeco === "church" && lanternX != null && dx > lanternX - 7 && dx < lanternX + 6) continue;
-    deco.push([kinds.length ? kinds[Math.floor(R() * kinds.length)] : "pine", dx]);
+    const k = kinds.length ? kinds[Math.floor(R() * kinds.length)] : "pine", c = fitNear(k, dx);
+    if (c != null && !deco.some(([k2, c2]) => c2 + (DECO_FOOT[k2] || [0, 0])[1] >= c + (DECO_FOOT[k] || [0, 0])[0] && c2 + (DECO_FOOT[k2] || [0, 0])[0] <= c + (DECO_FOOT[k] || [0, 0])[1])) deco.push([k, c]);
   }
   if (counted.length) {
     const ns = [...o.code.answer].map(Number), list = [];
@@ -201,15 +216,22 @@ function genLevel(o) {
     for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
     const cols = [];
     for (let c = 6; c < codeX - 4; c++) if (!bad.has(c) && topAt[c] < ROWS_GEN && Math.abs(c - gateX) >= 4) cols.push(c);
-    const picks = list.map((_, i) => cols[Math.floor((i + .5) * cols.length / list.length)]);
+    // spread evenly, each where it fits and not on top of another counted thing
+    const picks = [];
+    list.forEach((k, i) => {
+      const want = cols[Math.floor((i + .5) * cols.length / list.length)];
+      let c = null;
+      for (let d = 0; d <= 12 && c == null; d++) for (const t of [want + d, want - d]) if (fits(k, t) && !picks.some(p => Math.abs(p - t) < 3)) { c = t; break; }
+      picks.push(c ?? want);
+    });
     for (let i = deco.length - 1; i >= 0; i--) if (picks.some(c => Math.abs(c - deco[i][1]) < 4)) deco.splice(i, 1);
     list.forEach((k, i) => deco.push([k, picks[i]]));
     code.riddle = o.code.riddle || T(`How many did you see along the way? ${o.code.count.map(c => c[1]).join(", ")}: one digit each, in that order.`,
       `Hoeveel zag je onderweg? ${o.code.count.map(c => c[1]).join(", ")}: elk één cijfer, in die volgorde.`);
   }
   if (o.lantern) { const l = ents.find(e => e[0] === "lantern"); deco.push(o.lanternDeco === "church" ? ["church", l[1] - 3] : ["bench", l[1] + 1]); }
-  (o.decoExtra || []).filter(([k]) => !counted.includes(k)).forEach(([k, f]) => deco.push([k, Math.round(w * f)]));
-  riverDeco.forEach(c => deco.push(["canoe", c]));
+  (o.decoExtra || []).filter(([k]) => !counted.includes(k)).forEach(([k, f]) => { const c = Math.round(w * f); deco.push([k, fitNear(k, c, 8) ?? c]); });
+  riverDeco.forEach(c => deco.push(["canoe", fitNear("canoe", c, 4) ?? c]));
   return Object.assign({}, o, { ground, plats, blocks, spikes, gate, code, ents, deco, keysNeeded, ladderCols, river, rocks });
 }
 /** The keys on the lock for each kind of lock: digits, notes, colours, arrows or letters. */
@@ -225,8 +247,22 @@ function lockKeys(c) {
   if (k === "word") return [...new Set([...c.answer, ...(c.extra || "")])].sort().map(v => ({ v, name: v }));
   return [..."1234567890"].map(v => ({ v, name: v }));
 }
-/** The number of rows (canvas.js has ROWS, but that file loads after this one). */
-const ROWS_GEN = 15;
+/** How far each decoration reaches over the ground, in tiles left and right of its column (measured from drawDeco();
+    a kind that is not listed stands on one tile). Wide things (houses, stalls, cars) need flat ground under all of it,
+    so nothing hangs over a cliff or floats over a pit. */
+const DECO_FOOT = {
+  bagpipes: [0, 1], balcony: [-1, 2], bath: [-1, 2], bed: [-1, 2], bench: [0, 1], bike: [-1, 1], boatdeco: [0, 2], buranohouse: [-1, 2],
+  cake: [-1, 2], canoe: [0, 2], capanna: [0, 1], caravan: [0, 4], casone: [0, 1], castle: [-1, 2], chalet: [-1, 3], cheese: [-1, 1], church: [-1, 5],
+  clogs: [-1, 1], column: [-1, 1], cow: [0, 1], dalahorse: [0, 1], deuche: [0, 3], dune: [-1, 2], fika: [0, 1], fire: [-1, 1], gablehouse: [-1, 1],
+  gelatocart: [0, 1], glassshop: [-1, 2], gondola: [-1, 3], heather: [-1, 1], highlandhouse: [-1, 2], igloo: [-1, 2], kicksled: [-1, 1],
+  kitchen: [-1, 4], larch: [-1, 1], lavender: [0, 1], legoset: [-1, 3], lighthouse: [-1, 1], mas: [-1, 3], maypole: [0, 1], moosedeco: [0, 1],
+  muskox: [0, 1], palazzo: [-1, 2], parasol: [0, 2], polarbear: [0, 1], presents: [-1, 1], redhouse: [-1, 2], rifugio: [-1, 2], rorbu: [-1, 2],
+  saab900: [0, 4], saab93: [0, 4], saab96: [0, 3], sauna: [-1, 3], scania: [0, 5], skis: [0, 1], sleigh: [-1, 2], sofa: [-1, 2], stalagmite: [-1, 1],
+  stall: [-1, 3], stave: [-1, 3], stonehouse: [-1, 2], stove: [-1, 1], sunflowers: [0, 1], table: [-1, 4], tartan: [-1, 2], tent: [-1, 2],
+  thatch: [-1, 3], tulips: [-1, 1], vespa: [0, 1], vines: [0, 2], volvo: [0, 4], walrus: [0, 1], waterfall: [-1, 1], windmill: [0, 1]
+};
+/** The number of rows and the tile size (canvas.js has ROWS and TS, but that file loads after this one). */
+const ROWS_GEN = 15, TS_GEN = 32;
 
 const DAY22 = genLevel({
   seed: 2212, w: 150, day: dayLabel(1), name: T("Forest & Old Railway", "Bos & oude spoorlijn"), theme: "bos",

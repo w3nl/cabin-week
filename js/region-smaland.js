@@ -5,7 +5,7 @@
 const SWE = { theme: "bos", summer: true, scene: "smaland" };
 const SMALAND_LEVELS = [
   genLevel({ ...SWE,
-    seed: 8101, w: 150, day: dayLabel(0), name: T("Arrival in Lingonby", "Aankomst in Lingonby"),
+    seed: 8101, w: 200, day: dayLabel(0), name: T("Arrival in Lingonby", "Aankomst in Lingonby"),
     water: true, swim: true,
     sub: T("A red cottage with white corners, a jetty and a lake to swim in. The keys are somewhere along the shore.",
       "Een rood huisje met witte hoeken, een steiger en een meer om in te zwemmen. De sleutels liggen ergens langs de oever."),
@@ -30,7 +30,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Keys found, water on, feet in the lake. The summer has started.", "Sleutels gevonden, water aan, voeten in het meer. De zomer is begonnen.")
   }),
   genLevel({ ...SWE,
-    seed: 8202, w: 150, day: dayLabel(1), name: T("Fika in the Village", "Fika in het dorp"),
+    seed: 8202, w: 200, day: dayLabel(1), name: T("Fika in the Village", "Fika in het dorp"),
     sub: T("Fika: the Swedish break with something sweet. Three cups have gone missing from the café, and the princess cake is still at the bakery.",
       "Fika: de Zweedse pauze met iets lekkers. Bij het café zijn drie kopjes zoek, en de prinsessentaart staat nog bij de bakker."),
     keyType: "☕", keyHud: "☕", keyName: T("fika cups", "fikakopjes"),
@@ -53,7 +53,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Cups back, cake eaten, everyone a bit sticky. Tack för fikat!", "Kopjes terug, taart op, iedereen een beetje plakkerig. Tack för fikat!")
   }),
   genLevel({ ...SWE,
-    seed: 8303, hills: [12, 10], w: 160, day: dayLabel(2), name: T("The Moose Forest", "Het elandenbos"),
+    seed: 8303, hills: [12, 10], w: 215, day: dayLabel(2), name: T("The Moose Forest", "Het elandenbos"),
     moose: [.18, .45, .78],
     sub: T("Deep in the forest the moose walk. Find three baskets of chanterelles, and don't try to jump over a moose. Jump ON it.",
       "Diep in het bos lopen de elanden. Vind drie mandjes cantharellen, en spring niet over een eland heen. Spring erOP."),
@@ -77,7 +77,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Three baskets of chanterelles and three moose. Two of them waved. Probably.", "Drie mandjes cantharellen en drie elanden. Twee zwaaiden. Denken we.")
   }),
   genLevel({ ...SWE,
-    seed: 8404, w: 150, day: dayLabel(3), name: T("The Glass Kingdom", "Het Glasrijk"),
+    seed: 8404, w: 200, day: dayLabel(3), name: T("The Glass Kingdom", "Het Glasrijk"),
     sub: T("In the old glassworks the glassblowers make bowls, vases and little birds. Three glass birds flew off the shelf.",
       "In de oude glasblazerij maken ze schalen, vazen en vogeltjes. Drie glazen vogeltjes zijn van de plank gevlogen."),
     keyType: "🐦", keyHud: "🐦", keyName: T("glass birds", "glazen vogeltjes"),
@@ -101,7 +101,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Three glass birds back, one small bowl bought, nothing broken. A miracle.", "Drie glazen vogeltjes terug, één schaaltje gekocht, niets gebroken. Een wonder.")
   }),
   genLevel({ ...SWE,
-    seed: 8505, w: 150, day: dayLabel(4), name: T("Midsummer", "Midzomer"),
+    seed: 8505, w: 200, day: dayLabel(4), name: T("Midsummer", "Midzomer"),
     sub: T("Midsummer! Dancing around the pole like little frogs, strawberries with cream, and flowers in your hair. Find three bunches of flowers for the crowns.",
       "Midzomer! Als kikkertjes rond de paal dansen, aardbeien met slagroom en bloemen in je haar. Vind drie bosjes bloemen voor de kransen."),
     keyType: "🌼", keyHud: "🌼", keyName: T("bunches of flowers", "bosjes bloemen"),
@@ -124,7 +124,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Flower crowns on, everyone danced like a frog, and the sun never really set. Glad midsommar!", "Bloemenkransen op, iedereen danste als een kikker, en de zon ging nooit echt onder. Glad midsommar!")
   }),
   genLevel({ ...SWE,
-    seed: 8606, w: 160, day: dayLabel(5), name: T("Canoeing on the Lake", "Kanoën op het meer"),
+    seed: 8606, w: 215, day: dayLabel(5), name: T("Canoeing on the Lake", "Kanoën op het meer"),
     water: true, swim: true, movers: "boat",
     sub: T("A day on the lake: canoes, little islands and a swim from the rocks. Three paddles drifted away overnight.",
       "Een dag op het meer: kano's, eilandjes en zwemmen vanaf de rotsen. Vannacht zijn er drie peddels weggedreven."),
@@ -143,7 +143,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Three paddles found, one canoe tipped over, everyone wet and laughing.", "Drie peddels gevonden, één kano omgeslagen, iedereen nat en lachend.")
   }),
   genLevel({ ...SWE,
-    seed: 8707, ladders: true, w: 160, day: dayLabel(6), name: T("The Car Meet", "De autotreffen"),
+    seed: 8707, ladders: true, w: 215, day: dayLabel(6), name: T("The Car Meet", "De autotreffen"),
     sub: T("The village car meet! Saabs, a Volvo and a Scania timber lorry, polished until they shine. Three spanners rolled under the cars.",
       "De autotreffen in het dorp! Saabs, een Volvo en een Scania-houtwagen, gepoetst tot ze glimmen. Drie moersleutels zijn onder de auto's gerold."),
     keyType: "🔧", keyHud: "🔧", keyName: T("spanners", "moersleutels"),
@@ -168,7 +168,7 @@ const SMALAND_LEVELS = [
     doneMsg: T("Saabs, a Volvo and a Scania, all shining. Paul took 214 photos. Of the same car.", "Saabs, een Volvo en een Scania, allemaal glimmend. Paul maakte 214 foto's. Van dezelfde auto.")
   }),
   genLevel({ ...SWE,
-    seed: 8808, w: 160, day: dayLabel(7), name: T("Going Home", "Naar huis"),
+    seed: 8808, w: 215, day: dayLabel(7), name: T("Going Home", "Naar huis"),
     water: true, swim: true, moose: [.3],
     sub: T("The car is packed. Three little Dala horses are still somewhere in the garden. They're coming home with us.",
       "De auto is ingepakt. Drie Dalapaardjes staan nog ergens in de tuin. Die gaan mee naar huis."),
