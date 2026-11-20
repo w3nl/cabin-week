@@ -79,4 +79,5 @@ jobs:
 
       - name: Notice when there is no Snap Store login
         if: env.HAS_STORE != 'true'
-        run: echo "::notice::Not uploaded to the Snap Store: first set the secret SNAPCRAFT_STORE_CREDENTIALS (see docs/linux.md)."
+        run: |
+          echo "::notice::Not uploaded to the Snap Store: first set the secret SNAPCRAFT_STORE_CREDENTIALS (see docs/linux.md)."
