@@ -2782,8 +2782,11 @@ function render() {
       drawPerson(ch, 0, 0, 1, P.face, 0, false, pHat, { t: frame * 16, scarf, summer, indoor: theme === "huis", slide: true });
       g.setTransform(m0);
     } else {
-      if (P.onGround) shadowAt(P.x + P.w / 2, P.y + P.h, 11);
-      drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3, scarf, summer, indoor: theme === "huis" });
+      if (P.onGround && !P.canoe) shadowAt(P.x + P.w / 2, P.y + P.h, 11);
+      // in a canoe you sit inside it: only draw what sticks out above the edge (no legs under the boat, also mid-jump)
+      if (P.canoe) { g.save(); g.beginPath(); g.rect(P.x - 80, P.y - 120, P.w + 160, 120 + P.h * .45 + 4); g.clip(); }
+      drawPerson(ch, P.x + P.w / 2, P.y + P.h, 1, P.face, P.anim, !P.onGround, pHat, { t: frame * 16, moving: Math.abs(P.vx) > .3 && !P.canoe, scarf, summer, indoor: theme === "huis" });
+      if (P.canoe) g.restore();
       // swimming: the water covers you up to your chest
       if (P.swim) {
         drawWater(cx, [fl(P.x / TS), fl((P.x + P.w) / TS)]);
