@@ -96,7 +96,8 @@ function gpPress() {
 function gpBack() {
   if (state === "hero" && heroKeysOpen()) closeHeroKeys(); // Back closes the letters first
   else if (state === "pad") setScreen("play");
-  else if (state === "intro" || state === "card" || state === "map" || state === "hero" || state === "save") toTitle();
+  else if (state === "intro" || state === "card" || state === "map" || state === "hero") toTitle();
+  else if (state === "save") saveBack();
 }
 
 /* ---------- Toetsenbord en tv-afstandsbediening in menu's ---------- */
