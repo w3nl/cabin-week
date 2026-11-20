@@ -64,8 +64,8 @@ test('de dagen gaan met een voortgangscode van de kaart mee, zonder de held', as
   await page.locator('#regionBtn').click();
   await page.locator('#mapSave').click();
   await expect(page.locator('#saveWrap')).toBeVisible();
-  await expect(page.locator('#saveMine')).toContainText('14 days played');
-  await expect(page.locator('#saveMine')).toContainText('1 of 10 trips done');
+  await expect(page.locator('#saveMine')).toContainText('14 days scouted');
+  await expect(page.locator('#saveMine')).toContainText('1 of 10 trips scouted');
   const code = await page.locator('#saveCode').inputValue();
   expect(code).toMatch(/^TS1\.[A-Za-z0-9_-]+$/);
   await page.locator('#saveClose').click();
@@ -78,9 +78,9 @@ test('de dagen gaan met een voortgangscode van de kaart mee, zonder de held', as
   await other.locator('#regionBtn').click();
   await other.locator('#mapSave').click();
   await other.locator('#saveIn').fill('nonsense');
-  await expect(other.locator('#saveFb')).toContainText("isn't a code of this game");
+  await expect(other.locator('#saveFb')).toContainText("isn't a TripScouts code");
   await other.locator('#saveIn').fill(code);
-  await expect(other.locator('#saveFb')).toContainText('14 days played');
+  await expect(other.locator('#saveFb')).toContainText('14 days scouted');
   await other.locator('#saveImport').click();
   await expect(other.locator('html')).toHaveClass(/ready/);
   await expect(other.locator('#title')).toBeVisible();
@@ -145,7 +145,7 @@ test('een link met #save= opent het goede scherm met de code, en vervangt pas ie
   // a new #save= in the same tab (no reload): the progress screen
   await page.evaluate(code => { location.hash = 'save=' + code; }, days);
   await expect(page.locator('#saveTitle')).toHaveText('Take your days along');
-  await expect(page.locator('#saveFb')).toContainText('14 days played');
+  await expect(page.locator('#saveFb')).toContainText('14 days scouted');
   expect((await stored(page)).unlocked).toBe(1);
 });
 

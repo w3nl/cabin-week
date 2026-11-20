@@ -1,30 +1,23 @@
-// Maakt de PNG-iconen van de app uit icons/icon.svg (de bron). Draai: npm run icons
+// Makes the app icons and the Google TV banner from the TripScouts artwork (tools/art.js, drawn with the game's own
+// drawing code): winter and summer split on a diagonal, with Paul the scout in the middle. Run: npm run icons
 const { chromium } = require('@playwright/test');
-const fs = require('fs');
 const path = require('path');
+const { openArt, saveArt, ICON, wide } = require('./art-render');
 
 (async () => {
-  const svg = fs.readFileSync(path.join(__dirname, '..', 'icons', 'icon.svg'), 'utf8');
+  const root = path.join(__dirname, '..'), res = path.join(root, 'android-tv', 'app', 'src', 'main', 'res');
   const browser = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
-  for (const [name, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['apple-touch-icon.png', 180]]) {
-    const page = await browser.newPage({ viewport: { width: size, height: size } });
-    await page.setContent(`<style>html,body{margin:0}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`);
-    await page.screenshot({ path: path.join(__dirname, '..', 'icons', name) });
-    await page.close();
+  const { page, close } = await openArt(browser);
+  try {
+    // The web app (and the favicon)
+    for (const [name, size] of [['icon-512.png', 512], ['icon-192.png', 192], ['apple-touch-icon.png', 180], ['favicon-32.png', 32]])
+      await saveArt(page, path.join(root, 'icons', name), size, size, ICON);
+    // The Android app: launcher icons, and the banner on the Google TV home screen
+    for (const [dir, size] of [['mipmap-xhdpi', 96], ['mipmap-xxxhdpi', 192]]) await saveArt(page, path.join(res, dir, 'ic_launcher.png'), size, size, ICON);
+    await saveArt(page, path.join(res, 'drawable-xhdpi', 'banner.png'), 320, 180, wide(320, 180));
+    console.log('Icons made: icons/ and android-tv/app/src/main/res/');
+  } finally {
+    await close();
+    await browser.close();
   }
-  // De Google TV-app: launcher-icoon en de banner op het startscherm
-  const res = path.join(__dirname, '..', 'android-tv', 'app', 'src', 'main', 'res');
-  for (const [dir, size] of [['mipmap-xhdpi', 96], ['mipmap-xxxhdpi', 192]]) {
-    const page = await browser.newPage({ viewport: { width: size, height: size } });
-    await page.setContent(`<style>html,body{margin:0}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`);
-    await page.screenshot({ path: path.join(res, dir, 'ic_launcher.png') });
-    await page.close();
-  }
-  const banner = fs.readFileSync(path.join(__dirname, '..', 'android-tv', 'banner.svg'), 'utf8');
-  const page = await browser.newPage({ viewport: { width: 320, height: 180 } });
-  await page.setContent(`<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap"><style>html,body{margin:0}svg{display:block;width:320px;height:180px}</style>${banner}`);
-  await page.waitForTimeout(800);
-  await page.screenshot({ path: path.join(res, 'drawable-xhdpi', 'banner.png') });
-  await page.close();
-  await browser.close();
 })();

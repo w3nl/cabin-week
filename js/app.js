@@ -2,7 +2,7 @@
 // Start het spel: versie, service worker, updatebalk en de spellus.
 
 /** Staat op het titelscherm. Altijd hetzelfde getal als CACHE in sw.js (tests/pwa.spec.js controleert dat). */
-const GAME_VERSION = 25;
+const GAME_VERSION = 28;
 $("version").textContent = "v" + GAME_VERSION;
 
 /* ---------- Installeerbare app en updates ---------- */
@@ -23,6 +23,8 @@ if ("serviceWorker" in navigator && document.querySelector('link[rel="manifest"]
 /* ---------- Meldingen: installeren als app, en het scherm draaien ---------- */
 // Niet in de Google TV-app en niet als het spel al als app draait.
 const IN_TV_APP = location.hostname === "appassets.androidplatform.net";
+// In the Android app a link that opens a new window goes nowhere: show the source and the licence as plain text there.
+if (IN_TV_APP) $("credits").textContent = T("Source: github.com/w3nl/cabin-week · Licence: GPL-3.0", "Broncode: github.com/w3nl/cabin-week · Licentie: GPL-3.0");
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const IS_ANDROID = /Android/i.test(navigator.userAgent);
 const IS_APP = () => matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true;
@@ -36,7 +38,7 @@ function installChoice() {
   $("installText").textContent = IS_IOS ? T("📲 Put the game on your home screen: tap Share, then Add to Home Screen.", "📲 Zet het spel op je beginscherm: tik op Deel en dan op Zet op beginscherm.")
     : IS_ANDROID && web ? T("📲 Play as an app: add the web app to your home screen, or get the Android app from Google Play.", "📲 Speel als app: zet de web-app op je beginscherm, of haal de Android-app uit Google Play.")
     : IS_ANDROID ? T("📲 Play as an app: get the Android app from Google Play, or add the game to your home screen from the browser menu.", "📲 Speel als app: haal de Android-app uit Google Play, of zet het spel via het browsermenu op je beginscherm.")
-    : T("📲 Put Cabin Week on your home screen: play with one tap, even offline.", "📲 Zet Cabin Week op je beginscherm: met één tik spelen, ook zonder internet.");
+    : T("📲 Put TripScouts on your home screen: play with one tap, even offline.", "📲 Zet TripScouts op je beginscherm: met één tik spelen, ook zonder internet.");
 }
 function installLater() { try { return Date.now() < +(localStorage.getItem("cabin-week-install-later") || 0); } catch (e) { return false; } }
 /** Zet de meldingen aan of uit, passend bij het scherm (aangeroepen vanuit setScreen() en bij draaien). */

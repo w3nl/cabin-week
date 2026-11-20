@@ -1,6 +1,6 @@
 "use strict";
-// Taking your progress or your own hero to another device or another web address: browsers keep saved data per address,
-// so the game gives you a code (and a link with it) to copy, or a file to download, and takes one back (state "save").
+// Taking your progress or your own hero to another device or another web address (cabinweek.online →
+// tripscouts.online): browsers keep saved data per address, so the game gives you a code (and a link with it) to copy, or a file to download, and takes one back (state "save").
 // Two kinds, so you can take one without the other:
 //   - a progress code: the days of every trip (unlocked, best, the chosen trip). The 💾 button on the map opens it.
 //   - a hero code: your own hero. The 💾 button in the hero creator opens it.
@@ -31,11 +31,11 @@ function exportCode(kind) {
   const data = kind === "hero" ? { kind, hero: cleanHero(currentHero()) } : { kind: "progress", progress: cleanProgress(save) };
   return SAVE_PREFIX + b64encode(JSON.stringify(data));
 }
-/** The link that opens the game with this code (the Android app links to the website). A redirect to a new
-    address keeps the #save= part, so an old link still works there. */
+/** The link that opens the game with this code. From the old address and the Android app it goes to
+    tripscouts.online; a redirect keeps the #save= part, so a link copied on the old address works too. */
 function exportLink(code) {
-  const web = location.protocol.startsWith("http") && location.hostname !== "appassets.androidplatform.net";
-  return (web ? location.origin + location.pathname : "https://cabinweek.online/") + "#save=" + code;
+  const web = location.protocol.startsWith("http") && location.hostname !== "appassets.androidplatform.net" && !/cabinweek\.online$/.test(location.hostname);
+  return (web ? location.origin + location.pathname : "https://tripscouts.online/") + "#save=" + code;
 }
 /** Read a code, a link with #save=, or a downloaded file. Gives { kind: "progress", progress } or { kind: "hero", hero }, or null. */
 function readCode(text) {
@@ -89,8 +89,8 @@ function describeProgress(p) {
     const n = q ? Object.keys(q.best || {}).length : 0;
     days += n; if (n >= r.levels.length) trips++;
   }
-  const parts = [T(`${days} ${days === 1 ? "day" : "days"} played`, `${days} ${days === 1 ? "dag" : "dagen"} gespeeld`)];
-  if (trips) parts.push(T(`${trips} of ${REGIONS.length} trips done`, `${trips} van de ${REGIONS.length} reizen klaar`));
+  const parts = [T(`${days} ${days === 1 ? "day" : "days"} scouted`, `${days} ${days === 1 ? "dag" : "dagen"} verkend`)];
+  if (trips) parts.push(T(`${trips} of ${REGIONS.length} trips scouted`, `${trips} van de ${REGIONS.length} reizen verkend`));
   return parts.join(" · ");
 }
 function describeHero(h) {
@@ -108,7 +108,7 @@ const SAVE_TEXT = {
     inEyebrow: T("Bring progress here", "Voortgang overnemen"),
     in: T("Paste a progress code or open a file. This replaces the days on this device, not your hero.",
       "Plak een voortgangscode of open een bestand. Dit vervangt de dagen op dit apparaat, niet je held."),
-    file: "cabin-week-progress.txt"
+    file: "tripscouts-progress.txt"
   },
   hero: {
     eyebrow: T("Your own hero", "Jouw eigen held"), title: T("Take your hero along", "Neem je held mee"),
@@ -117,7 +117,7 @@ const SAVE_TEXT = {
     inEyebrow: T("Bring a hero here", "Een held overnemen"),
     in: T("Paste a hero code or open a file. This replaces your own hero on this device, not your days.",
       "Plak een heldcode of open een bestand. Dit vervangt je eigen held op dit apparaat, niet je dagen."),
-    file: "cabin-week-hero.txt"
+    file: "tripscouts-hero.txt"
   }
 };
 /** Open the screen for a kind of code ("progress" or "hero"), from the map, the hero creator or a link. */
@@ -145,7 +145,7 @@ function saveCheck() {
   const t = $("saveIn").value.trim(), fb = $("saveFb");
   if (!t) { fb.textContent = ""; fb.className = "fb"; return null; }
   const d = readCode(t);
-  if (!d) { fb.textContent = T("That isn't a code of this game.", "Dat is geen code van dit spel."); fb.className = "fb bad"; return null; }
+  if (!d) { fb.textContent = T("That isn't a TripScouts code.", "Dat is geen code van TripScouts."); fb.className = "fb bad"; return null; }
   if (d.kind !== saveKind) {
     fb.textContent = d.kind === "hero" ? T("That is a hero code: bring it in with 💾 in the hero creator.", "Dat is een heldcode: neem hem over met 💾 bij het maken van je held.")
       : T("That is a progress code: bring it in with 💾 on the map.", "Dat is een voortgangscode: neem hem over met 💾 op de kaart.");
@@ -185,10 +185,10 @@ async function saveCopy(text, okMsg) {
 }
 function saveDownload() {
   const code = $("saveCode").value, hero = saveKind === "hero";
-  const text = (hero ? T("Hero code. Open the game, open your own hero, press 💾 Hero code, then Open file.\n",
-    "Heldcode. Open het spel, open je eigen held, druk op 💾 Heldcode en dan op Bestand openen.\n")
-    : T("Progress code. Open the game, open the map, press 💾 Progress, then Open file.\n",
-      "Voortgangscode. Open het spel, open de kaart, druk op 💾 Voortgang en dan op Bestand openen.\n")) + code + "\n";
+  const text = (hero ? T("TripScouts hero code. Open tripscouts.online, open your own hero, press 💾 Hero code, then Open file.\n",
+    "Heldcode van TripScouts. Open tripscouts.online, open je eigen held, druk op 💾 Heldcode en dan op Bestand openen.\n")
+    : T("TripScouts progress code. Open tripscouts.online, open the map, press 💾 Progress, then Open file.\n",
+      "Voortgangscode van TripScouts. Open tripscouts.online, open de kaart, druk op 💾 Voortgang en dan op Bestand openen.\n")) + code + "\n";
   const name = SAVE_TEXT[saveKind].file, a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
   a.download = name; document.body.appendChild(a); a.click(); a.remove();

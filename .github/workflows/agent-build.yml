@@ -59,7 +59,7 @@ jobs:
             --max-turns 150
             --allowedTools "Read,Glob,Grep,Edit,Write,MultiEdit,Bash(npm:*),Bash(npx:*),Bash(node:*),Bash(git:*),Bash(gh issue:*),Bash(gh pr:*),Bash(ls:*),Bash(mkdir:*),Bash(cat:*),Bash(sed:*),Bash(grep:*)"
           prompt: |
-            You are the BUILD agent for "Cabin Week", a platform game in the browser in this repository.
+            You are the BUILD agent for "TripScouts", a platform game in the browser in this repository.
             AGENTS.md (loaded as project instructions) explains the code, the conventions and the checklists. Follow it closely.
 
             Build issue #${{ github.event.issue.number }} in ${{ github.repository }}.

@@ -15,7 +15,7 @@ You need: a terminal, Java's `keytool`, and the GitHub CLI `gh` (or the GitHub w
 
 ---
 
-## Option A: a new key for Cabin Week (recommended)
+## Option A: a new key for TripScouts (recommended)
 
 ### 1. Install keytool (part of Java)
 
@@ -40,7 +40,7 @@ keytool -genkeypair -v -keystore cabinweek.jks -alias cabinweek -keyalg RSA -key
 ```
 
 - It asks for a **password**: choose a strong one and write it down. If it asks for a second password (for the key), press Enter or type the **same** one.
-- Then it asks for your name, organisation, city and so on. This is not checked and is not shown in Google Play: "Cabin Week" as the name and your country code are enough. Answer `yes` at the end.
+- Then it asks for your name, organisation, city and so on. This is not checked and is not shown in Google Play: "TripScouts" as the name and your country code are enough. Answer `yes` at the end.
 
 You now have the file `cabinweek.jks`.
 
@@ -109,7 +109,7 @@ If you used the manual Actions steps above, get the bundle this way:
      ```
    - Windows: [7-zip.org](https://www.7-zip.org/) → right-click → 7-Zip → Extract.
    - Mac: [Keka](https://www.keka.io/) or `brew install sevenzip`.
-4. Upload `cabin-week.aab` in [Play Console](https://play.google.com/console) → Cabin Week → Test and release → a track (e.g. Internal testing) → **Create new release**. The first upload also registers your upload key with Google (Play App Signing).
+4. Upload `cabin-week.aab` in [Play Console](https://play.google.com/console) → TripScouts → Test and release → a track (e.g. Internal testing) → **Create new release**. The first upload also registers your upload key with Google (Play App Signing).
 
 ---
 

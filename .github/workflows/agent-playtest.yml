@@ -65,7 +65,7 @@ jobs:
             --max-turns 80
             --allowedTools "Read,Glob,Grep,Write,Edit,Bash(node:*),Bash(npx:*),Bash(npm:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh issue view:*),Bash(ls:*),Bash(mkdir:*),Bash(cat:*)"
           prompt: |
-            You are the PLAYTEST agent for "Cabin Week", a platform game in the browser in this repository.
+            You are the PLAYTEST agent for "TripScouts", a platform game in the browser in this repository.
             AGENTS.md (loaded as project instructions) explains the game, how the tests fill the saved progress, and all solutions.
 
             Test pull request #${{ env.PR }} in ${{ github.repository }}.

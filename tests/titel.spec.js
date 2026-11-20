@@ -1,4 +1,4 @@
-// The title screen and the languages. Cabin Week has no calendar: days unlock as you play.
+// The title screen and the languages. TripScouts has no calendar: days unlock as you play.
 const { test, expect } = require('@playwright/test');
 const crypto = require('crypto');
 const { KEY, seed } = require('./helpers');
@@ -28,6 +28,22 @@ test('the whole week done', async ({ page }) => {
   await page.evaluate(KEY => { const s = JSON.parse(localStorage.getItem(KEY)); s.best = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1 }; localStorage.setItem(KEY, JSON.stringify(s)); }, KEY);
   await page.reload();
   await expect(page.locator('.count')).toContainText('🏆');
+  await expect(page.locator('#cdWord')).toHaveText('Trip scouted!');
+});
+
+test('the name is TripScouts, and the title tells the story: you scout the trips for the families', async ({ page }) => {
+  await seed(page);
+  await expect(page).toHaveTitle('TripScouts');
+  await expect(page.locator('#title h1')).toHaveText('TripScouts');
+  await expect(page.locator('#title .tagline')).toHaveText('Two families, ten trips. You scout where they go!');
+  await expect(page.locator('#cdWord')).toHaveText('winter days to scout');
+  const manifest = await (await page.request.get('/manifest.webmanifest')).json();
+  expect([manifest.name, manifest.short_name]).toEqual(['TripScouts', 'TripScouts']);
+  // every trip has a scout's verdict, in both languages
+  expect(await page.evaluate(() => REGIONS.filter(r => !r.verdict || !r.verdict.startsWith('⭐')).map(r => r.id))).toEqual([]);
+  await seed(page, { lang: 'nl' });
+  await expect(page.locator('#title .tagline')).toHaveText('Twee gezinnen, tien reizen. Jij verkent waar ze heen gaan!');
+  await expect(page.locator('#cdWord')).toHaveText('winterdagen om te verkennen');
 });
 
 test('English by default; Dutch with ?lang=nl and with the language button, and the choice is remembered', async ({ page }) => {
@@ -82,4 +98,15 @@ test('no real places, dates or people from the original game', async ({ page }) 
 test("day 4 is Paul's birthday: he wears a party hat", async ({ page }) => {
   await seed(page, { unlocked: 8 });
   expect(await page.evaluate(() => LEVELS[3].birthday)).toBe('Paul');
+});
+
+test('the menu links to the source code and the licence, like the escape rooms', async ({ page }) => {
+  await seed(page);
+  const src = page.locator('#credits a', { hasText: 'Source code' }), lic = page.locator('#credits a', { hasText: 'Licence (GPL-3.0)' });
+  await expect(src).toHaveAttribute('href', 'https://github.com/w3nl/cabin-week');
+  await expect(lic).toHaveAttribute('href', 'https://github.com/w3nl/cabin-week/blob/main/LICENSE');
+  await expect(src).toBeVisible();
+  await seed(page, { lang: 'nl' });
+  await expect(page.locator('#credits')).toContainText('Broncode');
+  await expect(page.locator('#credits')).toContainText('Licentie (GPL-3.0)');
 });

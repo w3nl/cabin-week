@@ -1,19 +1,25 @@
 <!DOCTYPE html>
+<!--
+  TripScouts: a platform game in the browser. Two families can't choose a holiday, so you scout ten trips across Europe.
+  Source code: https://github.com/w3nl/cabin-week
+  Licence: GPL-3.0 (https://github.com/w3nl/cabin-week/blob/main/LICENSE)
+-->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cabin Week</title>
-<meta name="description" content="A platform game about a Christmas week in a holiday cabin: one level a day, with keys, tasks and code locks. In English and Dutch." data-nl-content="Een platformspel over een kerstweek in een vakantiehuisje: elke dag een level, met sleutels, opdrachten en codesloten. In het Engels en Nederlands.">
+<title>TripScouts</title>
+<meta name="description" content="Two families can't choose a holiday, so you scout ten trips across Europe: a platform game with one level a day, keys, tasks and code locks. In English and Dutch." data-nl-content="Twee gezinnen kunnen geen vakantie kiezen, dus jij verkent tien reizen door Europa: een platformspel met elke dag een level, sleutels, opdrachten en codesloten. In het Engels en Nederlands.">
 <meta name="theme-color" content="#0f1b2a">
 <!-- iPhone and iPad: Add to Home Screen (Safari → Share) opens the game full screen -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cabin Week">
+<meta name="apple-mobile-web-app-title" content="TripScouts">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +67,8 @@
            side by side, and the menu scales with the screen so nothing needs scrolling. -->
       <div class="col-a">
       <div class="eyebrow" id="eyebrow">The Hills × the Woods</div>
-      <h1><span class="a">Cabin</span> <span class="b">Week</span></h1>
+      <h1><span class="a">Trip</span><span class="b">Scouts</span></h1>
+      <p class="tagline" data-nl="Twee gezinnen, tien reizen. Jij verkent waar ze heen gaan!">Two families, ten trips. You scout where they go!</p>
 
       <div class="count">
         <b id="cdNum">8</b>
@@ -72,7 +79,7 @@
       </div>
 
       <div class="col-b">
-      <h2 data-nl="Kies je held <small>2 gezinnen · 9 personen · 1 huisje</small>">Choose your hero <small>2 families · 9 people · 1 cabin</small></h2>
+      <h2 data-nl="Kies je held <small>2 gezinnen · 9 personen · 10 reizen</small>">Choose your hero <small>2 families · 9 people · 10 trips</small></h2>
       <div class="chars" id="chars"></div>
 
       <div class="dayhead">
@@ -92,7 +99,8 @@
         <span class="tips">Jump on wild boars, robot vacuums and snowmen. Read the signs: the digits for the code locks are on them. Every day of the week has its own level.</span>
       </p>
       <p class="gp-status" id="gpStatus" role="status" hidden></p>
-      <p class="version">Cabin Week <span id="version" translate="no"></span> ·
+      <p class="version">TripScouts <span id="version" translate="no"></span> ·
+        <span class="credits" id="credits"><a href="https://github.com/w3nl/cabin-week" target="_blank" rel="noopener noreferrer" data-nl="Broncode">Source code</a> · <a href="https://github.com/w3nl/cabin-week/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-nl="Licentie (GPL-3.0)">Licence (GPL-3.0)</a></span> ·
         <button type="button" class="lang" data-lang="en" lang="en">English</button>
         <button type="button" class="lang" data-lang="nl" lang="nl">Nederlands</button>
         <button type="button" class="lang voice" id="voiceBtn" aria-pressed="false" hidden>🔈 Voices off</button>
@@ -103,7 +111,7 @@
 
   <!-- Install as an app (Android: buttons; iPhone/iPad: explanation) and turn to landscape (see the hints in app.js) -->
   <div class="hint-bar install" id="installBar" role="status" hidden>
-    <span id="installText">📲 Put Cabin Week on your home screen: play with one tap, even offline.</span>
+    <span id="installText">📲 Put TripScouts on your home screen: play with one tap, even offline.</span>
     <button class="btn" id="installBtn" type="button" hidden>Install</button>
     <a class="btn" id="installPlay" href="https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek" target="_blank" rel="noopener" hidden>Google Play</a>
     <button class="btn ghost" id="installClose" type="button" data-nl="Niet nu">Not now</button>
@@ -121,8 +129,8 @@
   <!-- The map of Europe: choose a region (each region is its own week) -->
   <div class="overlay" id="mapWrap" hidden>
     <div class="sheet map">
-      <div class="eyebrow" data-nl="Kies je reis">Choose your trip</div>
-      <h2 data-nl="Waar gaan we heen?">Where are we going?</h2>
+      <div class="eyebrow" data-nl="Kies een reis om te verkennen">Choose a trip to scout</div>
+      <h2 data-nl="Waar gaan we heen?">Where shall we go?</h2>
       <p class="map-info" id="mapInfo"></p>
       <div class="mapbox" id="mapBox"></div>
       <p class="soon" id="mapSoon"></p>

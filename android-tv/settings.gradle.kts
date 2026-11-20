@@ -1,4 +1,4 @@
-// The Android / Google TV app of Cabin Week: a small app that shows the game (from the folder assets/game).
+// The Android / Google TV app of TripScouts (formerly Cabin Week; the internal names stay): a small app that shows the game (from the folder assets/game).
 pluginManagement {
     repositories {
         google()

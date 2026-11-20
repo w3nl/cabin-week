@@ -1,12 +1,13 @@
 // Maakt de plaatjes voor de winkelvermelding in Google Play (docs/play-store/). Draai: npm run store
-// - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding
+// - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding (de TripScouts-tekening uit tools/art.js)
 // - social-preview.png (1280×640): de social preview van de repository op GitHub (Settings → General → Social preview)
-// - tv-banner.png (1280×720): de banner voor Android TV (uit android-tv/banner.svg)
+// - tv-banner.png (1280×720): de banner voor Android TV (de TripScouts-tekening uit tools/art.js)
 // - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, six regions and your own hero
 const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { openArt, saveArt, wide } = require('./art-render');
 
 const root = path.join(__dirname, '..'), out = path.join(root, 'docs', 'play-store');
 const port = 4187, base = `http://127.0.0.1:${port}/`;
@@ -110,31 +111,25 @@ async function play(page, i, walk) {
       await page.close();
     }
 
-    // Feature graphic (Google Play, 1024×500) and social preview (GitHub, 1280×640): Christmas Day with the name on top.
-    for (const [file, width, height, pad, big, small] of [['feature-graphic.png', 1024, 500, 56, 64, 24], ['social-preview.png', 1280, 640, 72, 92, 32]]) {
-      const page = await open(browser, { width, height, char: 3 });
-      await play(page, 4, 1400);
-      await page.evaluate(([pad, big, small]) => {
-        for (const id of ['hud', 'touch', 'dialog']) { const el = document.getElementById(id); if (el) el.style.visibility = 'hidden'; }
-        const d = document.createElement('div');
-        d.style.cssText = `position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding-left:${pad}px;` +
-          'background:linear-gradient(90deg,rgba(11,22,49,.88),rgba(11,22,49,.55) 48%,transparent 75%);color:#fff;font-family:Fredoka,sans-serif;z-index:99';
-        d.innerHTML = `<div style="font-size:${big}px;font-weight:700;line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.35)">Cabin<br>Week</div>` +
-          `<div style="font-size:${small}px;font-weight:600;margin-top:16px;color:#ffd25e">A level a day, all across Europe</div>`;
-        document.body.appendChild(d);
-      }, [pad, big, small]);
+    // Feature graphic (Google Play, 1024×500), social preview (GitHub, 1280×640) and the Android TV banner (1280×720):
+    // the TripScouts artwork (tools/art.js) with the name, like the app icon.
+    // The feature graphic and the social preview show real levels: Christmas Day in the snow (Lily) and the warm sea of
+    // Dalmatia (Max), split on the diagonal, with Paul and the name on top.
+    const shot = async (width, height, region, day, char, walk) => {
+      const page = await open(browser, { width, height, char, region });
+      await play(page, day, walk);
+      await page.evaluate(() => { for (const id of ['hud', 'touch', 'dialog', 'rotateHint']) { const el = document.getElementById(id); if (el) el.style.visibility = 'hidden'; } });
       await page.waitForTimeout(300);
-      await page.screenshot({ path: path.join(out, file) });
-      await page.close();
+      const b = await page.screenshot(); await page.close(); return b;
+    };
+    const art = await openArt(browser, port + 1);
+    const sub = 'Ten trips to scout, all across Europe';
+    for (const [file, width, height] of [['feature-graphic.png', 1024, 500], ['social-preview.png', 1280, 640]]) {
+      const imgs = { winter: await shot(width, height, 'ardennes', 4, 3, 1400), summer: await shot(width, height, 'dalmatia', 0, 8, 2200) };
+      await saveArt(art.page, path.join(out, file), width, height, { ...wide(width, height, sub), paulS: 4.8 }, imgs);
     }
-
-    // Banner voor Android TV, groot
-    const banner = fs.readFileSync(path.join(root, 'android-tv', 'banner.svg'), 'utf8');
-    const bp = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-    await bp.setContent(`<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap"><style>html,body{margin:0}svg{display:block;width:1280px;height:720px}</style>${banner}`);
-    await bp.waitForTimeout(800);
-    await bp.screenshot({ path: path.join(out, 'tv-banner.png') });
-    await bp.close();
+    await saveArt(art.page, path.join(out, 'tv-banner.png'), 1280, 720, wide(1280, 720));
+    await art.close();
     console.log('Images are in docs/play-store/');
   } finally {
     await browser.close();

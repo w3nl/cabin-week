@@ -1,7 +1,7 @@
 {
-  "name": "Cabin Week",
-  "short_name": "Cabin Week",
-  "description": "A platform game about a Christmas week in a holiday cabin: one level a day, with keys, tasks and code locks.",
+  "name": "TripScouts",
+  "short_name": "TripScouts",
+  "description": "Two families can't choose a holiday, so you scout ten trips across Europe: a platform game with one level a day, keys, tasks and code locks.",
   "lang": "en-GB",
   "id": "./",
   "start_url": "./",
@@ -32,12 +32,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
     }
   ]
 }

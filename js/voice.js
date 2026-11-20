@@ -95,7 +95,7 @@ $("voiceBtn").onclick = () => {
   voiceOn = !voiceOn;
   try { localStorage.setItem(VOICE_KEY, voiceOn ? "1" : "0"); } catch (e) {}
   showVoice(); tone(700, .04, "triangle", .04);
-  if (voiceOn) speakLine("Paul", T("Voices on. Off to the cabin!", "Stemmen aan. Op naar het huisje!"));
+  if (voiceOn) speakLine("Paul", T("Voices on. Let's go scouting!", "Stemmen aan. Op verkenning!"));
   else stopSpeaking();
 };
 if (canSpeak) speechSynthesis.getVoices(); // some browsers only load their voices after the first ask

@@ -1,6 +1,6 @@
 # The agent workflow: from idea to pull request
 
-Ideas for *Cabin Week* go past a small team of AI agents (Claude, in GitHub Actions). You decide at two moments: **approving the plan** and **merging the pull request**.
+Ideas for *TripScouts* go past a small team of AI agents (Claude, in GitHub Actions). You decide at two moments: **approving the plan** and **merging the pull request**.
 
 ```
  You            Refine agent       You               Build agent         Tests (+ on demand review      You
