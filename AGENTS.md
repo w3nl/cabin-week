@@ -72,6 +72,8 @@ The Snap Store's featured banner is `docs/play-store/snap-featured-banner.png` (
 
 The Linux app has a native TripScouts menu: full screen (F11) and quit (Ctrl+Q, also in full screen). Its labels follow the system language (English or Dutch); the game language stays independent.
 
+The Linux app is listed at https://snapcraft.io/tripscouts (currently edge: `sudo snap install tripscouts --edge`). Wrapper-only rebuilds keep `1.<GAME_VERSION>.0` but get a new Snap Store revision; the immutable GitHub release download is not replaced.
+
 ## Languages
 
 - **English is British English (en-GB)**, like the Google Play listing: colour, favourite, harbour, jumper, lorry, rowing boat, chips (not fries), sledge. **Dutch is nl-NL.** Regions may use a few local words where they fit, explained by context: in Scotland *wee*, *aye*, *bonnie*, *braw*, *dreich*, *haar*, *midgies*, *Haste ye back!*; in the Ardèche *bonjour*, *merci*, *au revoir*, *s'il vous plaît*, *oh là là*; in the Veneto *ciao*, *grazie (mille)*, *arrivederci*, *gelato*, *vaporetto*, *acqua alta*, *enrosadira* (in the Dutch text with a short explanation in brackets).

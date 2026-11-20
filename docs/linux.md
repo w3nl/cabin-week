@@ -7,6 +7,16 @@ TripScouts for Linux is a **snap**: the package format of the Snap Store, where 
 - Links that open a new window (*Source code*, *Licence*) open in your normal browser. The **TripScouts** menu has **Full screen** (**F11**) and **Quit** (**Ctrl+Q**). In full screen, use **Ctrl+Q** to quit or **F11** to return to the window and its menu. Menu labels follow the system language (English or Dutch).
 - `linux/package.json` holds the snap settings for electron-builder: the name `tripscouts`, the summary, the category *Game* and the permissions. *joystick* is added for controllers; the rest is the default set (screen, sound, network for the fonts).
 
+## Installing from the Snap Store
+
+TripScouts is available in the [Snap Store](https://snapcraft.io/tripscouts), currently on the **edge** channel:
+
+```bash
+sudo snap install tripscouts --edge
+```
+
+For an existing installation on edge, get the newest revision with `sudo snap refresh tripscouts --edge`, then close and reopen the app.
+
 ## Building
 
 The workflow **Build the Linux app** (`.github/workflows/linux.yml`) builds the snap on every pull request that changes the game or `linux/`, and on `main`:
@@ -16,6 +26,8 @@ The workflow **Build the Linux app** (`.github/workflows/linux.yml`) builds the 
 - With the secret `SNAPCRAFT_STORE_CREDENTIALS`, the workflow uploads every new version on `main` to the Snap Store, in the channel **edge**. Set the repository variable `SNAP_CHANNEL` to `stable` to publish straight to everyone.
 
 The snap's version follows the game: `GAME_VERSION` 33 becomes `1.33.0`. A new game version is therefore always a newer snap.
+
+Linux-wrapper-only changes do not raise `GAME_VERSION`, so another upload can have the same version (for example `1.33.0`) but a new **Snap Store revision**. Snap updates follow revisions, not just the version label. The game's title screen still shows `v33` because the bundled game version has not changed. The immutable GitHub release for `linux-v1.33.0` is not replaced, so its standalone download stays at the original build; use the Snap Store for the newer revision.
 
 To build it yourself on Linux:
 
@@ -49,7 +61,7 @@ For source builds in the store, connect `w3nl/tripscouts` in **My snaps → trip
 sudo snap install --dangerous ./tripscouts.snap
 ```
 
-`--dangerous` is needed because a snap from outside the store isn't signed by the store. Once it is in the store, install it the normal way, with `sudo snap install tripscouts` or the App Center.
+`--dangerous` is needed because a snap from outside the store isn't signed by the store. Prefer the store installation above for automatic updates. Once a version is promoted to **stable**, `sudo snap install tripscouts` installs that channel without `--edge`.
 
 ## Publishing in the Snap Store, step by step
 
