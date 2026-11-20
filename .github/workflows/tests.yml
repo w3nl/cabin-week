@@ -4,9 +4,9 @@ name: Play the game
 on:
   push:
     branches: [main]
-    paths-ignore: ["docs/**", "**/*.md", "LICENSE", "CNAME", ".vscode/**", ".github/ISSUE_TEMPLATE/**", ".github/pull_request_template.md", ".github/FUNDING.yml", ".github/workflows/agent-*.yml", ".github/workflows/claude.yml", ".github/workflows/setup-labels.yml", ".github/workflows/google-tv.yml", ".github/workflows/pages.yml", "android-tv/**"]
+    paths-ignore: ["docs/**", "**/*.md", "LICENSE", "CNAME", ".vscode/**", ".github/ISSUE_TEMPLATE/**", ".github/pull_request_template.md", ".github/FUNDING.yml", ".github/workflows/agent-*.yml", ".github/workflows/claude.yml", ".github/workflows/setup-labels.yml", ".github/workflows/google-tv.yml", ".github/workflows/pages.yml", ".github/workflows/linux.yml", "android-tv/**", "linux/**"]
   pull_request:
-    paths-ignore: ["docs/**", "**/*.md", "LICENSE", "CNAME", ".vscode/**", ".github/ISSUE_TEMPLATE/**", ".github/pull_request_template.md", ".github/FUNDING.yml", ".github/workflows/agent-*.yml", ".github/workflows/claude.yml", ".github/workflows/setup-labels.yml", ".github/workflows/google-tv.yml", ".github/workflows/pages.yml", "android-tv/**"]
+    paths-ignore: ["docs/**", "**/*.md", "LICENSE", "CNAME", ".vscode/**", ".github/ISSUE_TEMPLATE/**", ".github/pull_request_template.md", ".github/FUNDING.yml", ".github/workflows/agent-*.yml", ".github/workflows/claude.yml", ".github/workflows/setup-labels.yml", ".github/workflows/google-tv.yml", ".github/workflows/pages.yml", ".github/workflows/linux.yml", "android-tv/**", "linux/**"]
   workflow_dispatch:
 
 jobs:

@@ -1,0 +1,83 @@
+# Builds the Linux app (a snap for the Snap Store and Ubuntu's App Center) with the game inside. On main the snap goes
+# to the release "linux", so you can install it straight away, and with the secret SNAPCRAFT_STORE_CREDENTIALS it is also
+# uploaded to the Snap Store. See docs/linux.md.
+name: Build the Linux app
+
+on:
+  push:
+    branches: [main]
+    paths: ["linux/**", "index.html", "manifest.webmanifest", "sw.js", "css/**", "js/**", "icons/**", "tools/build-site.js", ".github/workflows/linux.yml"]
+  pull_request:
+    paths: ["linux/**", "index.html", "manifest.webmanifest", "sw.js", "css/**", "js/**", "icons/**", "tools/build-site.js", ".github/workflows/linux.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build the Linux app
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    env:
+      HAS_STORE: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS != '' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Put the game in the app
+        run: |
+          node tools/build-site.js
+          rm -rf linux/game
+          cp -r _site linux/game
+          # the snap's version follows the game: v33 becomes 1.33.0, so every new game version is a newer snap
+          V=$(grep -oP 'GAME_VERSION = \K[0-9]+' js/app.js)
+          cd linux && npm version "1.$V.0" --no-git-tag-version --allow-same-version
+
+      - name: Install the tools
+        working-directory: linux
+        run: npm ci --no-audit --no-fund
+
+      - name: Build the snap
+        working-directory: linux
+        run: |
+          npx electron-builder --linux snap --publish never
+          cp dist/*.snap ../tripscouts.snap
+
+      - name: Keep the snap
+        uses: actions/upload-artifact@v7
+        with:
+          name: tripscouts-linux
+          path: tripscouts.snap
+          retention-days: 30
+
+      - name: Attach the snap to the release "linux"
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view linux >/dev/null 2>&1 || gh release create linux --title "Linux app" --latest=false \
+            --notes "TripScouts for Linux, as a snap. Install with: sudo snap install --dangerous tripscouts.snap (see docs/linux.md)."
+          gh release upload linux tripscouts.snap --clobber
+
+      # The Snap Store: only with a login (the secret SNAPCRAFT_STORE_CREDENTIALS, see docs/linux.md).
+      # It goes to the channel "edge" (or the repository variable SNAP_CHANNEL); you promote it to "stable" yourself.
+      - name: Upload to the Snap Store
+        if: env.HAS_STORE == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          sudo snap install snapcraft --classic
+          snapcraft upload --release="${{ vars.SNAP_CHANNEL || 'edge' }}" tripscouts.snap
+
+      - name: Notice when there is no Snap Store login
+        if: env.HAS_STORE != 'true'
+        run: |
+          echo "::notice::Not uploaded to the Snap Store: first set the secret SNAPCRAFT_STORE_CREDENTIALS (see docs/linux.md)."
