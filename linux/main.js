@@ -22,16 +22,20 @@ function open() {
   // links that open a new window (source code, licence) go to the normal browser
   win.webContents.setWindowOpenHandler(({ url }) => { external(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('app://')) { e.preventDefault(); external(url); } });
-  // F11: full screen on and off
-  win.webContents.on('before-input-event', (e, input) => {
-    if (input.type === 'keyDown' && input.key === 'F11') { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
-  });
   win.loadURL('app://tripscouts/index.html');
   app.on('second-instance', () => { if (win.isMinimized()) win.restore(); win.focus(); });
 }
 
 app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
+  const nl = app.getLocale().startsWith('nl');
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{
+    label: 'TripScouts',
+    submenu: [
+      { role: 'togglefullscreen', label: nl ? 'Volledig scherm' : 'Full screen', accelerator: 'F11' },
+      { type: 'separator' },
+      { role: 'quit', label: nl ? 'Afsluiten' : 'Quit', accelerator: 'Control+Q' }
+    ]
+  }]));
   // app://tripscouts/<file> serves the files of the game, and nothing outside game/
   protocol.handle('app', req => {
     let p = decodeURIComponent(new URL(req.url).pathname);
