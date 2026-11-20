@@ -2715,7 +2715,7 @@ function drawSkates(cx, y, face, k) {
 /** A white bike (the free bikes of the Hoge Veluwe), behind the rider; pedal = how far the wheels have turned. */
 function drawBike(cx, y, face, k, pedal) {
   g.save(); g.translate(cx, y); g.scale(face, 1); g.lineJoin = "round"; g.lineCap = "round";
-  const r = 10, wy = -r, back = -17, front = 18, crank = [0, -10], seat = [-4, -25], bar = [13, -29];
+  const r = 10, wy = -r, back = -17, front = 18, crank = [0, -10], seat = [-4, -26], bar = [13, -30];
   for (const wx of [back, front]) {
     g.strokeStyle = "#2a2f3c"; g.lineWidth = 3; g.beginPath(); g.arc(wx, wy, r, 0, 7); g.stroke();
     g.strokeStyle = "#c9ced8"; g.lineWidth = 1; for (let i = 0; i < 3; i++) { const a = pedal + i * Math.PI / 3; g.beginPath(); g.moveTo(wx - Math.cos(a) * r, wy - Math.sin(a) * r); g.lineTo(wx + Math.cos(a) * r, wy + Math.sin(a) * r); g.stroke(); }
@@ -2728,10 +2728,10 @@ function drawBike(cx, y, face, k, pedal) {
   g.restore();
 }
 /** The pedalling legs on a bike, from the saddle to the pedals (drawn after the rider, in front of the bike). */
-function drawBikeLegs(cx, y, face, k, pedal, pants) {
+function drawBikeLegs(cx, y, face, k, pedal, pants, seatY = -26) {
   g.save(); g.translate(cx, y); g.scale(face, 1); g.lineJoin = "round"; g.lineCap = "round";
   for (const [ph, c] of [[pedal + Math.PI, shade(pants, -.25)], [pedal, pants]]) {
-    const px = Math.cos(ph) * 6, py = -10 + Math.sin(ph) * 6, hip = [-3, -24], knee = [(hip[0] + px) / 2 + 6, (hip[1] + py) / 2 - 2];
+    const px = Math.cos(ph) * 6, py = -10 + Math.sin(ph) * 6, hip = [-3, seatY + 1], knee = [(hip[0] + px) / 2 + 6, (hip[1] + py) / 2 - 2];
     g.strokeStyle = c; g.lineWidth = 5.5 * k; g.beginPath(); g.moveTo(...hip); g.lineTo(...knee); g.lineTo(px, py); g.stroke();
     g.fillStyle = "#3a2a22"; g.beginPath(); g.ellipse(px + 1.5, py, 3.5 * k, 2.2 * k, 0, 0, 7); g.fill();
   }
@@ -2750,11 +2750,13 @@ function drawRideIce(c0, c1) {
     g.fillStyle = "rgba(60,110,150,.35)"; g.fillRect(x, y + 12, TS + 1, 1.5);
   }
 }
-/** On a sledge or a bike you sit: how far the rider is drawn lower (sledge) or higher (bike), and where to cut off the legs. */
-function rideSeat(kind, feet, k) {
-  if (kind === "sled") return { by: feet + 4 * k, clip: feet - 9 };
-  if (kind === "bike") return { by: feet - 11, clip: feet - 24 };
-  return null;
+/** On a sledge or a bike you sit: the rider is moved so the hip is on the seat, and cut off just below the hem of the
+    coat (so the whole body shows, for a kid as well as a grown-up); the legs are drawn with the sledge or the bike. */
+function rideSeat(kind, feet, ch) {
+  if (kind !== "sled" && kind !== "bike") return null;
+  const sz = ch.size || 1, hip = (ch.kid ? 12 : 13) * sz, hem = (ch.coat === "long" ? 8 : 3) * sz;
+  const seat = kind === "sled" ? feet - 9 : feet - 26;
+  return { by: seat + hip, clip: seat + hem, seat: seat - feet };
 }
 /** An ice floe, a gondola of the cable car, or a little boat: you stand on top of it. */
 function drawMover(m) {
@@ -2999,7 +3001,7 @@ function render() {
       drawPerson(ch, 0, 0, 1, P.face, 0, false, pHat, { t: frame * 16, scarf, summer, indoor: theme === "huis", slide: true });
       g.setTransform(m0);
     } else {
-      const rx = P.x + P.w / 2, feet = P.y + P.h, rk = ch.size || 1, rd = P.ride, seat = rd && rideSeat(rd, feet, rk), pedal = P.x / 10;
+      const rx = P.x + P.w / 2, feet = P.y + P.h, rk = ch.size || 1, rd = P.ride, seat = rd && rideSeat(rd, feet, ch), pedal = P.x / 10;
       if (P.onGround && !P.canoe) shadowAt(rx, feet, rd ? 24 : 11);
       if (rd === "bike") drawBike(rx, feet, P.face, rk, pedal);
       // in a canoe you sit inside it: only draw what sticks out above the edge (no legs under the boat, also mid-jump);
@@ -3013,7 +3015,7 @@ function render() {
       if (rd === "ski") drawSkis(rx, feet, P.face, rk);
       if (rd === "skates") drawSkates(rx, feet, P.face, rk);
       if (rd === "sled") drawSled(rx, feet, P.face, rk, ch.pants);
-      if (rd === "bike") drawBikeLegs(rx, feet, P.face, rk, pedal, ch.pants);
+      if (rd === "bike") drawBikeLegs(rx, feet, P.face, rk, pedal, ch.pants, seat.seat);
       // swimming: the water covers you up to your chest
       if (P.swim) {
         drawWater(cx, [fl(P.x / TS), fl((P.x + P.w) / TS)]);
