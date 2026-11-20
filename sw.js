@@ -33,6 +33,7 @@ const CORE = [
   './js/screens.js',
   './js/hero.js',
   './js/voice.js',
+  './js/ambience.js',
   './js/gamepad.js',
   './js/app.js'
 ];

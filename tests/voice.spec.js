@@ -98,3 +98,49 @@ test('where the browser cannot speak (like an Android WebView), there is no Voic
   await talkTo(page);
   await skip(page);
 });
+
+test('a girl sounds like a girl, a man like a man: the right kind of device voice, and the pitch for their age', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__spoken = [];
+    const V = (name, lang) => ({ name, lang, voiceURI: name, default: false, localService: true });
+    const voices = [V('Google UK English Female', 'en-GB'), V('Google UK English Male', 'en-GB'), V('Microsoft Sonia', 'en-GB'), V('Microsoft Ryan', 'en-GB'), V('Xander', 'nl-NL')];
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: {
+      speak: u => window.__spoken.push({ voice: u.voice && u.voice.name, pitch: u.pitch }), cancel: () => {}, getVoices: () => voices } });
+    window.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } }; // so a pretend voice can be set
+    localStorage.setItem('cabin-week-voice', '1');
+  });
+  await seed(page);
+  const out = await page.evaluate(() => ['Lily', 'Tom', 'Sophie', 'Finn', 'Laura', 'Rob'].map(n => { __spoken.length = 0; speakLine(n, 'Hello!'); return { n, ...__spoken[0] }; }));
+  const by = Object.fromEntries(out.map(o => [o.n, o]));
+  for (const n of ['Lily', 'Sophie', 'Laura']) expect(by[n].voice).toMatch(/Female|Sonia/);
+  for (const n of ['Tom', 'Finn', 'Rob']) expect(by[n].voice).toMatch(/Male|Ryan/);
+  // kids higher than teens, teens higher than grown-ups
+  expect(by.Lily.pitch).toBeGreaterThan(by.Sophie.pitch); expect(by.Sophie.pitch).toBeGreaterThan(by.Laura.pitch);
+  expect(by.Tom.pitch).toBeGreaterThan(by.Finn.pitch); expect(by.Finn.pitch).toBeGreaterThan(by.Rob.pitch);
+  // your own hero chooses a voice in the creator
+  expect(await page.evaluate(() => { save.hero = { name: 'Noor', size: 'kid', voice: 'f' }; return voiceStyle('Noor'); })).toMatchObject({ kind: 'f', age: 'kid' });
+  expect(await page.evaluate(() => { save.hero = { name: 'Bas', size: 'adult', voice: 'm' }; return voiceStyle('Bas'); })).toMatchObject({ kind: 'm', age: 'adult' });
+  // a device with only female voices: a man still sounds low
+  expect(await page.evaluate(() => { const v = speechSynthesis.getVoices(); v.splice(1, 1); v.splice(2, 1); __spoken.length = 0; speakLine('Rob', 'Hello!'); return __spoken[0].pitch; })).toBeLessThan(.7);
+});
+
+test('animals make sounds: every enemy and every lost animal has one, and an animal near you calls now and then', async ({ page }) => {
+  await seed(page, { unlocked: 8 });
+  const missing = await page.evaluate(() => {
+    const kinds = new Set();
+    for (const id of REGIONS.map(r => r.id)) { setRegion(id); for (const d of LEVELS) { if (d.enemy) kinds.add(d.enemy); if (d.task && d.task.animal) kinds.add(d.task.animal); if (d.moose) kinds.add('alg'); } }
+    setRegion('ardennes');
+    return [...kinds].filter(k => !ANIMAL_SFX[k]);
+  });
+  expect(missing).toEqual([]);
+  // every sound plays without errors
+  expect(await page.evaluate(() => { for (const k in ANIMAL_SFX) animalSound(k, 1); return true; })).toBe(true);
+  // in a level: the boars call when you are near
+  await startDay(page, 1);
+  const heard = await page.evaluate(() => {
+    const got = []; const real = animalSound; window.animalSound = (k, l) => got.push(k);
+    const e = L.enemies[0]; P.x = e.x - 3 * TS; e.call = 1; L.calls = undefined;
+    animalCall(e); window.animalSound = real; return got;
+  });
+  expect(heard).toEqual(['zwijn']);
+});

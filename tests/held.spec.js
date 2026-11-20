@@ -157,7 +157,7 @@ test('Dutch: the creator is translated', async ({ page }) => {
   await expect(page.locator('#ownHero .nm')).toHaveText('Jouw held');
   await page.locator('#ownHero').click();
   await expect(page.locator('#heroDone')).toHaveText('Klaar');
-  await expect(page.locator('.hero-row .hl').first()).toHaveText('Lengte');
+  await expect(page.locator('.hero-row .hl').first()).toHaveText('Lengte, stem');
   await expect(page.locator('#heroName')).toHaveAttribute('placeholder', 'Ik');
 });
 

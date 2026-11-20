@@ -15,19 +15,21 @@ const HERO_OPTS = {
   extraCol: ["#b67ad9", "#b3202e", "#e07aa0", "#2e5a9a", "#e8b44a", "#59c28a", "#f1ece3"],
   glasses: [[null, T("None", "Geen")], ["round", T("Round", "Rond")], ["thick", T("Thick", "Breed")]],
   beanie: [null, "#c43a3a", "#2e5a9a", "#5a6068", "#2f7a4a", "#f1ece3"],
-  scarf: [null, "#d33a3a", "#2e5a9a", "#e8b44a", "#59c28a", "#e07aa0"]
+  scarf: [null, "#d33a3a", "#2e5a9a", "#e8b44a", "#59c28a", "#e07aa0"],
+  // the voice when the conversations are read aloud (js/voice.js): in the same row as the height, so everything fits
+  voice: [["f", "♀", T("Voice of a girl or woman", "Stem van een meisje of vrouw")], ["m", "♂", T("Voice of a boy or man", "Stem van een jongen of man")]]
 };
-const HERO_ROWS = [["size", T("Height", "Lengte")], ["skin", T("Skin", "Huid")], ["hair", T("Hair", "Haar")], ["hairCol", T("Hair colour", "Haarkleur")],
+const HERO_ROWS = [["size", T("Height, voice", "Lengte, stem"), "voice"], ["skin", T("Skin", "Huid")], ["hair", T("Hair", "Haar")], ["hairCol", T("Hair colour", "Haarkleur")],
   ["extra", T("In your hair", "In je haar")], ["extraCol", T("Clip colour", "Kleur clipje")],
   ["coat", T("Coat", "Jas")], ["coatCol", T("Coat colour", "Jaskleur")], ["legs", T("Bottoms", "Broek of rok")], ["pants", T("Colour", "Kleur")],
   ["glasses", T("Glasses", "Bril")], ["beanie", T("Hat", "Muts")], ["scarf", T("Scarf", "Sjaal")]];
-const HERO_DEFAULT = { name: "", size: "kid", skin: "#f4caa6", hair: "short", hairCol: "#a87c4c", coat: "puffer", coatCol: "#2e5a9a", legs: "trousers", pants: "#2c2f36", extra: null, extraCol: "#b67ad9", glasses: null, beanie: "#c43a3a", scarf: null };
+const HERO_DEFAULT = { name: "", size: "kid", skin: "#f4caa6", hair: "short", hairCol: "#a87c4c", coat: "puffer", coatCol: "#2e5a9a", legs: "trousers", pants: "#2c2f36", extra: null, extraCol: "#b67ad9", glasses: null, beanie: "#c43a3a", scarf: null, voice: "f" };
 const optVal = o => Array.isArray(o) ? o[0] : o;
 /** Turn the saved choices into a character for drawPerson(). */
 function makeHero(h) {
   h = Object.assign({}, HERO_DEFAULT, h || {});
   const c = { name: (h.name || "").trim() || T("Me", "Ik"), fam: T("You", "Jij"), size: { kid: .76, teen: .88, adult: 1 }[h.size] || .88, kid: h.size === "kid",
-    hair: h.hair, hairCol: h.hairCol, skin: h.skin, coat: h.coat, coatCol: h.coatCol, pants: h.pants, own: true };
+    hair: h.hair, hairCol: h.hairCol, skin: h.skin, coat: h.coat, coatCol: h.coatCol, pants: h.pants, voice: h.voice, own: true };
   // Shorts: bare legs. Skirt or dress: dark tights in the cold, bare legs in summer.
   if (h.legs === "shorts") c.shorts = true;
   if (h.legs === "skirt" || h.legs === "dress") { c[h.legs] = h.pants; c.pants = "#2e2a30"; c.bareSummer = true; }
@@ -50,17 +52,17 @@ function openHero() {
 }
 function buildHeroRows() {
   const box = $("heroRows"); box.innerHTML = "";
-  HERO_ROWS.forEach(([key, label]) => {
+  HERO_ROWS.forEach(([first, label, second]) => {
     const row = document.createElement("div"); row.className = "hero-row";
     row.innerHTML = `<span class="hl"></span><span class="hv"></span>`;
     row.querySelector(".hl").textContent = label;
-    HERO_OPTS[key].forEach(o => {
+    for (const key of second ? [first, second] : [first]) HERO_OPTS[key].forEach((o, j) => {
       const v = optVal(o), b = document.createElement("button"); b.type = "button";
       b.setAttribute("aria-pressed", String(heroDraft[key] === v));
       b.dataset.key = key;
-      if (Array.isArray(o)) { b.className = "chip"; b.textContent = o[1]; }
+      if (Array.isArray(o)) { b.className = "chip" + (key === second && !j ? " gap" : ""); b.textContent = o[1]; if (o[2]) b.setAttribute("aria-label", b.title = o[2]); }
       else { b.className = "swatch" + (v ? "" : " none"); b.style.setProperty("--c", v || "transparent"); b.setAttribute("aria-label", `${label}: ${v || T("none", "geen")}`); if (!v) b.textContent = "✕"; }
-      b.onclick = () => { heroDraft[key] = v; row.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); tone(620, .04, "triangle", .04); };
+      b.onclick = () => { heroDraft[key] = v; row.querySelectorAll(`button[data-key="${key}"]`).forEach(x => x.setAttribute("aria-pressed", String(x === b))); tone(620, .04, "triangle", .04); };
       row.querySelector(".hv").appendChild(b);
     });
     box.appendChild(row);
@@ -86,7 +88,7 @@ function heroPreview() {
 }
 function heroRandom() {
   const pick = a => optVal(a[Math.floor(Math.random() * a.length)]);
-  for (const [key] of HERO_ROWS) heroDraft[key] = pick(HERO_OPTS[key]);
+  for (const [key, , second] of HERO_ROWS) { heroDraft[key] = pick(HERO_OPTS[key]); if (second) heroDraft[second] = pick(HERO_OPTS[second]); }
   buildHeroRows(); tone(880, .08, "triangle", .05);
 }
 function heroSave() {
