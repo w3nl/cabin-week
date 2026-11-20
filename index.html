@@ -96,7 +96,8 @@
         <button type="button" class="lang" data-lang="en" lang="en">English</button>
         <button type="button" class="lang" data-lang="nl" lang="nl">Nederlands</button>
         <button type="button" class="lang voice" id="voiceBtn" aria-pressed="false" hidden>🔈 Voices off</button>
-        <button type="button" class="lang voice" id="ambBtn" aria-pressed="false">🌲 Ambience off</button></p>
+        <button type="button" class="lang voice" id="ambBtn" aria-pressed="false">🌲 Ambience off</button>
+        <button type="button" class="lang voice" id="saveBtn" data-nl="💾 Voortgang">💾 Progress</button></p>
       </div>
     </div>
   </div>
@@ -127,6 +128,36 @@
       <div class="mapbox" id="mapBox"></div>
       <p class="soon" id="mapSoon"></p>
       <div class="cta"><button class="btn ghost" id="mapClose" type="button" data-nl="Terug">Back</button></div>
+    </div>
+  </div>
+
+  <!-- Your progress and hero to another device or address (transfer.js) -->
+  <div class="overlay" id="saveWrap" hidden>
+    <div class="sheet save">
+      <div class="save-out">
+        <div class="eyebrow" data-nl="Jouw voortgang">Your progress</div>
+        <h2 data-nl="Meenemen naar een ander apparaat">Take it to another device</h2>
+        <p class="save-mine" id="saveMine"></p>
+        <p class="save-help" data-nl="Kopieer de link en open hem op het andere apparaat. Je dagen, je eigen held en je instellingen gaan mee.">Copy the link and open it on the other device. Your days, your own hero and your settings come along.</p>
+        <textarea id="saveCode" class="save-code" rows="2" readonly spellcheck="false" aria-label="Your save code" data-nl-label="Jouw bewaarcode"></textarea>
+        <div class="cta">
+          <button class="btn" id="saveCopyLink" type="button" data-nl="Link kopiëren">Copy link</button>
+          <button class="btn ghost" id="saveCopyCode" type="button" data-nl="Code kopiëren">Copy code</button>
+          <button class="btn ghost" id="saveDownload" type="button" data-nl="Als bestand bewaren">Save as file</button>
+        </div>
+      </div>
+      <div class="save-in">
+        <div class="eyebrow" data-nl="Voortgang overnemen">Bring progress here</div>
+        <p class="save-help" data-nl="Plak een bewaarcode of open een bestand. Dit vervangt de voortgang op dit apparaat.">Paste a save code or open a file. This replaces the progress on this device.</p>
+        <textarea id="saveIn" class="save-code" rows="2" spellcheck="false" placeholder="TS1.…" aria-label="Paste a save code" data-nl-label="Plak een bewaarcode"></textarea>
+        <p class="fb" id="saveFb" aria-live="polite"></p>
+        <div class="cta">
+          <button class="btn" id="saveImport" type="button" data-nl="Overnemen">Import</button>
+          <button class="btn ghost" id="saveOpen" type="button" data-nl="Bestand openen">Open file</button>
+          <button class="btn ghost" id="saveClose" type="button" data-nl="Terug">Back</button>
+        </div>
+        <input type="file" id="saveFile" accept=".txt,text/plain" hidden>
+      </div>
     </div>
   </div>
 
@@ -187,6 +218,7 @@
 <script src="js/world.js"></script>
 <script src="js/screens.js"></script>
 <script src="js/hero.js"></script>
+<script src="js/transfer.js"></script>
 <script src="js/voice.js"></script>
   <script src="js/ambience.js"></script>
 <script src="js/gamepad.js"></script>

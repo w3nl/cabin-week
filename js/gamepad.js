@@ -49,7 +49,7 @@ addEventListener("gamepadconnected", () => { gpStatus(); lastInput = "pad"; menu
 addEventListener("gamepaddisconnected", gpStatus);
 
 /* ---------- Menu's met de controller ---------- */
-function gpRoot() { return state === "title" ? $("title") : state === "map" ? $("mapWrap") : state === "hero" ? $("heroWrap") : state === "pad" ? $("padWrap") : $("cardWrap"); }
+function gpRoot() { return state === "title" ? $("title") : state === "map" ? $("mapWrap") : state === "hero" ? $("heroWrap") : state === "save" ? $("saveWrap") : state === "pad" ? $("padWrap") : $("cardWrap"); }
 function gpFocusables() { return [...gpRoot().querySelectorAll("button")].filter(b => !b.disabled && b.offsetParent !== null); }
 function gpCurrent() { const list = gpFocusables(); return list.includes(document.activeElement) ? document.activeElement : null; }
 function gpFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.scrollIntoView({ block: "nearest", inline: "nearest" }); }
@@ -96,7 +96,7 @@ function gpPress() {
 function gpBack() {
   if (state === "hero" && heroKeysOpen()) closeHeroKeys(); // Back closes the letters first
   else if (state === "pad") setScreen("play");
-  else if (state === "intro" || state === "card" || state === "map" || state === "hero") toTitle();
+  else if (state === "intro" || state === "card" || state === "map" || state === "hero" || state === "save") toTitle();
 }
 
 /* ---------- Toetsenbord en tv-afstandsbediening in menu's ---------- */
