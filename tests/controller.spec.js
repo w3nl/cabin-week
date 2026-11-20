@@ -220,3 +220,54 @@ test('rennen met R1 op de controller', async ({ page }) => {
   await expect.poll(() => page.evaluate(() => P.vx), { timeout: 3000 }).toBeGreaterThan(5.5);
   await page.evaluate(() => { window.__pad.buttons[5] = { pressed: false, value: 0 }; window.__pad.axes = [0, 0, 0, 0]; });
 });
+
+// Your own hero with only a controller: every row can be changed, and the name is typed with letters on screen.
+test('with a controller you make your own hero: every row, and a name with the letters on screen', async ({ page }) => {
+  await fakePad(page);
+  await seed(page);
+  await page.evaluate(() => $('ownHero').focus());
+  await press(page, BTN.A);
+  await expect(page.locator('#heroWrap')).toBeVisible();
+  await expect(page.locator('#heroDone')).toBeFocused();
+  // the name: ↑ to the field, ✕ shows the letters; spell "Sam", ○ closes them and keeps the name
+  await press(page, BTN.UP);
+  await expect(page.locator('#heroName')).toBeFocused();
+  await press(page, BTN.A);
+  await expect(page.locator('#heroKeys')).toBeVisible();
+  await expect(page.locator('#heroRows')).toBeHidden();
+  await expect(page.locator('#heroKeys .key').first()).toBeFocused();   // A
+  const keyAt = async ch => page.evaluate(ch => [...document.querySelectorAll('#heroKeys .key')].indexOf(document.activeElement) === [...document.querySelectorAll('#heroKeys .key')].findIndex(k => k.textContent === ch), ch);
+  // S: three rows down from A is V, so go down twice (O) and right four times (S)
+  await press(page, BTN.DOWN); await press(page, BTN.DOWN);
+  for (let i = 0; i < 4; i++) await press(page, BTN.RIGHT);
+  expect(await keyAt('S')).toBe(true);
+  await press(page, BTN.A);
+  // A: back up to the top left
+  await press(page, BTN.UP); await press(page, BTN.UP);
+  for (let i = 0; i < 4; i++) await press(page, BTN.LEFT);
+  expect(await keyAt('A')).toBe(true);
+  await press(page, BTN.A);
+  // M: second row, sixth letter
+  await press(page, BTN.DOWN);
+  for (let i = 0; i < 5; i++) await press(page, BTN.RIGHT);
+  expect(await keyAt('M')).toBe(true);
+  await press(page, BTN.A);
+  await expect(page.locator('#heroName')).toHaveValue('Sam');
+  await press(page, BTN.B);
+  await expect(page.locator('#heroKeys')).toBeHidden();
+  await expect(page.locator('#heroWrap')).toBeVisible();
+  await expect(page.locator('#heroDone')).toBeFocused();
+  // the rows: → past Surprise me and Back into the rows, then go to "Glasses" and choose the last option
+  for (let i = 0; i < 4 && !await page.evaluate(() => document.activeElement.dataset.key); i++) await press(page, BTN.RIGHT);
+  for (let i = 0; i < 15 && await page.evaluate(() => document.activeElement.dataset.key) !== 'glasses'; i++)
+    await press(page, await page.evaluate(() => HERO_ROWS.findIndex(r => r[0] === document.activeElement.dataset.key) < HERO_ROWS.findIndex(r => r[0] === 'glasses')) ? BTN.DOWN : BTN.UP);
+  for (let i = 0; i < 3; i++) await press(page, BTN.RIGHT);
+  await press(page, BTN.A);
+  expect(await page.evaluate(() => heroDraft.glasses)).toBe('thick');
+  // ← along the row and to Done, ✕ saves
+  for (let i = 0; i < 6 && !await page.evaluate(() => document.activeElement === $('heroDone')); i++) await press(page, BTN.LEFT);
+  await press(page, BTN.A);
+  await expect(page.locator('#title')).toBeVisible();
+  await expect(page.locator('#ownHero .nm')).toHaveText('Sam');
+  expect(await page.evaluate(() => [save.hero.name, save.hero.glasses])).toEqual(['Sam', 'thick']);
+});

@@ -60,6 +60,85 @@ test('typing a name does not move the menu or start the game; Enter saves, and a
   await expect(page.locator('#ownHero .nm')).toHaveText('Me');
 });
 
+// With a remote, a controller or the keyboard you move through the creator row by row. "In your hair", "Coat",
+// "Bottoms" and "Glasses" come right after a row of colours; "the nearest button" used to jump over them.
+for (const [w, h] of [[960, 540], [740, 360], [412, 915]]) test(`arrows reach every row and every option, and Enter chooses (${w}×${h})`, async ({ page }) => {
+  await page.setViewportSize({ width: w, height: h });
+  await seed(page);
+  await page.keyboard.press('ArrowRight'); // the keyboard is in use: focus goes on a button, as with a remote
+  await page.locator('#ownHero').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#heroWrap')).toBeVisible();
+  await expect(page.locator('#heroDone')).toBeFocused();
+  const rows = await page.evaluate(() => HERO_ROWS.map(([k]) => k));
+  // the name field: ↑ from Done; OK/Enter without typing does not save but shows the letters; Escape closes them (back on Done)
+  await page.keyboard.press('ArrowUp');
+  await expect(page.locator('#heroName')).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#heroDone')).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#heroWrap')).toBeVisible();
+  await expect(page.locator('#heroKeys')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#heroKeys')).toBeHidden();
+  await expect(page.locator('#heroDone')).toBeFocused();
+  // into the rows: → (past Surprise me and Back) on a wide screen, ↓ on an upright phone (the rows are below the buttons there)
+  const rowOf = () => page.evaluate(() => document.activeElement.dataset.key);
+  for (let i = 0; i < 4 && !await rowOf(); i++) await page.keyboard.press(w > h ? 'ArrowRight' : 'ArrowDown');
+  // go to the top row, then visit every row going down
+  for (let i = 0; i < 15 && await rowOf() !== rows[0]; i++) await page.keyboard.press('ArrowUp');
+  for (const [i, key] of rows.entries()) {
+    if (i) await page.keyboard.press('ArrowDown');
+    expect(await rowOf()).toBe(key);
+  }
+  // change the four rows that used to be skipped: go to the row, pick the last option with → and Enter
+  for (const key of ['glasses', 'legs', 'coat', 'extra']) {
+    for (let i = 0; i < 15 && await rowOf() !== key; i++) await page.keyboard.press('ArrowUp');
+    expect(await rowOf()).toBe(key);
+    for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Enter');
+    const last = page.locator(`.hero-row button[data-key="${key}"]`).last();
+    await expect(last).toBeFocused();
+    await expect(last).toHaveAttribute('aria-pressed', 'true');
+  }
+  expect(await page.evaluate(() => [heroDraft.extra, heroDraft.coat, heroDraft.legs, heroDraft.glasses])).toEqual(['headband', 'jacket', 'dress', 'thick']);
+  // ← from the first option leads back to the buttons (wide screens), ↑ from the top row (upright phone); then save
+  const onDone = () => page.evaluate(() => document.activeElement === $('heroDone'));
+  for (let i = 0; i < 16 && !await onDone(); i++) await page.keyboard.press(w > h ? 'ArrowLeft' : 'ArrowUp');
+  await expect(page.locator('#heroDone')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#title')).toBeVisible();
+  expect(await page.evaluate(KEY => JSON.parse(localStorage.getItem(KEY)).hero.glasses, KEY)).toBe('thick');
+});
+
+test('the letters on screen: Enter on the name without typing shows them; a capital first; ⌫, Space; Escape closes them', async ({ page }) => {
+  await seed(page);
+  await page.locator('#ownHero').click();
+  await page.locator('#heroName').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#heroKeys')).toBeVisible();
+  await expect(page.locator('#heroWrap')).toBeVisible();
+  const key = ch => page.locator('#heroKeys .key', { hasText: new RegExp('^' + ch + '$') }).click();
+  for (const ch of ['J', 'O', 'Space', 'B', 'O', 'O']) await key(ch);
+  await expect(page.locator('#heroName')).toHaveValue('Jo Boo');
+  await page.locator('#heroKeys .key[aria-label="Delete a letter"]').click();
+  await expect(page.locator('#heroName')).toHaveValue('Jo Bo');
+  // Escape closes the letters, not the creator; the name stays
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#heroKeys')).toBeHidden();
+  await expect(page.locator('#heroRows')).toBeVisible();
+  await expect(page.locator('#heroWrap')).toBeVisible();
+  await expect(page.locator('#heroName')).toHaveValue('Jo Bo');
+  // at most 12 letters
+  await page.locator('#heroName').focus(); await page.keyboard.press('Enter');
+  for (let i = 0; i < 10; i++) await key('Z');
+  await expect(page.locator('#heroName')).toHaveValue('Jo Bozzzzzzz');
+  await key('OK');
+  await expect(page.locator('#heroKeys')).toBeHidden();
+  await expect(page.locator('#heroDone')).toBeFocused();
+});
+
 test('Surprise me picks new looks; Escape goes back', async ({ page }) => {
   await seed(page);
   await page.locator('#ownHero').click();
