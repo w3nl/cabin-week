@@ -2,7 +2,7 @@
 // Start het spel: versie, service worker, updatebalk en de spellus.
 
 /** Staat op het titelscherm. Altijd hetzelfde getal als CACHE in sw.js (tests/pwa.spec.js controleert dat). */
-const GAME_VERSION = 25;
+const GAME_VERSION = 26;
 $("version").textContent = "v" + GAME_VERSION;
 
 /* ---------- Installeerbare app en updates ---------- */
@@ -23,6 +23,8 @@ if ("serviceWorker" in navigator && document.querySelector('link[rel="manifest"]
 /* ---------- Meldingen: installeren als app, en het scherm draaien ---------- */
 // Niet in de Google TV-app en niet als het spel al als app draait.
 const IN_TV_APP = location.hostname === "appassets.androidplatform.net";
+// In the Android app a link that opens a new window goes nowhere: show the source and the licence as plain text there.
+if (IN_TV_APP) $("credits").textContent = T("Source: github.com/w3nl/cabin-week · Licence: GPL-3.0", "Broncode: github.com/w3nl/cabin-week · Licentie: GPL-3.0");
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const IS_ANDROID = /Android/i.test(navigator.userAgent);
 const IS_APP = () => matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true;
