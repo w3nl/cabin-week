@@ -150,17 +150,18 @@ const isTouch = matchMedia("(pointer: coarse)").matches;
    ===================================================================== */
 function say(name, lines, cb, calm) {
   if (typeof lines === "string") lines = [lines]; // one text is one balloon, never one letter at a time
-  dialog = { name, lines, i: 0, cb };
+  dialog = { name, lines, i: 0, cb, calm };
   $("dialog").classList.toggle("calm", !!calm);
   $("dName").textContent = name; $("dText").textContent = lines[0];
   $("dialog").hidden = false;
+  if (typeof speakLine === "function") speakLine(name, lines[0], calm); // optional voices (voice.js)
 }
 function advanceDialog() {
   dialog.i++;
   if (dialog.i >= dialog.lines.length) { const cb = dialog.cb; dialog = null; hideDialog(); if (cb) cb(); }
-  else $("dText").textContent = dialog.lines[dialog.i];
+  else { $("dText").textContent = dialog.lines[dialog.i]; if (typeof speakLine === "function") speakLine(dialog.name, dialog.lines[dialog.i], dialog.calm); }
 }
-function hideDialog() { $("dialog").hidden = true; }
+function hideDialog() { $("dialog").hidden = true; if (typeof stopSpeaking === "function") stopSpeaking(); }
 
 /* =====================================================================
    SPELLOGICA
