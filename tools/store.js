@@ -2,6 +2,7 @@
 // - feature-graphic.png (1024×500): de grote afbeelding bovenaan de vermelding (de TripScouts-tekening uit tools/art.js)
 // - social-preview.png (1280×640): de social preview van de repository op GitHub (Settings → General → Social preview)
 // - tv-banner.png (1280×720): de banner voor Android TV (de TripScouts-tekening uit tools/art.js)
+// - snap-featured-banner.png (720×240): the featured banner for the Snap Store
 // - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, six regions and your own hero
 const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
@@ -129,6 +130,7 @@ async function play(page, i, walk) {
       await saveArt(art.page, path.join(out, file), width, height, { ...wide(width, height, sub), paulS: 4.8 }, imgs);
     }
     await saveArt(art.page, path.join(out, 'tv-banner.png'), 1280, 720, wide(1280, 720));
+    await saveArt(art.page, path.join(out, 'snap-featured-banner.png'), 720, 240, wide(720, 240, sub));
     await art.close();
     console.log('Images are in docs/play-store/');
   } finally {

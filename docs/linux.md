@@ -4,7 +4,7 @@ TripScouts for Linux is a **snap**: the package format of the Snap Store, where 
 
 - `linux/main.js` opens one window with the game. It runs on Electron, the same browser engine as the tests (Chromium), so the keyboard, controllers, sound and voices work as in Chrome.
 - The game is served from `app://tripscouts/`, so saved progress has its own fixed place, separate from the website. To bring progress along, use 💾 *Progress* on the map and 💾 *Hero code* in the hero creator.
-- Links that open a new window (*Source code*, *Licence*) open in your normal browser. **F11** turns full screen on and off.
+- Links that open a new window (*Source code*, *Licence*) open in your normal browser. The **TripScouts** menu has **Full screen** (**F11**) and **Quit** (**Ctrl+Q**). In full screen, use **Ctrl+Q** to quit or **F11** to return to the window and its menu. Menu labels follow the system language (English or Dutch).
 - `linux/package.json` holds the snap settings for electron-builder: the name `tripscouts`, the summary, the category *Game* and the permissions. *joystick* is added for controllers; the rest is the default set (screen, sound, network for the fonts).
 
 ## Building
@@ -65,6 +65,7 @@ sudo snap install --dangerous ./tripscouts.snap
    - **Description:** use the full description from `docs/play-store/README.md` (English). For example: *Two families want to go on holiday together, but they can't agree where. So you go ahead as their trip scout: try out ten trips across Europe, a week each, from the Ardennes and the North Pole to Scotland and the Veneto. Walk, jump, ski, skate and canoe, find things, help people and crack the code lock at the end of every day. No ads, nothing to buy, nothing collected.*
    - **Category:** Games
    - **Icon:** `icons/icon-512.png`
+   - **Featured banner:** [snap-featured-banner.png](play-store/snap-featured-banner.png) (720 × 240 pixels). Regenerate it with `npm run store`; it uses the same TripScouts artwork as the app icons.
    - **Screenshots:** the phone and tablet screenshots from `docs/play-store/`, or new ones from the app (1280×720)
    - **Website:** `https://tripscouts.online/`. **Source code:** `https://github.com/w3nl/tripscouts`. **Licence:** GPL-3.0
 6. **Release:** when the edge version works, promote it in *Releases* from *edge* to *stable*, or with `snapcraft release tripscouts <revision> stable`. Then it is in the App Center for everyone.
