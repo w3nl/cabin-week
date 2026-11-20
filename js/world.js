@@ -2821,4 +2821,24 @@ function render() {
   drawAmbient(theme);
   if (theme === "sneeuw" || theme === "stad") drawFlakes();
   vignette();
+  if (L.timer > 0) drawGateTimer();
+}
+/** After ringing the bell: a big countdown at the top of the screen, with a bar that runs out and an arrow towards the gate.
+    Gold while there is time, red and pulsing in the last two seconds. */
+function drawGateTimer() {
+  const total = Math.round((L.d.task.secs || 5) * 60), left = Math.max(0, L.timer), secs = left / 60, hurry = secs <= 2;
+  const w = 236, h = 46, x = viewW / 2 - w / 2, y = 54, pulse = hurry ? 1 + Math.sin(frame / 3) * .04 : 1;
+  const gx = L.d.gate[0] * TS + 16, dir = gx > P.x + P.w / 2 ? "→" : "←";
+  g.save(); g.translate(viewW / 2, y + h / 2); g.scale(pulse, pulse); g.translate(-viewW / 2, -(y + h / 2));
+  g.fillStyle = "rgba(20,10,4,.78)"; g.strokeStyle = hurry ? "#ff6a5a" : "#ffd25e"; g.lineWidth = 2.5;
+  g.beginPath(); rp(x, y, w, h, 12); g.fill(); g.stroke();
+  // the bar that runs out
+  g.fillStyle = "rgba(255,255,255,.12)"; g.beginPath(); rp(x + 10, y + h - 13, w - 20, 6, 3); g.fill();
+  g.fillStyle = hurry ? "#ff6a5a" : "#ffd25e"; g.beginPath(); rp(x + 10, y + h - 13, Math.max(6, (w - 20) * left / total), 6, 3); g.fill();
+  g.textBaseline = "middle"; g.textAlign = "left"; g.font = "700 15px Fredoka, sans-serif"; g.fillStyle = "#fff";
+  emoji("🔔", x + 22, y + 17, 18);
+  g.fillStyle = "#fff"; g.fillText(T("Gate open", "Hek open") + "  " + dir, x + 38, y + 17);
+  g.textAlign = "right"; g.font = "700 20px Fredoka, sans-serif"; g.fillStyle = hurry ? "#ff8a7a" : "#ffd25e";
+  g.fillText(secs.toFixed(1) + " s", x + w - 12, y + 17);
+  g.restore();
 }

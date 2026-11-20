@@ -511,6 +511,7 @@ function step() {
     if (P.x > gx + TS) { L.questDone = true; L.timer = 0; SFX.open(); pop(gx + 16, 8 * TS, T("Made it!", "Gehaald!"), "#8dffb5"); }
     else if (--L.timer <= 0) { if (P.x + P.w > gx && P.x < gx + TS) L.timer = 1; else { L.gateOpen = false; L.gateFade = 1; SFX.bad(); } }
     if (L.timer % 60 === 0) { tone(L.timer ? 700 : 300, .05, "square", .03); updateHud(); }
+    else if (L.timer < 120 && L.timer % 30 === 0) tone(880, .04, "square", .025); // the last two seconds tick faster
   }
   // A melody bell rings when you walk past it for the first time.
   for (const c of L.clues) { if (c.ring > 0) c.ring--; if (c.kind === "melody" && !c.heard && Math.abs(c.x + 16 - (P.x + P.w / 2)) < 20) { c.heard = true; ringClue(c); } }

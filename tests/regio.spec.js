@@ -477,3 +477,23 @@ test('the bell: far enough from the gate that you have to hurry, but you make it
   }
   expect(res.length).toBeGreaterThan(5);
 });
+
+test('after ringing the bell, a countdown on screen shows how much time is left', async ({ page }) => {
+  await seed(page, { region: 'ardeche', unlocked: 8 });
+  await startDay(page, 4);
+  const r = await page.evaluate(() => {
+    const calls = [], real = drawGateTimer; window.drawGateTimer = () => { calls.push(L.timer); real(); };
+    L.enemies.length = 0; P.x = L.bell.x + 4; P.y = L.bell.y + 32 - P.h;
+    for (let k = 0; k < 3; k++) step();
+    const before = calls.length; render();
+    edges.push('act'); step(); if (dialog) hideDialog();
+    for (let k = 0; k < 30; k++) step(); render();
+    const during = calls.at(-1);
+    L.timer = 0; render();
+    window.drawGateTimer = real;
+    return { before, drawn: calls.length, during, secs: L.d.task.secs };
+  });
+  expect(r.before).toBe(0);
+  expect(r.drawn).toBe(1);                       // drawn while the gate is open, not before or after
+  expect(r.during).toBeGreaterThan(r.secs * 60 - 40);
+});
