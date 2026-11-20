@@ -161,7 +161,17 @@ function advanceDialog() {
   if (dialog.i >= dialog.lines.length) { const cb = dialog.cb; dialog = null; hideDialog(); if (cb) cb(); }
   else { $("dText").textContent = dialog.lines[dialog.i]; if (typeof speakLine === "function") speakLine(dialog.name, dialog.lines[dialog.i], dialog.calm); }
 }
-function hideDialog() { $("dialog").hidden = true; if (typeof stopSpeaking === "function") stopSpeaking(); }
+function hideDialog(soft) { $("dialog").hidden = true; if (typeof stopSpeaking === "function") stopSpeaking(soft); }
+/** Walking away ends a conversation, like in real life: the balloon closes, whatever it was about still happens (a gate
+    that opens, an animal that comes along), and the voice trails off at the next word instead of stopping hard.
+    Only a new press of ← or →: if you were still holding one when the conversation opened, let go first (walkArmed). */
+function walkAway() {
+  const dir = held.left || held.right || padHeld.left || padHeld.right || tvHeld.left || tvHeld.right;
+  if (!dir) { dialog.walkArmed = true; return false; }
+  if (!dialog.walkArmed) return false;
+  const cb = dialog.cb; dialog = null; hideDialog(true); if (cb) cb();
+  return true;
+}
 
 /* =====================================================================
    SPELLOGICA
@@ -304,7 +314,7 @@ function step() {
   popups = popups.filter(p => p.life > 0);
   if (state !== "play") { edges.length = 0; return; }
 
-  if (dialog) { while (edges.length) { const e = edges.shift(); if (e === "act" || e === "jump") { advanceDialog(); break; } } edges.length = 0; return; }
+  if (dialog && !walkAway()) { while (edges.length) { const e = edges.shift(); if (e === "act" || e === "jump") { advanceDialog(); break; } } edges.length = 0; return; }
 
   L.time++;
   let wantJump = false, wantAct = false;

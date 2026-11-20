@@ -67,9 +67,21 @@ function speakLine(name, text, calm) {
     } else u.voice = vs.find(v => v.default) || vs[0];
   }
   u.pitch = Math.max(0, Math.min(2, pitch)); u.rate = st.rate; u.volume = .9;
+  speaking = u;
   speechSynthesis.speak(u);
 }
-function stopSpeaking() { if (canSpeak) speechSynthesis.cancel(); }
+let speaking = null; // the line being spoken now
+/** Stop the voice. soft (you walked away): browsers can't turn a line down while it plays, so let it trail off: stop at
+    the next word after a moment, and at the latest after about a second. Otherwise (a new line, the menu): stop now. */
+function stopSpeaking(soft) {
+  if (!canSpeak) return;
+  if (!soft || !speaking) { speaking = null; speechSynthesis.cancel(); return; }
+  const u = speaking, t0 = performance.now();
+  const end = () => { if (speaking === u) { speaking = null; speechSynthesis.cancel(); } };
+  u.onboundary = () => { if (performance.now() - t0 > 350) end(); };
+  u.onend = () => { if (speaking === u) speaking = null; };
+  setTimeout(end, 1100);
+}
 
 /* ---------- the Voices button (title screen) ---------- */
 function showVoice() {

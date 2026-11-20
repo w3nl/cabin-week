@@ -199,6 +199,9 @@ function genLevel(o) {
   const fits = (k, c) => {
     const [l, r] = DECO_FOOT[k] || [0, 0], t = topAt[c];
     if (c == null || t >= ROWS_GEN) return false;
+    // scenery animals stand in the background, behind the path: only where the path is at its normal height (row 12),
+    // so the background ground behind it is always in view (drawBgAnimals() in world.js)
+    if (BG_KINDS.has(k) && t !== 12) return false;
     for (let i = c + l; i <= c + r; i++) if (i < 1 || i >= w - 1 || topAt[i] !== t || bad.has(i) || Math.abs(i - gateX) < 3 || Math.abs(i - codeX) < 4) return false;
     return true;
   };
@@ -221,7 +224,7 @@ function genLevel(o) {
     list.forEach((k, i) => {
       const want = cols[Math.floor((i + .5) * cols.length / list.length)];
       let c = null;
-      for (let d = 0; d <= 12 && c == null; d++) for (const t of [want + d, want - d]) if (fits(k, t) && !picks.some(p => Math.abs(p - t) < 3)) { c = t; break; }
+      for (let d = 0; d <= 60 && c == null; d++) for (const t of [want + d, want - d]) if (fits(k, t) && !picks.some(p => Math.abs(p - t) < 3)) { c = t; break; }
       picks.push(c ?? want);
     });
     for (let i = deco.length - 1; i >= 0; i--) if (picks.some(c => Math.abs(c - deco[i][1]) < 4)) deco.splice(i, 1);
@@ -263,6 +266,8 @@ const DECO_FOOT = {
 };
 /** The number of rows and the tile size (canvas.js has ROWS and TS, but that file loads after this one). */
 const ROWS_GEN = 15, TS_GEN = 32;
+/** The scenery animals that stand in the background (the same as BG_ANIMALS in world.js, which loads later). */
+const BG_KINDS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow", "flamingo"]);
 
 const DAY22 = genLevel({
   seed: 2212, w: 150, day: dayLabel(1), name: T("Forest & Old Railway", "Bos & oude spoorlijn"), theme: "bos",

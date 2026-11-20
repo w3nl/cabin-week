@@ -171,3 +171,31 @@ test('an animal close by comes walking towards you and calls; knocked over, it m
   }), r.kind);
   expect(after).toEqual([r.kind]);
 });
+
+test('walking away ends a conversation: the balloon closes, the gate still opens, and the voice trails off', async ({ page }) => {
+  await page.addInitScript(recorder);
+  await page.addInitScript(() => localStorage.setItem('cabin-week-voice', '1'));
+  await seed(page);
+  await page.evaluate(() => localStorage.setItem('cabin-week-voice', '1'));
+  await page.reload();
+  await startDay(page, 0);
+  const r = await page.evaluate(() => {
+    let done = false;
+    // you were still walking when the conversation opened: that does not close it
+    held.right = true;
+    say('Paul', ['First line.', 'Second line.', 'Third line.'], () => { done = true; });
+    for (let i = 0; i < 5; i++) step();
+    const stillOpen = !!dialog;
+    // let go, then walk: the balloon closes and what it was about still happens
+    held.right = false; step();
+    const cancels = window.__cancels;
+    held.right = true; step();
+    const closed = !dialog && $('dialog').hidden, x0 = P.x;
+    for (let i = 0; i < 20; i++) step();
+    held.right = false;
+    return { stillOpen, closed, done, walked: P.x > x0, softly: window.__cancels === cancels };
+  });
+  // the voice is not cut off at once: it stops at the next word, or after about a second
+  expect(r).toEqual({ stillOpen: true, closed: true, done: true, walked: true, softly: true });
+  await expect.poll(() => page.evaluate(() => window.__cancels)).toBeGreaterThan(0);
+});

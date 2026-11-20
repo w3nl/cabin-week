@@ -26,8 +26,10 @@ async function startDay(page, i) {
 }
 
 /** Zet het poppetje (zonder te botsen) op een plek: x en y in pixels, voeten op y. */
+// Animals within a few tiles of where we put you are cleared first, as if you had jumped on them: they walk towards
+// you (animalChase), so a slow machine could otherwise get you hit and pushed away before the next key press.
 async function put(page, x, feetY) {
-  await page.evaluate(([x, feetY]) => { P.x = x; P.y = feetY - P.h; P.vx = 0; P.vy = 0; }, [x, feetY]);
+  await page.evaluate(([x, feetY]) => { L.enemies = L.enemies.filter(e => e.kind === 'alg' || Math.abs(e.x - x) > 7 * TS); P.x = x; P.y = feetY - P.h; P.vx = 0; P.vy = 0; }, [x, feetY]);
   await page.waitForTimeout(60);
 }
 

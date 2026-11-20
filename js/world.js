@@ -241,7 +241,10 @@ function getTex(theme, spikeKind) {
 const LW = 1536;
 const per = (x, k, ph) => Math.sin(x / LW * Math.PI * 2 * k + ph);
 const ridge = (base, amps, x) => base - amps.reduce((s, [a, k, p]) => s + a * per(x, k, p), 0);
-function layerCanvas(fn) { const c = mk(LW, VIEW_H); withCtx(c.getContext("2d"), fn); return c; }
+/** A background layer. It remembers its ground line (the first ridge drawn on it, `_ground`), so the scenery animals can
+    stand on it (drawBgAnimals()). */
+let LAYER_GROUND = null;
+function layerCanvas(fn) { const c = mk(LW, VIEW_H); LAYER_GROUND = null; withCtx(c.getContext("2d"), fn); c._ground = LAYER_GROUND; LAYER_GROUND = null; return c; }
 /** Battlements on a wall from x0 to x1 whose top is at y: blocks of size s standing on the wall, with gaps between. */
 function battlements(x0, x1, y, s, line) {
   const n = Math.max(2, Math.round((x1 - x0) / (s * 2))), step = (x1 - x0 - s) / (n - 1);
@@ -250,6 +253,7 @@ function battlements(x0, x1, y, s, line) {
 /** The lowest ground (largest y) under something w wide at x, so a building on a slope stands on the hill instead of floating. */
 function groundUnder(top, x, w) { let y = 0; for (let d = 0; d <= w; d += 2) y = Math.max(y, top(x + d)); return y; }
 function fillRidge(base, amps, col, hi) {
+  if (!LAYER_GROUND) LAYER_GROUND = { base, amps };
   g.fillStyle = col; g.beginPath(); g.moveTo(0, VIEW_H);
   for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(base, amps, x));
   g.lineTo(LW, VIEW_H); g.fill();
@@ -849,21 +853,30 @@ function getSceneLayers(scene) {
   else if (scene === "dolomiti") {
     // the Dolomites: pale, jagged towers of rock with a pink glow, green meadows and larch forests
     out.far = layerCanvas(() => {
+      // The towers of rock stand on a broad base of scree and larch forest that runs down behind the meadows (the
+      // middle layer starts at about 306), so the mountains never float above the hills.
+      const foot = 410;
       g.fillStyle = "#d8c8c8";
       for (let x = -40; x < LW; x += 70 + R() * 60) {
         const h = 120 + R() * 110, w = 40 + R() * 50, base = 300;
-        g.beginPath(); g.moveTo(x, base);
+        g.beginPath(); g.moveTo(x - 12, foot); g.lineTo(x, base);
         for (let i = 0; i <= 6; i++) g.lineTo(x + w * i / 6 + (R() - .5) * 8, base - h * (i % 2 ? .85 + R() * .15 : .6 + R() * .2) * (i === 0 || i === 6 ? .3 : 1));
-        g.lineTo(x + w, base); g.fill();
+        g.lineTo(x + w, base); g.lineTo(x + w + 12, foot); g.closePath(); g.fill();
       }
       // the three peaks, side by side
       const tx = 700; g.fillStyle = "#e0cccc";
-      [[0, 150, 30], [36, 190, 36], [80, 160, 30]].forEach(([dx, h, w]) => { g.beginPath(); g.moveTo(tx + dx, 300); g.lineTo(tx + dx + w * .2, 300 - h); g.lineTo(tx + dx + w * .7, 300 - h + 6); g.lineTo(tx + dx + w, 300); g.fill(); });
+      [[0, 150, 30], [36, 190, 36], [80, 160, 30]].forEach(([dx, h, w]) => { g.beginPath(); g.moveTo(tx + dx - 10, foot); g.lineTo(tx + dx, 300); g.lineTo(tx + dx + w * .2, 300 - h); g.lineTo(tx + dx + w * .7, 300 - h + 6); g.lineTo(tx + dx + w, 300); g.lineTo(tx + dx + w + 10, foot); g.closePath(); g.fill(); });
       // the pink glow of sunset and the dark lines of the cliffs: only on the rock, never on the sky
       g.globalCompositeOperation = "source-atop";
       g.fillStyle = "rgba(240,150,165,.3)"; g.fillRect(0, 0, LW, 300);
       g.strokeStyle = "rgba(120,100,110,.35)"; g.lineWidth = 1.2; for (let x = 0; x < LW; x += 11) { g.beginPath(); g.moveTo(x, 300); g.lineTo(x + 2, 200 + R() * 60); g.stroke(); }
       g.globalCompositeOperation = "source-over";
+      // the foot of the mountains, all along: grey scree slopes, then dark larch forest further down
+      const scree = [[14, 3, 1], [7, 9, 3]], wood = [[10, 4, 2], [6, 11, 4]];
+      g.fillStyle = "#b9a8ac"; g.beginPath(); g.moveTo(0, foot); for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(292, scree, x)); g.lineTo(LW, foot); g.fill();
+      g.strokeStyle = "rgba(120,100,110,.25)"; g.lineWidth = 1; for (let x = 0; x < LW; x += 9) { const y = ridge(292, scree, x); g.beginPath(); g.moveTo(x, y + 2); g.lineTo(x + 5, y + 16 + R() * 10); g.stroke(); }
+      g.fillStyle = "#4f7a52"; g.beginPath(); g.moveTo(0, foot); for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(312, wood, x)); g.lineTo(LW, foot); g.fill();
+      for (let x = 0; x < LW; x += 9 + R() * 8) { const y = ridge(312, wood, x) + 3; pineShape(x, y, 14 + R() * 10, "#46704a", "#3c6440", null, "#2c4a30"); }
     });
     out.mid = layerCanvas(() => {
       const a = [[16, 3, 1], [8, 8, 2]];
@@ -1222,8 +1235,8 @@ function drawBackground(theme, camX) {
     const Ls = getSceneLayers(scene);
     drawSceneSky(scene);
     drawLayer(Ls.far, camX * .15);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
     return;
   }
   if (theme === "huis") {
@@ -1241,8 +1254,8 @@ function drawBackground(theme, camX) {
     drawLayer(Ls.clouds, camX * .08 + frame * .15);
     drawLayer(Ls.far, camX * .15);
     g.fillStyle = "rgba(220,240,250,.25)"; g.fillRect(0, 250, viewW, 120);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
     // vogeltjes
     g.strokeStyle = "#2a3a4a"; g.lineWidth = 1.5;
     for (let i = 0; i < 3; i++) { const bx = ((frame * (.6 + i * .2) + i * 400) % (viewW + 200)) - 100, by = 70 + i * 26 + Math.sin(frame / 40 + i) * 6, w = Math.sin(frame / 6 + i) * 3;
@@ -1252,8 +1265,8 @@ function drawBackground(theme, camX) {
     g.fillStyle = "#fff"; for (let i = 0; i < 40; i++) { g.globalAlpha = .3 + .5 * Math.abs(Math.sin(frame / 40 + i)); g.fillRect(((hash(i * 3) * 3000 - camX * .04) % viewW + viewW) % viewW, hash(i * 7) * 160, 2, 2); } g.globalAlpha = 1;
     drawLayer(Ls.far, camX * .15);
     g.fillStyle = "rgba(230,170,150,.18)"; g.fillRect(0, 250, viewW, 120);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
   } else {
     g.fillStyle = grad("sky-sneeuw", () => { const gr = g.createLinearGradient(0, 0, 0, VIEW_H); gr.addColorStop(0, "#081230"); gr.addColorStop(.7, "#2a4a82"); gr.addColorStop(1, "#4a6fa8"); return gr; }); g.fillRect(0, 0, viewW, VIEW_H);
     g.fillStyle = "#fff";
@@ -1270,8 +1283,8 @@ function drawBackground(theme, camX) {
     g.fillStyle = "#e3dcc0"; [[-8, -6, 6], [9, 7, 4], [4, -12, 3]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(mx + dx, 90 + dy, r, 0, 7); g.fill(); });
     drawLayer(Ls.far, camX * .15);
     g.fillStyle = "rgba(160,190,230,.18)"; g.fillRect(0, 260, viewW, 120);
-    drawLayer(Ls.mid, camX * .3);
-    drawLayer(Ls.near, camX * .5);
+    drawLayer(Ls.mid, camX * .3); drawBgAnimals(camX, Ls.mid, "mid");
+    drawLayer(Ls.near, camX * .5); drawBgAnimals(camX, Ls.near, "near");
   }
 }
 
@@ -1362,15 +1375,11 @@ function sign2(x, y, w, h, bg, text, fg) {
 }
 
 /* ---------- Decoratie ---------- */
-/** Animals in the scenery that stand still: drawn smaller, a bit higher and a bit faded, as if further away, so you
- *  can see at once that they are background and not something to bump into or stand on. */
-const BG_ANIMALS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow", "flamingo"]);
+/** Animals in the scenery that stand still: drawn in the background by drawBgAnimals() (behind the path, smaller,
+ *  hazy, with parallax), so you can see at once that they are not something to bump into or stand on. */
+const BG_ANIMALS = BG_KINDS; // levelgen.js
 function drawDeco(kind, x, theme, far) {
-  if (!far && BG_ANIMALS.has(kind)) {
-    const bx = x * TS + 32, gy = groundTop(x) * TS;
-    g.save(); g.translate(bx, gy - 8); g.scale(.6, .6); g.translate(-bx, -gy); g.globalAlpha = .88;
-    drawDeco(kind, x, theme, true); g.restore(); return;
-  }
+  if (!far && BG_ANIMALS.has(kind)) return; // drawn in the background by drawBgAnimals()
   const by = groundTop(x) * TS, px = x * TS;
   g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const H = hash(x * 5.3);
@@ -1708,15 +1717,37 @@ function drawDeco(kind, x, theme, far) {
     g.fillStyle = "#2a3a2a"; g.fillRect(px + 18, by - 26, 16, 26); g.strokeRect(px + 18, by - 26, 16, 26);
     g.fillStyle = "#f4f8ff"; g.fillRect(px - 2, by - h - 2, w + 4, 3);
   } else if (kind === "polarbear") {
-    // a polar bear standing on the ice (scenery: it minds its own business, so its legs stay still)
-    const st = 0;
-    shadowAt(px + 30, by, 34);
-    g.fillStyle = "#e8eef2"; [[8, st], [18, -st], [40, st], [50, -st]].forEach(([dx, d]) => { g.beginPath(); rp(px + dx, by - 18 + d * .3, 9, 18 - d * .3, 3); g.fill(); g.stroke(); });
-    g.beginPath(); g.ellipse(px + 30, by - 28, 30, 16, 0, 0, 7); g.fill(); g.stroke();
-    g.fillStyle = "#d4dde4"; g.beginPath(); g.ellipse(px + 26, by - 20, 24, 6, 0, 0, 7); g.fill();
-    g.fillStyle = "#f4f8fb"; g.beginPath(); g.ellipse(px + 62, by - 30, 12, 9, .2, 0, 7); g.fill(); g.stroke();
-    g.beginPath(); g.arc(px + 58, by - 39, 3.5, 0, 7); g.fill(); g.stroke();
-    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(px + 73, by - 28, 2.2, 0, 7); g.fill(); g.fillRect(px + 64, by - 34, 2, 2);
+    // A polar bear standing on the ice, facing right (scenery: it minds its own business, so its legs stay still).
+    // The rump is higher than the shoulders, a long neck, a narrow head with a Roman nose, big paws, a cream-white coat.
+    const fur = "#f3f0e4", shadow = "#d9d6c6", far = "#e2dfd0", sx = px - 2;
+    shadowAt(sx + 36, by, 38);
+    const leg = (x, top, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(x - 6, top); g.lineTo(x + 6, top); g.quadraticCurveTo(x + 7, by - 10, x + 6, by - 4);
+      g.quadraticCurveTo(x + 9, by, x + 4, by); g.lineTo(x - 6, by); g.quadraticCurveTo(x - 7, by - 4, x - 6, top); g.closePath(); g.fill(); g.stroke();
+      g.strokeStyle = shadow; g.lineWidth = 1; [-2, 1, 4].forEach(d => { g.beginPath(); g.moveTo(x + d, by - 2.5); g.lineTo(x + d, by); g.stroke(); }); g.strokeStyle = OUT; g.lineWidth = 2; };
+    // far legs first, a little darker
+    leg(sx + 18, by - 24, far); leg(sx + 50, by - 22, far);
+    // the body: high rump at the back, the back slopes down to the shoulders, a heavy belly
+    const body = () => { g.beginPath(); g.moveTo(sx + 6, by - 30); g.quadraticCurveTo(sx + 6, by - 46, sx + 22, by - 46); g.quadraticCurveTo(sx + 40, by - 45, sx + 52, by - 40);
+      g.quadraticCurveTo(sx + 60, by - 37, sx + 60, by - 28); g.quadraticCurveTo(sx + 58, by - 18, sx + 46, by - 18); g.quadraticCurveTo(sx + 30, by - 15, sx + 14, by - 19);
+      g.quadraticCurveTo(sx + 6, by - 21, sx + 6, by - 30); g.closePath(); };
+    g.fillStyle = fur; body(); g.fill();
+    g.save(); body(); g.clip(); g.fillStyle = shadow; g.beginPath(); g.ellipse(sx + 32, by - 16, 30, 7, 0, 0, 7); g.fill(); g.restore();
+    body(); g.stroke();
+    // a little tail
+    g.fillStyle = fur; g.beginPath(); g.ellipse(sx + 6, by - 36, 3, 2.5, 0, 0, 7); g.fill(); g.stroke();
+    // near legs
+    leg(sx + 13, by - 26, fur); leg(sx + 45, by - 26, fur);
+    // the long neck and the head, held a little low and forward
+    g.fillStyle = fur; g.beginPath(); g.moveTo(sx + 50, by - 41); g.quadraticCurveTo(sx + 62, by - 44, sx + 70, by - 38); g.lineTo(sx + 70, by - 28); g.quadraticCurveTo(sx + 62, by - 26, sx + 56, by - 26); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(sx + 52, by - 41); g.quadraticCurveTo(sx + 62, by - 44, sx + 68, by - 40); g.stroke();
+    g.beginPath(); g.moveTo(sx + 66, by - 40); g.quadraticCurveTo(sx + 72, by - 44, sx + 78, by - 40); g.quadraticCurveTo(sx + 86, by - 36, sx + 88, by - 33);
+    g.quadraticCurveTo(sx + 89, by - 29, sx + 85, by - 28); g.quadraticCurveTo(sx + 76, by - 26, sx + 68, by - 28); g.quadraticCurveTo(sx + 64, by - 33, sx + 66, by - 40); g.closePath(); g.fill(); g.stroke();
+    // ear, eye, nose, mouth
+    g.beginPath(); g.arc(sx + 70, by - 42, 3, Math.PI * .9, Math.PI * 2.1); g.fill(); g.stroke();
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(sx + 77, by - 36.5, 1.5, 0, 7); g.fill();
+    g.beginPath(); g.ellipse(sx + 87, by - 32, 2.6, 2, 0, 0, 7); g.fill();
+    g.strokeStyle = "#1d1d26"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(sx + 86, by - 29); g.quadraticCurveTo(sx + 82, by - 28, sx + 79, by - 29); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
   } else if (kind === "walrus") {
     // a walrus resting on the ice, with long tusks and a moustache
     shadowAt(px + 26, by, 30);
@@ -1739,17 +1770,48 @@ function drawDeco(kind, x, theme, far) {
     g.strokeStyle = OUT; g.lineWidth = 2;
     g.fillStyle = "#1d1d26"; g.fillRect(px + 48, by - 24, 2, 2); g.fillRect(px + 53, by - 24, 2, 2);
   } else if (kind === "cow") {
-    // a black-and-white Dutch cow in a winter blanket
-    shadowAt(px + 22, by, 24);
-    g.fillStyle = "#f6f4ee"; [[6], [12], [30], [36]].forEach(([dx]) => { g.fillRect(px + dx, by - 16, 4, 16); });
-    g.beginPath(); rp(px, by - 36, 46, 22, 9); g.fill(); g.stroke();
-    g.fillStyle = "#1d1d26"; [[8, -32, 7, 5], [24, -30, 9, 6], [36, -24, 5, 4]].forEach(([dx, dy, rx, ry]) => { g.beginPath(); g.ellipse(px + dx, by + dy, rx, ry, .3, 0, 7); g.fill(); });
-    g.fillStyle = "#c43a3a"; g.fillRect(px + 12, by - 36, 22, 12); g.fillStyle = "#e8c45a"; g.fillRect(px + 12, by - 30, 22, 2);
-    g.fillStyle = "#f6f4ee"; g.beginPath(); rp(px + 40, by - 42, 16, 15, 5); g.fill(); g.stroke();
-    g.fillStyle = "#f0b8b0"; g.beginPath(); rp(px + 47, by - 33, 10, 7, 3); g.fill();
-    g.fillStyle = "#1d1d26"; g.fillRect(px + 46, by - 38, 2, 2);
-    g.strokeStyle = "#d8cfb8"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 43, by - 42); g.lineTo(px + 40, by - 47); g.moveTo(px + 52, by - 42); g.lineTo(px + 55, by - 47); g.stroke();
+    // A cow in the field, facing right. In the Netherlands mostly a black-and-white Holstein, now and then a red-and-white
+    // one; in the Dolomites a brown Alpine cow with a bell. The patches are clipped to the body, so they follow its shape.
+    const alp = L && L.d && L.d.scene === "dolomiti", red = !alp && H > .72;
+    const hide = alp ? "#9a6a44" : "#f7f5ef", spot = red ? "#9a3f26" : "#22222a", hoof = "#3a3036", sx = px - 4;
+    shadowAt(sx + 30, by, 30);
+    // legs (far pair a little darker), with knees and hooves
+    const leg = (x, far, k) => { g.lineWidth = 1.4; g.fillStyle = far ? shade(hide, -.14) : hide; g.beginPath(); g.moveTo(x - 4, by - 21); g.lineTo(x + 4, by - 21); g.lineTo(x + 3.5 + k, by - 10); g.lineTo(x + 3, by - 3); g.lineTo(x - 3, by - 3); g.lineTo(x - 3.5 + k, by - 10); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = hoof; g.beginPath(); rp(x - 3.5, by - 4.5, 7, 4.5, 1.5); g.fill(); g.lineWidth = 2; };
+    leg(sx + 14, true, -1); leg(sx + 40, true, 1);
+    // tail with a tuft
+    g.strokeStyle = shade(hide, -.25); g.lineWidth = 2; g.beginPath(); g.moveTo(sx + 5, by - 33); g.quadraticCurveTo(sx - 2, by - 26, sx + 1, by - 13); g.stroke();
+    g.fillStyle = alp ? "#5a3a22" : spot; g.beginPath(); g.ellipse(sx + 1, by - 11, 2.5, 4, 0, 0, 7); g.fill();
     g.strokeStyle = OUT; g.lineWidth = 2;
+    // the body: a straight back with hip bones, a round belly
+    const body = () => { g.beginPath(); g.moveTo(sx + 6, by - 34); g.quadraticCurveTo(sx + 9, by - 39, sx + 14, by - 37); g.quadraticCurveTo(sx + 30, by - 35, sx + 46, by - 38);
+      g.quadraticCurveTo(sx + 52, by - 37, sx + 52, by - 30); g.quadraticCurveTo(sx + 52, by - 20, sx + 44, by - 19); g.quadraticCurveTo(sx + 28, by - 15, sx + 12, by - 19);
+      g.quadraticCurveTo(sx + 3, by - 21, sx + 4, by - 28); g.closePath(); };
+    g.fillStyle = hide; body(); g.fill();
+    if (!alp) { g.save(); body(); g.clip(); g.fillStyle = spot;
+      [[14, -32, 9, 7, .4], [33, -33, 8, 5, -.3], [27, -21, 7, 4, .2], [47, -27, 5, 6, 0], [6, -24, 4, 5, .5]].forEach(([dx, dy, rx, ry, a], i) => {
+        if (red && i === 4) return; g.beginPath(); g.ellipse(sx + dx + (H - .5) * 4, by + dy, rx, ry, a, 0, 7); g.fill(); });
+      g.restore(); }
+    else { g.fillStyle = "#c79a70"; g.beginPath(); g.ellipse(sx + 28, by - 20, 14, 3, 0, 0, 7); g.fill(); }
+    g.strokeStyle = OUT; body(); g.stroke();
+    // udder
+    g.lineWidth = 1.4; g.fillStyle = "#f2b6b0"; g.beginPath(); g.ellipse(sx + 18, by - 17.5, 3.6, 2.4, 0, 0, 7); g.fill(); g.stroke(); g.lineWidth = 2;
+    // near legs, in front of the body
+    leg(sx + 10, false, -1); leg(sx + 44, false, 1);
+    // the head: neck, a long face, ears, short horns, a pink muzzle
+    g.fillStyle = hide; g.beginPath(); g.moveTo(sx + 46, by - 37); g.quadraticCurveTo(sx + 54, by - 42, sx + 58, by - 41); g.lineTo(sx + 56, by - 27); g.quadraticCurveTo(sx + 51, by - 26, sx + 48, by - 28); g.closePath(); g.fill();
+    g.strokeStyle = "#d8cfb8"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(sx + 56, by - 44); g.quadraticCurveTo(sx + 55, by - 49, sx + 52, by - 50); g.moveTo(sx + 61, by - 44); g.quadraticCurveTo(sx + 63, by - 49, sx + 66, by - 50); g.stroke();
+    g.strokeStyle = OUT; g.lineWidth = 2;
+    g.fillStyle = hide; g.beginPath(); g.ellipse(sx + 52, by - 41, 5, 2.6, -.3, 0, 7); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(sx + 54, by - 45); g.quadraticCurveTo(sx + 59, by - 47, sx + 64, by - 44); g.quadraticCurveTo(sx + 67, by - 36, sx + 67, by - 29); g.lineTo(sx + 57, by - 28); g.quadraticCurveTo(sx + 53, by - 37, sx + 54, by - 45); g.closePath(); g.fill(); g.stroke();
+    if (!alp && !red) { g.fillStyle = spot; g.beginPath(); g.ellipse(sx + 57.5, by - 41, 3.5, 3, .3, 0, 7); g.fill(); }
+    g.fillStyle = "#f0b4ac"; g.beginPath(); rp(sx + 56, by - 33, 12, 7, 3.5); g.fill(); g.stroke();
+    g.fillStyle = "#8a4a4a"; g.fillRect(sx + 60, by - 31, 1.6, 1.6); g.fillRect(sx + 64, by - 31, 1.6, 1.6);
+    g.fillStyle = "#1d1d26"; g.beginPath(); g.arc(sx + 63, by - 39, 1.6, 0, 7); g.fill();
+    g.fillStyle = "#fff"; g.fillRect(sx + 63, by - 40, .8, .8);
+    // an Alpine cow wears a bell
+    if (alp) { g.strokeStyle = "#7a3a2a"; g.lineWidth = 3; g.beginPath(); g.moveTo(sx + 52, by - 29); g.lineTo(sx + 56, by - 27); g.stroke(); g.strokeStyle = OUT; g.lineWidth = 2;
+      g.fillStyle = "#e0b24a"; g.beginPath(); g.moveTo(sx + 51, by - 27); g.lineTo(sx + 57, by - 27); g.lineTo(sx + 58, by - 20); g.lineTo(sx + 50, by - 20); g.closePath(); g.fill(); g.stroke(); }
   } else if (kind === "clogs") {
     // a giant pair of wooden clogs: a classic photo spot
     shadowAt(px + 30, by, 34);
@@ -2723,6 +2785,39 @@ function drawDark(cx) {
     g.fillStyle = gl; g.fillRect(x - r, y - r, 2 * r, 2 * r);
   }
   g.globalCompositeOperation = m0;
+}
+
+/** The scenery animals (cows, polar bears, deer, flamingos...) are part of the landscape: they stand on the ground of a
+    background layer and move exactly with it, so they never slide against the houses and trees behind them.
+    Usually that is the middle layer, with the villages (a layer without a ridge, like the lagoon, gets a flat ground). Where the near layer is a dense forest that would hide them
+    (snow, the Alps, the fjord), they stand on the near layer instead: on the strip of snow between its trees and the
+    path, in front of the trees. drawBackground() calls this right after that layer. The generator only puts them
+    where the path is at its normal height (BG_KINDS in levelgen.js), so the ground behind the path is in view; their
+    feet are never lower than BG_CLEAR above the path. They are never left out: some locks count them. Animals you
+    can bump into (the enemies, the penguin, the moose) stay on the path. */
+const BG_NEAR = new Set(["sneeuw", "bos", "alps", "fjord"]);
+const BG_PAR = { mid: .3, near: .5 }, BG_SIZE = { mid: .42, near: .5 }, BG_CLEAR = 12;
+function bgAnimalLayer() { return L && L.d && BG_NEAR.has(L.d.scene || L.d.theme) ? "near" : "mid"; }
+/** Where a scenery animal is drawn: its x on screen and the y of its feet. */
+function bgAnimalAt(x, cx, layer, which) {
+  // a layer without a ridge (the lagoon is only water) gets a flat ground at the usual height
+  const par = BG_PAR[which], gr = layer._ground || { base: which === "mid" ? 342 : 382, amps: [] };
+  // its spot in the layer, chosen so it is on screen when you are at its place in the level
+  const lx = x * TS * par + viewW * (1 - par) / 2, sx = lx - cx * par;
+  const col = Math.floor((sx + cx) / TS), path = Math.min(...[-1, 0, 1].map(d => groundTop(Math.max(0, Math.min(L.w - 1, col + d))) * TS));
+  return [sx, Math.min(ridge(gr.base, gr.amps, ((lx % LW) + LW) % LW) + 6, Math.min(path, 12 * TS) - BG_CLEAR)];
+}
+function drawBgAnimals(cx, layer, which) {
+  if (!L || !L.d || !layer || which !== bgAnimalLayer() || state === "title" || state === "map" || state === "hero") return;
+  const size = BG_SIZE[which], theme = L.d.theme;
+  for (const [k, x] of L.d.deco) {
+    if (!BG_ANIMALS.has(k)) continue;
+    const [sx, feet] = bgAnimalAt(x, cx, layer, which);
+    if (sx < -60 || sx > viewW + 60) continue;
+    const bx = x * TS + 32, gy = groundTop(x) * TS;
+    g.save(); g.translate(sx, feet); g.scale(size, size); g.translate(-bx, -gy); g.globalAlpha = .92;
+    drawDeco(k, x, theme, true); g.restore();
+  }
 }
 
 /* ---------- Alles samen ---------- */
