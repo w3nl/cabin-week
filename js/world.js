@@ -853,21 +853,30 @@ function getSceneLayers(scene) {
   else if (scene === "dolomiti") {
     // the Dolomites: pale, jagged towers of rock with a pink glow, green meadows and larch forests
     out.far = layerCanvas(() => {
+      // The towers of rock stand on a broad base of scree and larch forest that runs down behind the meadows (the
+      // middle layer starts at about 306), so the mountains never float above the hills.
+      const foot = 410;
       g.fillStyle = "#d8c8c8";
       for (let x = -40; x < LW; x += 70 + R() * 60) {
         const h = 120 + R() * 110, w = 40 + R() * 50, base = 300;
-        g.beginPath(); g.moveTo(x, base);
+        g.beginPath(); g.moveTo(x - 12, foot); g.lineTo(x, base);
         for (let i = 0; i <= 6; i++) g.lineTo(x + w * i / 6 + (R() - .5) * 8, base - h * (i % 2 ? .85 + R() * .15 : .6 + R() * .2) * (i === 0 || i === 6 ? .3 : 1));
-        g.lineTo(x + w, base); g.fill();
+        g.lineTo(x + w, base); g.lineTo(x + w + 12, foot); g.closePath(); g.fill();
       }
       // the three peaks, side by side
       const tx = 700; g.fillStyle = "#e0cccc";
-      [[0, 150, 30], [36, 190, 36], [80, 160, 30]].forEach(([dx, h, w]) => { g.beginPath(); g.moveTo(tx + dx, 300); g.lineTo(tx + dx + w * .2, 300 - h); g.lineTo(tx + dx + w * .7, 300 - h + 6); g.lineTo(tx + dx + w, 300); g.fill(); });
+      [[0, 150, 30], [36, 190, 36], [80, 160, 30]].forEach(([dx, h, w]) => { g.beginPath(); g.moveTo(tx + dx - 10, foot); g.lineTo(tx + dx, 300); g.lineTo(tx + dx + w * .2, 300 - h); g.lineTo(tx + dx + w * .7, 300 - h + 6); g.lineTo(tx + dx + w, 300); g.lineTo(tx + dx + w + 10, foot); g.closePath(); g.fill(); });
       // the pink glow of sunset and the dark lines of the cliffs: only on the rock, never on the sky
       g.globalCompositeOperation = "source-atop";
       g.fillStyle = "rgba(240,150,165,.3)"; g.fillRect(0, 0, LW, 300);
       g.strokeStyle = "rgba(120,100,110,.35)"; g.lineWidth = 1.2; for (let x = 0; x < LW; x += 11) { g.beginPath(); g.moveTo(x, 300); g.lineTo(x + 2, 200 + R() * 60); g.stroke(); }
       g.globalCompositeOperation = "source-over";
+      // the foot of the mountains, all along: grey scree slopes, then dark larch forest further down
+      const scree = [[14, 3, 1], [7, 9, 3]], wood = [[10, 4, 2], [6, 11, 4]];
+      g.fillStyle = "#b9a8ac"; g.beginPath(); g.moveTo(0, foot); for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(292, scree, x)); g.lineTo(LW, foot); g.fill();
+      g.strokeStyle = "rgba(120,100,110,.25)"; g.lineWidth = 1; for (let x = 0; x < LW; x += 9) { const y = ridge(292, scree, x); g.beginPath(); g.moveTo(x, y + 2); g.lineTo(x + 5, y + 16 + R() * 10); g.stroke(); }
+      g.fillStyle = "#4f7a52"; g.beginPath(); g.moveTo(0, foot); for (let x = 0; x <= LW; x += 6) g.lineTo(x, ridge(312, wood, x)); g.lineTo(LW, foot); g.fill();
+      for (let x = 0; x < LW; x += 9 + R() * 8) { const y = ridge(312, wood, x) + 3; pineShape(x, y, 14 + R() * 10, "#46704a", "#3c6440", null, "#2c4a30"); }
     });
     out.mid = layerCanvas(() => {
       const a = [[16, 3, 1], [8, 8, 2]];
