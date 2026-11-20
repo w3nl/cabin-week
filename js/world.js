@@ -2044,11 +2044,12 @@ function drawDeco(kind, x, theme, far) {
   } else if (kind === "saab900") { drawSaab("900", px, by);
   } else if (kind === "saab96") { drawSaab("96", px, by);
   } else if (kind === "legoset") {
-    // Lego voor de jarige: een torentje, "44" van steentjes en een Saab van Lego
+    // Lego for the birthday boy: a little tower, "40" in bricks (Paul turns 40) and a Saab made of Lego
     g.fillStyle = "#2a9a4a"; g.fillRect(px - 4, by - 6, 120, 6); g.strokeRect(px - 4, by - 6, 120, 6);
     for (let r = 0; r < 7; r++) drawLegoBrick(px + 10, by - 12 - r * 11, LEGO_COLS[r % LEGO_COLS.length]);
     const four = [[0, 0], [0, 1], [0, 2], [1, 2], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4]];
-    [32, 62].forEach(ox => four.forEach(([c, r]) => drawLegoBrick(px + ox + c * 9, by - 56 + r * 10, "#d8232a", 9)));
+    const zero = [[0, 0], [1, 0], [2, 0], [0, 1], [2, 1], [0, 2], [2, 2], [0, 3], [2, 3], [0, 4], [1, 4], [2, 4]];
+    [[32, four], [62, zero]].forEach(([ox, digit]) => digit.forEach(([c, r]) => drawLegoBrick(px + ox + c * 9, by - 56 + r * 10, "#d8232a", 9)));
     g.save(); g.translate(px + 92, by - 6); g.scale(.22, .22); drawSaab("900", -72, 0, { tree: false, color: "#d8232a" }); g.restore();
   } else if (kind === "stall") {
     // kerstmarktkraam
