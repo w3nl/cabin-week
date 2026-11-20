@@ -144,10 +144,34 @@ The Android TV fields only appear after adding Android TV in **Test and release 
 | Privacy policy | `https://cabinweek.online/privacy.html` |
 | App access | All functionality is available without special access |
 | Ads | No |
-| Content rating | Category Game. Only violence: cartoon-like (jumping on enemies). Everything else no. Result about PEGI 3 |
-| Target audience | 6-8, 9-12, 13-15 and older. Not designed to attract children with ads (there are none) |
+| Content rating | Category **Game**; the answers are below. Expected result: **PEGI 3**, ESRB **Everyone**, USK **0** |
+| Target audience | **6–8, 9–12, 13–15, 16–17 and 18+** (not 5 and under: you need to read the signs and conversations). Not designed to attract children with ads (there are none) |
 | Data safety | Collects no data, shares no data |
 | Government, financial features, health | No |
+
+### Content rating, question by question
+
+Policy → App content → **Content rating** asks the IARC questionnaire; Play works out the ratings from the answers (you don't pick an age). The wording in Play Console can differ a little.
+
+| Question | Answer | Why |
+|---|---|---|
+| Category | **Game** | |
+| Violence | **Yes: cartoon or fantasy violence, in a comical, child-like setting.** No blood, not realistic, not against humans | You jump on cartoon animals; they fall over with a "whee" and a "Pfff!" and disappear. Animals walk towards you when you are close |
+| Fear, horror | No | The dark cave, the troll forest and the trolls are cosy, not scary |
+| Sexuality, nudity | No | |
+| Bad language | No | |
+| Drugs, tobacco | No | |
+| Alcohol | **Only references** (if Play asks): no use shown, not encouraged, never by children | Mulled wine is mentioned at the Christmas markets ("mulled wine for the grown-ups, hot chocolate for the kids"), there are wine barrels and vines on the grape harvest day, and "the grown-ups taste the wine". Answer honestly; Play may add a small note such as "Alcohol Reference" next to the rating |
+| Gambling or simulated gambling | No | |
+| Crude humour | No | Jokes about the wifi, chips and Uno |
+| Users can talk to or interact with each other | No | No chat, no online play |
+| Shares the user's location | No | |
+| Digital purchases | No | |
+| Unrestricted internet or a web browser | No | The game runs offline in its own WebView |
+
+PEGI 3 allows very mild violence in a comical or child-like setting. **Got PEGI 7 instead?** Then check the violence answer first (cartoon, comical and child-like, not realistic), then the alcohol answer (references only, no use shown). If it stays higher, removing the few wine references from the texts would lower it.
+
+**Target audience and the Families policy:** with age groups under 13, Google Play's Families policy applies. Cabin Week meets it: no ads, no data collected or shared (Data safety), and a privacy policy (`https://cabinweek.online/privacy.html`).
 
 ## GitHub social preview
 
