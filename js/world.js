@@ -1362,15 +1362,11 @@ function sign2(x, y, w, h, bg, text, fg) {
 }
 
 /* ---------- Decoratie ---------- */
-/** Animals in the scenery that stand still: drawn smaller, a bit higher and a bit faded, as if further away, so you
- *  can see at once that they are background and not something to bump into or stand on. */
+/** Animals in the scenery that stand still: drawn in the background by drawBgAnimals() (behind the path, smaller,
+ *  hazy, with parallax), so you can see at once that they are not something to bump into or stand on. */
 const BG_ANIMALS = new Set(["moosedeco", "polarbear", "walrus", "muskox", "deer", "cow", "flamingo"]);
 function drawDeco(kind, x, theme, far) {
-  if (!far && BG_ANIMALS.has(kind)) {
-    const bx = x * TS + 32, gy = groundTop(x) * TS;
-    g.save(); g.translate(bx, gy - 8); g.scale(.6, .6); g.translate(-bx, -gy); g.globalAlpha = .88;
-    drawDeco(kind, x, theme, true); g.restore(); return;
-  }
+  if (!far && BG_ANIMALS.has(kind)) return; // drawn in the background by drawBgAnimals()
   const by = groundTop(x) * TS, px = x * TS;
   g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = OUT; g.lineWidth = 2;
   const H = hash(x * 5.3);
@@ -2778,6 +2774,23 @@ function drawDark(cx) {
   g.globalCompositeOperation = m0;
 }
 
+/** The scenery animals (cows, polar bears, deer, flamingos...) stand in the background: on the field behind the path,
+    smaller, a little hazy, and drawn before the path, the trees and the houses, which cover them. They also move a bit
+    slower than the path when you walk (parallax), so they clearly belong to the landscape, not to the path you walk
+    on. Animals you can bump into (the enemies, the penguin, the moose) stay on the path. */
+const BG_PARALLAX = .86, BG_SCALE = .52;
+function drawBgAnimals(cx, theme) {
+  for (const [k, x] of L.d.deco) {
+    if (!BG_ANIMALS.has(k)) continue;
+    const bx = x * TS + 32, gy = groundTop(x) * TS;
+    // where it stands on screen: further away, so it moves at BG_PARALLAX of the camera speed
+    const sx = (bx - cx) + (cx - bx + viewW / 2) * (1 - BG_PARALLAX), fy = gy - 30;
+    if (sx < -80 || sx > viewW + 80) continue;
+    g.save(); g.translate(sx, fy); g.scale(BG_SCALE, BG_SCALE); g.translate(-bx, -gy); g.globalAlpha = .82;
+    drawDeco(k, x, theme, true); g.restore();
+  }
+}
+
 /* ---------- Alles samen ---------- */
 function render() {
   // Geen aparte wisbeurt: de achtergrond (lucht of interieur) bedekt altijd het hele canvas.
@@ -2792,6 +2805,7 @@ function render() {
   }
   const theme = L.d.theme, cx = Math.round(cam);
   drawBackground(theme, cx);
+  drawBgAnimals(cx, theme);
   g.save(); g.translate(-cx, 0);
 
   for (const [k, x] of L.d.deco) drawDeco(k, x, theme);
