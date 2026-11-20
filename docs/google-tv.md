@@ -32,7 +32,7 @@ In every menu the gold outline is on a button right away, so you always see wher
 
 ## 1. In a browser app
 
-1. Put the game online: see [domain.md](domain.md). It is at `https://tripscouts.online/` (or `https://w3nl.github.io/cabin-week/`).
+1. Put the game online: see [domain.md](domain.md). It is at `https://tripscouts.online/`.
 2. Install a browser from the Play Store on the Google TV, for example **TV Bro**.
 3. Open `tripscouts.online` and play with the remote or a controller.
 
@@ -48,7 +48,7 @@ Whether a controller works in such a browser depends on the browser. If not, use
 
 The workflow *Build the Android app* (`google-tv.yml`) builds **one Android app** with the whole game inside on every change. It is the same app for phone, tablet and Google TV (on the TV it has its own tile on the home screen); this page only covers the TV part. It works offline. On `main` the app is attached to the release **google-tv**:
 
-`https://github.com/w3nl/cabin-week/releases/download/google-tv/cabin-week.apk`
+`https://github.com/w3nl/tripscouts/releases/download/google-tv/cabin-week.apk`
 
 **Once on the Google TV:**
 
