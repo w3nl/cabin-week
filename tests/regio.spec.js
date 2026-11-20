@@ -497,3 +497,20 @@ test('after ringing the bell, a countdown on screen shows how much time is left'
   expect(r.drawn).toBe(1);                       // drawn while the gate is open, not before or after
   expect(r.during).toBeGreaterThan(r.secs * 60 - 40);
 });
+
+test('in the dark, a lamp you light keeps its surroundings lit, also when you walk on', async ({ page }) => {
+  await seed(page, { region: 'ardeche', unlocked: 8 });
+  await startDay(page, 3);
+  const r = await page.evaluate(() => {
+    const s = L.switches[0], cx = s.x - 300; // look around the lamp
+    const before = darkLights(cx).length;
+    s.on = true;
+    const after = darkLights(cx);
+    // walk away from it (still on screen): its light stays where the lamp is
+    P.x = s.x + 8 * TS;
+    const away = darkLights(cx).find(l => Math.abs(l[0] - (s.x + 16 - cx)) < 1);
+    render();
+    return { before, after: after.length, away: !!away, radius: away && away[2] > 3 * TS };
+  });
+  expect(r).toEqual({ before: 1, after: 2, away: true, radius: true });
+});

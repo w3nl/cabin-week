@@ -2687,12 +2687,42 @@ function drawWeather() {
 /** Darkness with a circle of light around you (the troll forest, the northern lights night). Finding things makes it bigger. */
 /** How far you can see in the dark: more for every thing you find, the task item and every lamp or torch you light. */
 function darkRadius() { const dk = L.d.dark; return dk.r + L.keys * (dk.key || 0) + (L.hasQuest || L.questDone ? dk.quest || 0 : 0) + L.switches.filter(s => s.on).length * (dk.lamp || 0); }
+/* Darkness (dark levels): a dark layer with holes of light. One around you, and one around every lamp or torch you
+   lit: that place stays light when you walk on, so you can see the way back. The layer is drawn at half size on its own
+   canvas (DARK_CV) and scaled up: the edges are soft anyway, and it is quick enough for the TV. */
+let DARK_CV = null;
+const LAMP_LIGHT = 3.6 * TS; // how far a lit lamp lights up its surroundings
+function darkLights(cx) {
+  const r = darkRadius(), out = [[P.x + P.w / 2 - cx, P.y + P.h / 2, r, .45]];
+  for (const s of L.switches) if (s.on && L.d.task && L.d.task.kind === "lights") {
+    const lx = s.x + 16 - cx, ly = s.y + TS - 50;
+    if (lx > -LAMP_LIGHT && lx < viewW + LAMP_LIGHT) out.push([lx, ly + 10, LAMP_LIGHT * (1 + Math.sin(frame / 9 + s.x) * .03), .35]);
+  }
+  return out;
+}
 function drawDark(cx) {
-  const r = darkRadius();
-  const sx = P.x + P.w / 2 - cx, sy = P.y + P.h / 2;
-  const gr = g.createRadialGradient(sx, sy, r * .45, sx, sy, r);
-  gr.addColorStop(0, "rgba(4,6,18,0)"); gr.addColorStop(1, "rgba(4,6,18,.9)");
-  g.fillStyle = gr; g.fillRect(0, 0, viewW, VIEW_H);
+  const k = .5, w = Math.ceil(viewW * k), h = Math.ceil(VIEW_H * k);
+  DARK_CV = DARK_CV || document.createElement("canvas");
+  if (DARK_CV.width !== w || DARK_CV.height !== h) { DARK_CV.width = w; DARK_CV.height = h; }
+  const d = DARK_CV.getContext("2d");
+  d.globalCompositeOperation = "source-over"; d.clearRect(0, 0, w, h);
+  d.fillStyle = "rgba(4,6,18,.9)"; d.fillRect(0, 0, w, h);
+  d.globalCompositeOperation = "destination-out";
+  const lights = darkLights(cx);
+  for (const [x, y, r, inner] of lights) {
+    const gr = d.createRadialGradient(x * k, y * k, r * inner * k, x * k, y * k, r * k);
+    gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+    d.fillStyle = gr; d.fillRect((x - r) * k, (y - r) * k, 2 * r * k, 2 * r * k);
+  }
+  g.drawImage(DARK_CV, 0, 0, viewW, VIEW_H);
+  // a warm glow around the lit lamps
+  const m0 = g.globalCompositeOperation; g.globalCompositeOperation = "lighter";
+  for (const [x, y, r] of lights.slice(1)) {
+    const gl = g.createRadialGradient(x, y, 4, x, y, r * .8);
+    gl.addColorStop(0, "rgba(255,190,110,.22)"); gl.addColorStop(1, "rgba(255,190,110,0)");
+    g.fillStyle = gl; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  g.globalCompositeOperation = m0;
 }
 
 /* ---------- Alles samen ---------- */
