@@ -126,7 +126,38 @@
       <p class="map-info" id="mapInfo"></p>
       <div class="mapbox" id="mapBox"></div>
       <p class="soon" id="mapSoon"></p>
-      <div class="cta"><button class="btn ghost" id="mapClose" type="button" data-nl="Terug">Back</button></div>
+      <div class="cta"><button class="btn ghost" id="mapClose" type="button" data-nl="Terug">Back</button>
+        <button class="btn ghost" id="mapSave" type="button" data-nl="💾 Voortgang">💾 Progress</button></div>
+    </div>
+  </div>
+
+  <!-- Your progress (from the map) or your own hero (from the creator) to another device or address (transfer.js) -->
+  <div class="overlay" id="saveWrap" hidden>
+    <div class="sheet save">
+      <div class="save-out">
+        <div class="eyebrow" id="saveEyebrow"></div>
+        <h2 id="saveTitle"></h2>
+        <p class="save-mine" id="saveMine"></p>
+        <p class="save-help" id="saveHelpOut"></p>
+        <textarea id="saveCode" class="save-code" rows="2" readonly spellcheck="false" aria-label="Your code" data-nl-label="Jouw code"></textarea>
+        <div class="cta">
+          <button class="btn" id="saveCopyLink" type="button" data-nl="Link kopiëren">Copy link</button>
+          <button class="btn ghost" id="saveCopyCode" type="button" data-nl="Code kopiëren">Copy code</button>
+          <button class="btn ghost" id="saveDownload" type="button" data-nl="Als bestand bewaren">Save as file</button>
+        </div>
+      </div>
+      <div class="save-in">
+        <div class="eyebrow" id="saveEyebrowIn"></div>
+        <p class="save-help" id="saveHelpIn"></p>
+        <textarea id="saveIn" class="save-code" rows="2" spellcheck="false" placeholder="TS1.…" aria-label="Paste a code" data-nl-label="Plak een code"></textarea>
+        <p class="fb" id="saveFb" aria-live="polite"></p>
+        <div class="cta">
+          <button class="btn" id="saveImport" type="button" data-nl="Overnemen">Import</button>
+          <button class="btn ghost" id="saveOpen" type="button" data-nl="Bestand openen">Open file</button>
+          <button class="btn ghost" id="saveClose" type="button" data-nl="Terug">Back</button>
+        </div>
+        <input type="file" id="saveFile" accept=".txt,text/plain" hidden>
+      </div>
     </div>
   </div>
 
@@ -142,6 +173,7 @@
           <button class="btn" id="heroDone" type="button" data-nl="Klaar">Done</button>
           <button class="btn ghost" id="heroRandom" type="button" data-nl="🎲 Verras me">🎲 Surprise me</button>
           <button class="btn ghost" id="heroCancel" type="button" data-nl="Terug">Back</button>
+          <button class="btn ghost" id="heroShare" type="button" data-nl="💾 Heldcode">💾 Hero code</button>
         </div>
       </div>
       <div class="hero-rows" id="heroRows"></div>
@@ -187,6 +219,7 @@
 <script src="js/world.js"></script>
 <script src="js/screens.js"></script>
 <script src="js/hero.js"></script>
+<script src="js/transfer.js"></script>
 <script src="js/voice.js"></script>
   <script src="js/ambience.js"></script>
 <script src="js/gamepad.js"></script>

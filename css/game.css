@@ -378,3 +378,22 @@ html.wide .hero-rows { gap: 5px; }
   .hero-row .chip { font-size: 11px; padding: 1px 8px; }
   .hero-row .swatch { width: 19px; height: 19px; font-size: 10px; }
 }
+
+/* ---------- Your progress to another device or address (transfer.js) ---------- */
+#saveWrap { display: flex; padding: 12px; }
+#saveWrap[hidden] { display: none; }
+.sheet.save { margin: auto; width: min(560px, 100%); padding: 16px 18px; display: grid; gap: 14px; }
+.sheet.save h2 { margin: 4px 0 6px; }
+.sheet.save .save-in { border-top: 1px solid var(--line); padding-top: 12px; }
+.save-mine { margin: 0 0 4px; font-weight: 700; color: var(--gold); }
+.save-help { margin: 4px 0 8px; color: var(--muted); line-height: 1.4; }
+.save-code { display: block; width: 100%; box-sizing: border-box; resize: none; font: 12px/1.35 ui-monospace, Menlo, Consolas, monospace; color: var(--snow);
+  background: #0b1520; border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; word-break: break-all; }
+.save-code:focus { outline: none; border-color: var(--gold); }
+.sheet.save .cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sheet.save .fb { min-height: 1.4em; margin: 8px 0 0; font-weight: 700; line-height: 1.4; color: var(--muted); }
+.sheet.save .fb.ok { color: var(--pine); }
+.sheet.save .fb.bad { color: var(--rose); }
+/* landscape (computer, TV, phone turned): taking it away on the left, bringing it here on the right */
+html.wide .sheet.save { width: min(820px, 100%); grid-template-columns: 1fr 1fr; gap: 22px; padding: 14px 18px; }
+html.wide .sheet.save .save-in { border-top: 0; padding-top: 0; border-left: 1px solid var(--line); padding-left: 22px; }
