@@ -1,7 +1,7 @@
 // Service worker: maakt het spel installeerbaar en offline speelbaar.
 // Verhoog CACHE bij elke wijziging, zodat telefoons de nieuwe versie krijgen, en houd GAME_VERSION in js/app.js
 // hetzelfde getal (tests/pwa.spec.js controleert dat). De pagina toont dat getal en biedt herladen aan bij een nieuwere versie.
-const CACHE = 'cabinweek-v27';
+const CACHE = 'cabinweek-v28';
 const CORE = [
   './',
   './index.html',
@@ -32,6 +32,7 @@ const CORE = [
   './js/world.js',
   './js/screens.js',
   './js/hero.js',
+  './js/transfer.js',
   './js/voice.js',
   './js/ambience.js',
   './js/gamepad.js',

@@ -32,6 +32,7 @@ function setScreen(s) {
   $("title").hidden = s !== "title";
   $("mapWrap").hidden = s !== "map";
   $("heroWrap").hidden = s !== "hero";
+  $("saveWrap").hidden = s !== "save";
   $("cardWrap").hidden = !(s === "intro" || s === "card");
   $("padWrap").hidden = s !== "pad";
   $("hud").hidden = !(s === "play" || s === "pad");
