@@ -96,7 +96,7 @@ test('the new regions have their own scenery, enemies and checkpoint flags', asy
   expect(info.find(r => r.id === 'veneto').scenes).toEqual(expect.arrayContaining(['laguna', 'venezia', 'burano', 'verona', 'dolomiti']));
   expect(info.find(r => r.id === 'veneto').enemies).toEqual(expect.arrayContaining(['duif', 'meeuw', 'marmot']));
   expect(new Set(codes).size).toBe(80);
-  expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'meeuw', 'zwijn']));
+  expect(info.find(r => r.id === 'netherlands').enemies).toEqual(expect.arrayContaining(['gans', 'duif', 'meeuw', 'zwijn']));
 });
 
 test('Dutch: the map and the region names are translated', async ({ page }) => {

@@ -30,6 +30,7 @@ function ambKind(d) {
   } else {
     k.beds.push(th === "stad" ? "breeze" : "wind");
     if (th === "stad") k.events.push("bells", "bells", "chatter");
+    if (d.enemy === "duif") k.events.push("coo"); // city pigeons (Amsterdam)
     else if (sc === "pole" || sc === "fjord") k.events.push("ice", "crow");
     else if (sc === "alps") k.events.push("cowbell", "crow");
     else k.events.push(night ? "owl" : "crow", "owl");
