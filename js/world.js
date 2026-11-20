@@ -2815,7 +2815,7 @@ function bgAnimalAt(x, cx, layer, which) {
   return [sx, Math.min(ridge(gr.base, gr.amps, ((lx % LW) + LW) % LW) + 6, 12 * TS - BG_CLEAR)];
 }
 function drawBgAnimals(cx, layer, which) {
-  if (!L || !L.d || !layer || which !== bgAnimalLayer() || state === "title" || state === "map" || state === "hero") return;
+  if (!L || !L.d || !layer || which !== bgAnimalLayer() || state === "title" || state === "map" || state === "hero" || state === "save") return;
   const size = BG_SIZE[which], theme = L.d.theme;
   for (const [k, x] of L.d.deco) {
     if (!BG_ANIMALS.has(k)) continue;
@@ -2833,7 +2833,7 @@ function render() {
   g.setTransform(scale, 0, 0, scale, 0, 0);
   g.imageSmoothingEnabled = true;
 
-  if (!L || state === "title" || state === "map" || state === "hero") {
+  if (!L || state === "title" || state === "map" || state === "hero" || state === "save") {
     drawBackground("sneeuw", frame * .6, REGION.scene);
     if (!REGION.summer) drawFlakes();
     vignette();
