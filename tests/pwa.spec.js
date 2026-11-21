@@ -41,6 +41,29 @@ test('een Chromebook toont de Chrome Web Store-optie zonder installatieprompt', 
   await expect(page.locator('#installBtn')).toBeHidden();
 });
 
+test('de installatiemelding werkt met pijltjes en Enter', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (X11; CrOS x86_64 14526.64.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36' }));
+  await page.goto('/');
+  await expect(page.locator('#installChrome')).toBeVisible();
+  expect(await page.evaluate(() => gpFocusables().map(el => el.id))).toEqual(expect.arrayContaining(['installChrome', 'installClose']));
+  const focusables = await page.evaluate(() => gpFocusables().map(el => el.id));
+  expect(focusables).not.toContain('installBtn');
+  expect(focusables).not.toContain('installPlay');
+  await page.evaluate(() => {
+    window.__storeClicks = 0;
+    document.querySelector('#installChrome').addEventListener('click', e => { e.preventDefault(); window.__storeClicks++; });
+  });
+  await page.locator('#installClose').focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(page.locator('#installChrome')).toBeFocused();
+  await page.keyboard.press('Enter');
+  expect(await page.evaluate(() => window.__storeClicks)).toBe(1);
+  await page.locator('#installClose').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#installBar')).toBeHidden();
+  expect(await page.evaluate(() => gpFocusables().some(el => el.closest('#installBar')))).toBe(false);
+});
+
 test('een Chromebook biedt de geïnstalleerde Chrome-extensie niet opnieuw aan', async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tripscouts-extension-'));
   let context;
