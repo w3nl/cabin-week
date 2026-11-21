@@ -50,7 +50,11 @@ addEventListener("gamepaddisconnected", gpStatus);
 
 /* ---------- Menu's met de controller ---------- */
 function gpRoot() { return state === "title" ? $("title") : state === "map" ? $("mapWrap") : state === "hero" ? $("heroWrap") : state === "save" ? $("saveWrap") : state === "pad" ? $("padWrap") : $("cardWrap"); }
-function gpFocusables() { return [...gpRoot().querySelectorAll("button")].filter(b => !b.disabled && b.offsetParent !== null); }
+function gpFocusables() {
+  const list = [...gpRoot().querySelectorAll("button")];
+  if (state === "title") list.push(...$("installBar").querySelectorAll("button, a[href]"));
+  return list.filter(b => !b.disabled && b.offsetParent !== null);
+}
 function gpCurrent() { const list = gpFocusables(); return list.includes(document.activeElement) ? document.activeElement : null; }
 function gpFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.scrollIntoView({ block: "nearest", inline: "nearest" }); }
 /** Waar de focus begint: de laatst vrijgespeelde dag, de eerste knop op een kaart, of de 1 op het codeslot. */

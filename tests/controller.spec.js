@@ -51,6 +51,22 @@ test('met de pijltjes kies je een ander personage', async ({ page }) => {
   await expect(page.locator('#chars button').nth(2)).toBeFocused();   // de focus blijft op dezelfde plek
 });
 
+test('met de controller kies en open je de Chrome Web Store', async ({ page }) => {
+  await fakePad(page);
+  await page.addInitScript(() => Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (X11; CrOS x86_64 14526.64.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36' }));
+  await seed(page);
+  await expect(page.locator('#installChrome')).toBeVisible();
+  await page.evaluate(() => {
+    window.__storeClicks = 0;
+    document.querySelector('#installChrome').addEventListener('click', e => { e.preventDefault(); window.__storeClicks++; });
+  });
+  await page.locator('#installClose').focus();
+  await press(page, BTN.LEFT);
+  await expect(page.locator('#installChrome')).toBeFocused();
+  await press(page, BTN.A);
+  expect(await page.evaluate(() => window.__storeClicks)).toBe(1);
+});
+
 test('lopen met de stick, springen met ✕, praten met □, verder met ✕, en Start voor het menu', async ({ page }) => {
   await fakePad(page);
   await seed(page);
