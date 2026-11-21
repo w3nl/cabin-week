@@ -29,6 +29,20 @@ cd linux && npm ci && npm run snap
 
 The snap is then in `linux/dist/`. To try the app without building a snap, run `npm start` in `linux/` after copying the game in.
 
+### Snapcraft and Snap Store source builds
+
+The root `snapcraft.yaml` lets Snapcraft and the Snap Store's **Builds** service build directly from this repository. It is a separate route from the existing electron-builder snap build in GitHub Actions; that working workflow is unchanged.
+
+The recipe builds for **amd64** on `core22`, with the GNOME extension for desktop libraries and integration. It installs Node 26 for the build, copies the game with `tools/build-site.js`, packages the existing Electron app and includes its launcher and icon. The version follows the same rule: `1.<GAME_VERSION>.0`. Keyboard, audio, network and joystick access are retained. Electron runs with `--no-sandbox` inside the strictly confined snap, as is customary for Electron snaps.
+
+To build locally with an initialised LXD installation:
+
+```bash
+snapcraft pack --use-lxd
+```
+
+For source builds in the store, connect `w3nl/tripscouts` in **My snaps → tripscouts → Builds** and select the branch containing the recipe (normally `main` after merging). Build for amd64. Set the release channel deliberately; avoid publishing the same commit through both the store builder and GitHub Actions, or it will produce duplicate store revisions.
+
 ## Installing the snap from the release (without the store)
 
 ```bash
@@ -73,5 +87,5 @@ sudo snap install --dangerous ./tripscouts.snap
 ## Good to know
 
 - **Size:** about 105 MB, because Electron brings its own browser. Updates come in automatically through snapd.
-- **Base:** the snap is built with electron-builder's ready-made template on `core20` (supported until 2030), so the runner doesn't need snapcraft or LXD to build. electron-builder warns that this `snap` setting is old. Its newer `snapcraft` setting with `core24` is still beta and needs snapcraft with LXD; switch when it is stable.
+- **Base:** GitHub Actions uses electron-builder's ready-made `core20` template (supported until 2030), so that route needs no LXD to build. The root Snapcraft recipe uses `core22` and the GNOME extension instead; it does not use electron-builder's beta `snapcraft` target.
 - **Only amd64** (normal laptops and PCs). An arm64 snap (Raspberry Pi, some laptops) would need an arm64 runner.

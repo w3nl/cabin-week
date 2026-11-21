@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=TripScouts
+Comment=Scout ten family trips across Europe
+Exec=tripscouts
+Icon=${SNAP}/meta/gui/tripscouts.png
+Terminal=false
+Type=Application
+Categories=Game;
+Keywords=game;platform;family;holiday;
+StartupWMClass=TripScouts
