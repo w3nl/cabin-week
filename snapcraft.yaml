@@ -1,0 +1,52 @@
+name: tripscouts
+base: core22
+adopt-info: tripscouts
+summary: Scout ten family trips across Europe in a cosy platform game
+description: |
+  Two families can't agree where to go on holiday, so you scout ten trips
+  across Europe for them. Walk, jump, find things and crack codes.
+  A platform game in English and Dutch, with offline play, keyboard and
+  controller support. No ads, nothing to buy, nothing collected.
+grade: stable
+confinement: strict
+license: GPL-3.0
+website: https://tripscouts.online/
+source-code: https://github.com/w3nl/tripscouts
+issues: https://github.com/w3nl/tripscouts/issues
+architectures:
+  - build-on: amd64
+    build-for: amd64
+
+apps:
+  tripscouts:
+    command: tripscouts/tripscouts --no-sandbox
+    extensions: [gnome]
+    desktop: meta/gui/tripscouts.desktop
+    plugs: [browser-support, network, audio-playback, joystick]
+
+parts:
+  tripscouts:
+    plugin: nil
+    source: .
+    build-snaps: [node/26/stable]
+    build-packages: [git, unzip]
+    stage-packages: [libnss3, libnspr4, libasound2, libxss1, libxtst6, libnotify4]
+    override-build: |
+      set -eu
+      node tools/build-site.js
+      rm -rf linux/game
+      cp -a _site linux/game
+      V=$(sed -nE 's/^const GAME_VERSION = ([0-9]+);$/\1/p' js/app.js)
+      if [ -z "$V" ]; then
+        echo "Could not read GAME_VERSION from js/app.js" >&2
+        exit 1
+      fi
+      craftctl set version="1.$V.0"
+      cd linux
+      npm version "1.$V.0" --no-git-tag-version --allow-same-version
+      npm ci --no-audit --no-fund
+      npx electron-builder --linux dir --x64 --publish never
+      mkdir -p "$CRAFT_PART_INSTALL/tripscouts"
+      cp -a dist/linux-unpacked/. "$CRAFT_PART_INSTALL/tripscouts/"
+      install -Dm644 tripscouts.desktop "$CRAFT_PART_INSTALL/meta/gui/tripscouts.desktop"
+      install -Dm644 game/icons/icon-512.png "$CRAFT_PART_INSTALL/meta/gui/tripscouts.png"
