@@ -51,7 +51,7 @@ test('een Chromebook biedt de geïnstalleerde Chrome-extensie niet opnieuw aan',
       fs.cpSync(path.join(root, f), path.join(extension, f), { recursive: true });
     fs.copyFileSync(path.join(root, 'chrome', 'background.js'), path.join(extension, 'background.js'));
     fs.writeFileSync(path.join(extension, 'manifest.json'), JSON.stringify({
-      manifest_version: 3, name: 'TripScouts', version: '1.0.0', background: { service_worker: 'background.js' }
+      manifest_version: 3, name: 'TripScouts', version: '1.0.0', action: {}, background: { service_worker: 'background.js' }
     }));
     context = await chromium.launchPersistentContext(path.join(tmp, 'profile'), {
       headless: true,
