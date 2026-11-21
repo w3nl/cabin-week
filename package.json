@@ -9,8 +9,10 @@
     "build": "node tools/build-site.js",
     "build:aab": "node tools/build-aab.js",
     "bundle": "node tools/bundle.js",
+    "build:chrome": "node tools/build-chrome.js",
     "icons": "node tools/icons.js",
-    "store": "node tools/store.js"
+    "store": "node tools/store.js",
+    "store:chrome": "node tools/store.js chrome"
   },
   "license": "GPL-3.0",
   "devDependencies": {

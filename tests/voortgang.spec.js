@@ -81,7 +81,7 @@ test('de dagen gaan met een voortgangscode van de kaart mee, zonder de held', as
   await expect(other.locator('#saveFb')).toContainText("isn't a TripScouts code");
   await other.locator('#saveIn').fill(code);
   await expect(other.locator('#saveFb')).toContainText('14 days scouted');
-  await other.locator('#saveImport').click();
+  await Promise.all([other.waitForEvent('load'), other.locator('#saveImport').click()]);
   await expect(other.locator('html')).toHaveClass(/ready/);
   await expect(other.locator('#title')).toBeVisible();
   const s = await stored(other);
@@ -156,7 +156,8 @@ test('een vreemde code wordt nagekeken en kan het spel niet breken', async ({ pa
   await page.locator('#regionBtn').click();
   await page.locator('#mapSave').click();
   await page.locator('#saveIn').fill(days);
-  await page.locator('#saveImport').click();
+  // importing days reloads the page after a moment; the old page is already "ready", so wait for the new one
+  await Promise.all([page.waitForEvent('load'), page.locator('#saveImport').click()]);
   await expect(page.locator('html')).toHaveClass(/ready/);
   let s = await stored(page);
   expect(s.unlocked).toBe(8);

@@ -15,7 +15,9 @@ const { openArt, saveArt, ICON, wide } = require('./art-render');
     // The Android app: launcher icons, and the banner on the Google TV home screen
     for (const [dir, size] of [['mipmap-xhdpi', 96], ['mipmap-xxxhdpi', 192]]) await saveArt(page, path.join(res, dir, 'ic_launcher.png'), size, size, ICON);
     await saveArt(page, path.join(res, 'drawable-xhdpi', 'banner.png'), 320, 180, wide(320, 180));
-    console.log('Icons made: icons/ and android-tv/app/src/main/res/');
+    // The Chrome extension (the toolbar and chrome://extensions)
+    for (const size of [16, 32, 48, 128]) await saveArt(page, path.join(root, 'chrome', 'chrome-icons', `icon-${size}.png`), size, size, ICON);
+    console.log('Icons made: icons/, chrome/chrome-icons/ and android-tv/app/src/main/res/');
   } finally {
     await close();
     await browser.close();

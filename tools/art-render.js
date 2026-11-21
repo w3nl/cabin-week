@@ -21,14 +21,15 @@ async function openArt(browser, port = 4189) {
     (screenshots of real levels, the same size): they fill the two halves instead of the drawn scenes. */
 async function saveArt(page, file, W, H, opts = {}, imgs = {}) {
   const urls = Object.fromEntries(Object.entries(imgs).map(([k, b]) => [k, 'data:image/png;base64,' + b.toString('base64')]));
-  const url = await page.evaluate(async ([W, H, opts, urls]) => {
+  const type = file.endsWith('.jpg') ? 'image/jpeg' : 'image/png';   // JPEG for stores that want no alpha
+  const url = await page.evaluate(async ([W, H, opts, urls, type]) => {
     const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
     if (urls.winter) opts.winterImg = await load(urls.winter);
     if (urls.summer) opts.summerImg = await load(urls.summer);
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     drawTripScene(c.getContext('2d'), W, H, opts);
-    return c.toDataURL('image/png');
-  }, [W, H, opts, urls]);
+    return c.toDataURL(type, .92);
+  }, [W, H, opts, urls, type]);
   fs.writeFileSync(file, Buffer.from(url.split(',')[1], 'base64'));
 }
 

@@ -4,13 +4,16 @@
 // - tv-banner.png (1280×720): de banner voor Android TV (de TripScouts-tekening uit tools/art.js)
 // - snap-featured-banner.png (720×240): the featured banner for the Snap Store
 // - screenshot-*.png (1920×1080): for phone, tablet and TV (Google Play takes up to 8): the title, the map, six regions and your own hero
+// The Chrome Web Store (docs/chrome-store/): store-icon.png (128×128: 96×96 artwork with transparent padding) and five
+// screenshot-*.jpg (1280×800, no alpha). Only these: npm run store:chrome
+const chromeOnly = process.argv[2] === 'chrome';
 const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { openArt, saveArt, wide } = require('./art-render');
 
-const root = path.join(__dirname, '..'), out = path.join(root, 'docs', 'play-store');
+const root = path.join(__dirname, '..'), out = path.join(root, 'docs', 'play-store'), chromeOut = path.join(root, 'docs', 'chrome-store');
 const port = 4187, base = `http://127.0.0.1:${port}/`;
 const KEY = 'cabin-week';
 
@@ -45,13 +48,29 @@ async function play(page, i, walk) {
   await page.waitForTimeout(700);
 }
 
+/** The store icon for the Chrome Web Store (128×128): as Google asks, the artwork is 96×96 in the middle, with rounded
+    corners, and 16 px of transparent space around it. */
+async function chromeStoreIcon(page, file) {
+  const url = await page.evaluate(() => {
+    const art = document.createElement('canvas'); art.width = art.height = 96;
+    drawTripScene(art.getContext('2d'), 96, 96, {});
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const x = c.getContext('2d');
+    x.beginPath(); x.roundRect(16, 16, 96, 96, 18); x.clip();
+    x.drawImage(art, 16, 16);
+    return c.toDataURL('image/png');
+  });
+  fs.writeFileSync(file, Buffer.from(url.split(',')[1], 'base64'));
+}
+
 (async () => {
   fs.mkdirSync(out, { recursive: true });
+  fs.mkdirSync(chromeOut, { recursive: true });
   const server = spawn(process.execPath, [path.join(root, 'tests', 'serve.js')], { env: { ...process.env, PORT: String(port) }, stdio: 'ignore' });
   await new Promise(r => setTimeout(r, 800));
   const browser = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
   try {
-    // Screenshots: 1280×720 at 1.5× = 1920×1080. [file, region, day (null = a menu), character, walk ms, extra]
+    // Screenshots: [file, region, day (null = a menu), character, walk ms, extra]
     const shots = [
       ['screenshot-1-title.png', 'norway', null, 'me', 0],
       ['screenshot-2-map.png', 'ardennes', null, 0, 0, 'map'],
@@ -62,8 +81,16 @@ async function play(page, i, walk) {
       ['screenshot-7-christmas.png', 'ardennes', 4, 8, 900, 'slide'],
       ['screenshot-8-hero.png', 'ardennes', null, 'me', 0, 'hero'],
     ];
-    for (const [name, region, day, char, walk, extra] of shots) {
-      const page = await open(browser, { width: 1280, height: 720, scale: 1.5, char, region });
+    // Google Play: 1280×720 at 1.5× = 1920×1080, all eight. The Chrome Web Store: 1280×800, at most five, and no alpha,
+    // so JPEG.
+    const CHROME_SHOTS = ['screenshot-1-title.png', 'screenshot-2-map.png', 'screenshot-3-dalmatia.png', 'screenshot-4-tirol.png', 'screenshot-7-christmas.png'];
+    const sets = [
+      ...(chromeOnly ? [] : [{ dir: out, width: 1280, height: 720, scale: 1.5, list: shots }]),
+      { dir: chromeOut, width: 1280, height: 800, scale: 1, list: shots.filter(s => CHROME_SHOTS.includes(s[0])), jpeg: true },
+    ];
+    for (const set of sets) for (const [file, region, day, char, walk, extra] of set.list) {
+      const name = set.jpeg ? file.replace(/\.png$/, '.jpg') : file;
+      const page = await open(browser, { width: set.width, height: set.height, scale: set.scale, char, region });
       if (day !== null) await play(page, day, walk);
       if (extra === 'map') {
         await page.locator('#regionBtn').click();
@@ -108,14 +135,13 @@ async function play(page, i, walk) {
         await page.waitForTimeout(260);
       }
       else if (day === null && !extra) await page.evaluate(() => { document.activeElement.blur(); document.querySelectorAll('*').forEach(el => { el.scrollTop = 0; }); });
-      await page.screenshot({ path: path.join(out, name) });
+      await page.screenshot(set.jpeg ? { path: path.join(set.dir, name), type: 'jpeg', quality: 92 } : { path: path.join(set.dir, name) });
       await page.close();
     }
 
-    // Feature graphic (Google Play, 1024×500), social preview (GitHub, 1280×640) and the Android TV banner (1280×720):
-    // the TripScouts artwork (tools/art.js) with the name, like the app icon.
-    // The feature graphic and the social preview show real levels: Christmas Day in the snow (Lily) and the warm sea of
-    // Dalmatia (Max), split on the diagonal, with Paul and the name on top.
+    // The big images: the TripScouts artwork (tools/art.js) with the name, like the app icon. The feature graphic, the
+    // social preview and the marquee show real levels: Christmas Day in the snow (Lily) and the warm sea of Dalmatia
+    // (Max), split on the diagonal, with Paul and the name on top.
     const shot = async (width, height, region, day, char, walk) => {
       const page = await open(browser, { width, height, char, region });
       await play(page, day, walk);
@@ -123,16 +149,22 @@ async function play(page, i, walk) {
       await page.waitForTimeout(300);
       const b = await page.screenshot(); await page.close(); return b;
     };
+    const levelShots = async (width, height) => ({ winter: await shot(width, height, 'ardennes', 4, 3, 1400), summer: await shot(width, height, 'dalmatia', 0, 8, 2200) });
     const art = await openArt(browser, port + 1);
     const sub = 'Ten trips to scout, all across Europe';
-    for (const [file, width, height] of [['feature-graphic.png', 1024, 500], ['social-preview.png', 1280, 640]]) {
-      const imgs = { winter: await shot(width, height, 'ardennes', 4, 3, 1400), summer: await shot(width, height, 'dalmatia', 0, 8, 2200) };
-      await saveArt(art.page, path.join(out, file), width, height, { ...wide(width, height, sub), paulS: 4.8 }, imgs);
-    }
+    // The Chrome Web Store: the store icon, the small promo tile (440×280) and the marquee (1400×560), JPEG for no alpha
+    await chromeStoreIcon(art.page, path.join(chromeOut, 'store-icon.png'));
+    await saveArt(art.page, path.join(chromeOut, 'small-promo-tile.jpg'), 440, 280, wide(440, 280));
+    await saveArt(art.page, path.join(chromeOut, 'marquee-promo-tile.jpg'), 1400, 560, { ...wide(1400, 560, sub), paulS: 4.8 }, await levelShots(1400, 560));
+    if (chromeOnly) { await art.close(); console.log('Images are in docs/chrome-store/'); return; }
+    // Google Play: the feature graphic (1024×500) and the Android TV banner (1280×720); GitHub: the social preview
+    // (1280×640); the Snap Store: the featured banner (720×240)
+    for (const [file, width, height] of [['feature-graphic.png', 1024, 500], ['social-preview.png', 1280, 640]])
+      await saveArt(art.page, path.join(out, file), width, height, { ...wide(width, height, sub), paulS: 4.8 }, await levelShots(width, height));
     await saveArt(art.page, path.join(out, 'tv-banner.png'), 1280, 720, wide(1280, 720));
     await saveArt(art.page, path.join(out, 'snap-featured-banner.png'), 720, 240, wide(720, 240, sub));
     await art.close();
-    console.log('Images are in docs/play-store/');
+    console.log('Images are in docs/play-store/ and docs/chrome-store/');
   } finally {
     await browser.close();
     server.kill();
