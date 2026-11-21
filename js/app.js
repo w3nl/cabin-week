@@ -27,6 +27,7 @@ const IN_TV_APP = location.hostname === "appassets.androidplatform.net";
 if (IN_TV_APP) $("credits").textContent = T("Source: github.com/w3nl/tripscouts · Licence: GPL-3.0", "Broncode: github.com/w3nl/tripscouts · Licentie: GPL-3.0");
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const IS_ANDROID = /Android/i.test(navigator.userAgent);
+const IS_CHROMEOS = /\bCrOS\b/.test(navigator.userAgent);
 const IS_CHROME = /(?:Chrome|Chromium)\//.test(navigator.userAgent) && !/(?:Android|Edg\/|OPR\/|CriOS\/)/.test(navigator.userAgent);
 const IS_APP = () => matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true;
 let installEvt = null, installOffer = false, playClicked = false, rotateClosed = false, rotateTimer = 0;
@@ -63,7 +64,7 @@ addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = 
 addEventListener("appinstalled", () => { installOffer = false; installEvt = null; updateHints(); });
 // iPhone en iPad: Safari heeft geen installeerknop, dus uitleg in één zin.
 // Android: meteen de keuze voor de Android-app uit Google Play (de web-app-knop komt erbij zodra de browser die aanbiedt).
-if ((IS_IOS || IS_ANDROID || IS_CHROME) && !IS_APP() && !IN_TV_APP) installOffer = true;
+if ((IS_IOS || IS_ANDROID || IS_CHROMEOS) && !IS_APP() && !IN_TV_APP) installOffer = true;
 installChoice();
 $("installPlay").onclick = () => { playClicked = true; setTimeout(updateHints, 0); };
 $("installBtn").onclick = async () => {

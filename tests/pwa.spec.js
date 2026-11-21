@@ -24,12 +24,21 @@ test('Chrome biedt de Chrome Web Store-extensie aan, Android niet', async ({ pag
   await page.goto('/');
   const chrome = await page.evaluate(() => /(?:Chrome|Chromium)\//.test(navigator.userAgent) && !/(?:Android|Edg\/|OPR\/|CriOS\/)/.test(navigator.userAgent));
   if (chrome) {
+    await page.evaluate(() => { const e = new Event('beforeinstallprompt'); e.prompt = () => {}; e.userChoice = Promise.resolve({ outcome: 'accepted' }); dispatchEvent(e); });
     await expect(page.locator('#installBar')).toBeVisible();
     await expect(page.locator('#installChrome')).toBeVisible();
     await expect(page.locator('#installChrome')).toHaveAttribute('href', 'https://chrome.google.com/webstore/detail/pcpdooenjphohflgmclkpachhfonjokc');
   } else {
     await expect(page.locator('#installChrome')).toBeHidden();
   }
+});
+
+test('een Chromebook toont de Chrome Web Store-optie zonder installatieprompt', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (X11; CrOS x86_64 14526.64.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36' }));
+  await page.goto('/');
+  await expect(page.locator('#installBar')).toBeVisible();
+  await expect(page.locator('#installChrome')).toBeVisible();
+  await expect(page.locator('#installBtn')).toBeHidden();
 });
 
 test('elk bestand in de offline-lijst bestaat, en elk spelbestand staat erin', async () => {
