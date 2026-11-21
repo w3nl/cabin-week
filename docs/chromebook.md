@@ -2,6 +2,8 @@
 
 There are two ways to install TripScouts. Both use the existing game; there is no separate Chrome OS package or build workflow.
 
+The game is also packaged as a Chrome extension for the Chrome Web Store, which works on a Chromebook too: see [chrome-web-store.md](chrome-web-store.md).
+
 | Route | Needed | Updates |
 |---|---|---|
 | Web app (recommended) | Chrome and permission to install web apps | The website's service worker |
