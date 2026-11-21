@@ -2,6 +2,8 @@
 
 From nothing to TripScouts in Google Play (phone, tablet and Google TV). Do part A once; part D for every new version.
 
+The same bundle can also serve compatible Chromebooks with Google Play. No separate Chrome OS build or Google Play Games on PC enrolment is needed; check device eligibility and test the app as described in [chromebook.md](chromebook.md).
+
 Commands are for Ubuntu (Linux). Mac and Windows: see [android-key.md](android-key.md).
 
 | Part | What | How often |
@@ -112,6 +114,7 @@ The `.aab` is **not public**: it is only in the run, inside a 7z file with your 
 ### C4. Install
 
 - **Phone or tablet:** open the opt-in link with the tester's Google account → **Become a tester** → **Download it on Google Play** → **Install**.
+- **Chromebook with Google Play:** join the test with the same account used by the Chromebook's Play Store, then install TripScouts there. See [chromebook.md](chromebook.md) if the device is unavailable.
 - **Google TV:** the Google account on the TV must be a tester (it opened the opt-in link once). Then, on the phone with the same account: Play Store → TripScouts → **Install on more devices** → the TV. Or on the TV: Play Store → search **TripScouts**. Just after the first upload it can take an hour.
 
 "Not available for this device" on the TV: Android TV is not on yet (B3), or the account on the TV is not a tester.

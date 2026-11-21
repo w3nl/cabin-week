@@ -20,6 +20,7 @@ A platform game in the browser (walk, jump, find things, do tasks, crack codes) 
 - Static site at **https://tripscouts.online/** (GitHub Pages, see [docs/domain.md](docs/domain.md); cabinweek.online redirects there), installable as an app, playable offline. Also works as a loose file (`file://`), but then without app and offline.
 - A **Linux app** (a snap for the Snap Store, `linux/`, see [docs/linux.md](docs/linux.md)), with the same game files as the website.
 - One Android app for phones, tablets and Google TV (`android-tv/`, package `nl.w3nl.cabinweek`; the folder, the workflow file `google-tv.yml` and the release tag `google-tv` keep the old TV name on purpose, because links and tools use them). Google Play Games on PC is optional and not turned on.
+- **Chromebooks (Chrome OS):** two routes, documented in `docs/chromebook.md`: install the existing PWA from Chrome, or install the same Android bundle on a Google Play-enabled Chromebook. No separate Chrome OS build. The Android manifest keeps touchscreen/TV/gamepad features optional, declares `android.hardware.type.pc` optional for native mouse/touchpad input, and explicitly enables activity resizing. Its existing `configChanges` keeps the WebView alive on window resizing. Play Console device eligibility and real Chromebook testing still need checking; Google Play Games on PC is Windows, not Chrome OS.
 - `package.json` and `node_modules/` are only for the tests, the local server and the tools.
 
 ### No personal information

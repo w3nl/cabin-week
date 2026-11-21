@@ -46,7 +46,7 @@ Whether a controller works in such a browser depends on the browser. If not, use
 
 ## 3. The app on the Google TV
 
-The workflow *Build the Android app* (`google-tv.yml`) builds **one Android app** with the whole game inside on every change. It is the same app for phone, tablet and Google TV (on the TV it has its own tile on the home screen); this page only covers the TV part. It works offline. On `main` the app is attached to the release **google-tv**:
+The workflow *Build the Android app* (`google-tv.yml`) builds **one Android app** with the whole game inside on every change. It is the same app for phone, tablet, Google TV and compatible Chromebooks (on the TV it has its own tile on the home screen); this page only covers the TV part. For Chrome OS, see [chromebook.md](chromebook.md). It works offline. On `main` the app is attached to the release **google-tv**:
 
 `https://github.com/w3nl/tripscouts/releases/download/google-tv/cabin-week.apk`
 

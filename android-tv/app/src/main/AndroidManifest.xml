@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Een Android-app voor telefoon, tablet en Google TV; op de TV een tegel op het startscherm (banner), te bedienen met de afstandsbediening of een controller. -->
+<!-- One Android app for phones, tablets, Google TV and compatible Chromebooks. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+    <!-- Native mouse/touchpad input on ChromeOS, without making PC hardware a requirement on phones or TVs. -->
+    <uses-feature android:name="android.hardware.type.pc" android:required="false" />
     <!-- screenOrientation="landscape" makes Google Play assume a landscape screen is required; it is not: the app also runs where it cannot turn. -->
     <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
     <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
@@ -20,6 +22,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:resizeableActivity="true"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|uiMode">
             <intent-filter>

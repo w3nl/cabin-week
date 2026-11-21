@@ -13,6 +13,7 @@ Play as one of the nine, or **make your own hero** (name, height, skin, hair, co
 - **Online:** [tripscouts.online](https://tripscouts.online/) (GitHub Pages).
 - **Android app (test):** one app for **phones, tablets and Google TV** (touch, controller or TV remote). It is in a test on Google Play. Testers join once at [play.google.com/apps/testing/nl.w3nl.cabinweek](https://play.google.com/apps/testing/nl.w3nl.cabinweek) (with the Google account that is on the tester list), then install it from [TripScouts on Google Play](https://play.google.com/store/apps/details?id=nl.w3nl.cabinweek). Publishing it: [docs/publish-android.md](docs/publish-android.md).
 - **On your phone or tablet:** open the site and choose "Add to Home screen" (or the Android app, offered in the game). After that the game also works offline. iPhone and iPad: see [docs/iphone-ipad.md](docs/iphone-ipad.md).
+- **On a Chromebook (Chrome OS):** install the website as an app from Chrome, or use the same Android app on a Chromebook with Google Play. Installation, tester access and compatibility checks: [docs/chromebook.md](docs/chromebook.md).
 - **On Linux (Ubuntu):** a snap, for the Snap Store and Ubuntu's App Center. Until it is in the store, install it from the [latest release](https://github.com/w3nl/tripscouts/releases/latest/download/tripscouts.snap): `sudo snap install --dangerous ./tripscouts.snap`. See [docs/linux.md](docs/linux.md).
 - **On the TV (Google TV):** the Android app above, or a browser app, or casting. See [docs/google-tv.md](docs/google-tv.md).
 - **Locally:**
@@ -65,6 +66,7 @@ Coming later: Iceland, Tuscany, Catalonia and Greece (ideas in [docs/ideas.md](d
 - [AGENTS.md](AGENTS.md): how the code works, the solutions, the pitfalls and the checklists.
 - [docs/domain.md](docs/domain.md): the domain (tripscouts.online) and its DNS settings.
 - [docs/linux.md](docs/linux.md): the Linux app (a snap), building it in GitHub Actions and publishing it in the Snap Store, step by step.
+- [docs/chromebook.md](docs/chromebook.md): installing on Chrome OS as a web app or through Google Play, and checking Chromebook compatibility.
 - [docs/publish-android.md](docs/publish-android.md): publishing the Android app in Google Play, and getting the `.aab`, step by step.
 - [docs/android-key.md](docs/android-key.md): the signing key for the Android app, in detail.
 - [docs/blueprint.md](docs/blueprint.md): the recipe for a game like this (in Dutch).
