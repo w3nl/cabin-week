@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const fs = require('fs'), path = require('path');
+const { test, expect, chromium } = require('@playwright/test');
+const fs = require('fs'), path = require('path'), os = require('os');
 const root = path.join(__dirname, '..');
 
 test('het spel is een installeerbare app die offline werkt', async ({ page, context }) => {
@@ -39,6 +39,37 @@ test('een Chromebook toont de Chrome Web Store-optie zonder installatieprompt', 
   await expect(page.locator('#installBar')).toBeVisible();
   await expect(page.locator('#installChrome')).toBeVisible();
   await expect(page.locator('#installBtn')).toBeHidden();
+});
+
+test('een Chromebook biedt de geïnstalleerde Chrome-extensie niet opnieuw aan', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tripscouts-extension-'));
+  let context;
+  try {
+    const extension = path.join(tmp, 'extension');
+    fs.mkdirSync(extension);
+    for (const f of ['index.html', 'manifest.webmanifest', 'css', 'js', 'icons'])
+      fs.cpSync(path.join(root, f), path.join(extension, f), { recursive: true });
+    fs.copyFileSync(path.join(root, 'chrome', 'background.js'), path.join(extension, 'background.js'));
+    fs.writeFileSync(path.join(extension, 'manifest.json'), JSON.stringify({
+      manifest_version: 3, name: 'TripScouts', version: '1.0.0', background: { service_worker: 'background.js' }
+    }));
+    context = await chromium.launchPersistentContext(path.join(tmp, 'profile'), {
+      headless: true,
+      channel: 'chromium',
+      executablePath: process.env.PW_CHROMIUM || undefined,
+      ignoreDefaultArgs: ['--disable-extensions'],
+      args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`],
+      userAgent: 'Mozilla/5.0 (X11; CrOS x86_64 14526.64.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+    });
+    const worker = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
+    const page = await context.newPage();
+    await page.goto(new URL('/index.html', worker.url()).href);
+    await expect(page.locator('html')).toHaveClass(/ready/);
+    await expect(page.locator('#installBar')).toBeHidden();
+  } finally {
+    if (context) await context.close();
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
 });
 
 test('elk bestand in de offline-lijst bestaat, en elk spelbestand staat erin', async () => {

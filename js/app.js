@@ -2,7 +2,7 @@
 // Start het spel: versie, service worker, updatebalk en de spellus.
 
 /** Staat op het titelscherm. Altijd hetzelfde getal als CACHE in sw.js (tests/pwa.spec.js controleert dat). */
-const GAME_VERSION = 35;
+const GAME_VERSION = 36;
 $("version").textContent = "v" + GAME_VERSION;
 
 /* ---------- Installeerbare app en updates ---------- */
@@ -64,7 +64,7 @@ addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = 
 addEventListener("appinstalled", () => { installOffer = false; installEvt = null; updateHints(); });
 // iPhone en iPad: Safari heeft geen installeerknop, dus uitleg in één zin.
 // Android: meteen de keuze voor de Android-app uit Google Play (de web-app-knop komt erbij zodra de browser die aanbiedt).
-if ((IS_IOS || IS_ANDROID || IS_CHROMEOS) && !IS_APP() && !IN_TV_APP) installOffer = true;
+if ((IS_IOS || IS_ANDROID || (IS_CHROMEOS && location.protocol !== "chrome-extension:")) && !IS_APP() && !IN_TV_APP) installOffer = true;
 installChoice();
 $("installPlay").onclick = () => { playClicked = true; setTimeout(updateHints, 0); };
 $("installBtn").onclick = async () => {
