@@ -20,6 +20,18 @@ test('het spel is een installeerbare app die offline werkt', async ({ page, cont
   await context.setOffline(false);
 });
 
+test('Chrome biedt de Chrome Web Store-extensie aan, Android niet', async ({ page }) => {
+  await page.goto('/');
+  const chrome = await page.evaluate(() => /(?:Chrome|Chromium)\//.test(navigator.userAgent) && !/(?:Android|Edg\/|OPR\/|CriOS\/)/.test(navigator.userAgent));
+  if (chrome) {
+    await expect(page.locator('#installBar')).toBeVisible();
+    await expect(page.locator('#installChrome')).toBeVisible();
+    await expect(page.locator('#installChrome')).toHaveAttribute('href', 'https://chrome.google.com/webstore/detail/pcpdooenjphohflgmclkpachhfonjokc');
+  } else {
+    await expect(page.locator('#installChrome')).toBeHidden();
+  }
+});
+
 test('elk bestand in de offline-lijst bestaat, en elk spelbestand staat erin', async () => {
   const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   const core = [...sw.match(/const CORE = \[([\s\S]*?)\];/)[1].matchAll(/'\.\/([^']*)'/g)].map(m => m[1]).filter(Boolean);

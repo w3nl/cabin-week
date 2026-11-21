@@ -2,6 +2,7 @@
 
 The Chrome extension is a small wrapper around the same game files as the website, like the Android and Linux apps:
 
+- Install [TripScouts from the Chrome Web Store](https://chrome.google.com/webstore/detail/pcpdooenjphohflgmclkpachhfonjokc).
 - `chrome/background.js` opens the game in a tab when you click the TripScouts button in the toolbar (and once right after installing). If the game is already open, it brings that tab to the front.
 - The game is **inside the extension**, so it works offline, also on a Chromebook. There is no service worker: it only runs on http(s), and the extension doesn't need one.
 - It asks for **no permissions** and runs no code from elsewhere. Only the fonts come from Google Fonts; without internet the game uses the fallback fonts.
